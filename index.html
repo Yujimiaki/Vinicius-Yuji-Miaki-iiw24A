@@ -1,80 +1,34 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="pt-BR">
 <head>
-  <head>
-    <title>Herança em JavaScript</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Garagem Inteligente</title>
     <link rel="stylesheet" href="estilo.css">
-  </head>
-
-
 </head>
-
 <body>
-  <h1>Controle de Carros</h1>
+    <h1>Garagem Inteligente</h1>
 
-  <h2>Carro Normal</h2>
-  <label for="modeloNormal">Modelo:</label>
-  <input type="text" id="modeloNormal" value="Sedan"><br><br>
-  <label for="corNormal">Cor:</label>
-  <input type="text" id="corNormal" value="Prata"><br><br>
-  <button onclick="criarCarroNormal()">Criar Carro Normal</button><br><br>
+    <h2>Selecionar Veículo:</h2>
+    <button onclick="selecionarVeiculo('meuCarro')">Carro Normal</button>
+    <button onclick="selecionarVeiculo('meuCarroEsportivo')">Carro Esportivo</button>
+    <button onclick="selecionarVeiculo('meuCaminhao')">Caminhão</button>
 
-  <button onclick="ligarNormal()">Ligar</button>
-  <button onclick="desligarNormal()">Desligar</button>
-  <button onclick="acelerarNormal()">Acelerar</button>
-  <button onclick="frearNormal()">Frear</button><br><br>
+    <h2>Ações:</h2>
+    <button onclick="interagir('ligar')">Ligar</button>
+    <button onclick="interagir('desligar')">Desligar</button>
+    <button onclick="interagir('acelerar')">Acelerar</button>
+    <button onclick="interagir('frear')">Frear</button>
+    <button onclick="interagir('ativarTurbo')" id="botaoTurbo">Ativar Turbo</button>
+    <button onclick="interagir('desativarTurbo')" id="botaoDesativarTurbo">Desativar Turbo</button>
+    <button onclick="interagir('carregar')" id="botaoCarregar">Carregar</button>
+    <button onclick="interagir('descarregar')" id="botaoDescarregar">Descarregar</button>
+    <button onclick="exibirInformacoes()">Exibir Informações</button>
 
-  <p id="infoNormal"></p>
-  <img src="imagens/8957263-green-car-icon-clipart-in-animated-cartoon-png-flat-vector-vetor-removebg-preview.png"
-  alt=""> <!-- Substitua com a sua imagem -->
+    <div id="informacoesVeiculo">
+        <!-- Informações do veículo selecionado serão exibidas aqui -->
+    </div>
 
-
-
-  <h2>Carro Esportivo</h2>
-  <label for="modeloEsportivo">Modelo:</label>
-  <input type="text" id="modeloEsportivo" value="Ferrari"><br><br>
-  <label for="corEsportivo">Cor:</label>
-  <input type="text" id="corEsportivo" value="Vermelho"><br><br>
-  <button onclick="criarCarroEsportivo()">Criar Carro Esportivo</button><br><br>
-
-  <button onclick="ligarEsportivo()">Ligar</button>
-  <button onclick="desligarEsportivo()">Desligar</button>
-  <button onclick="acelerarEsportivo()">Acelerar</button>
-  <button onclick="ativarTurbo()">Turbo</button>
-  <button onclick="desativarTurbo()">Desativar Turbo</button><br><br>
-
-
-  <p id="infoEsportivo"></p>
-  <img src="imagens/images.png"
-    alt="">
-
-  <h2>Caminhão</h2>
-  <label for="modeloCaminhao">Modelo:</label>
-  <input type="text" id="modeloCaminhao" value="Scania"><br><br>
-  <label for="corCaminhao">Cor:</label>
-  <input type="text" id="corCaminhao" value="Azul"><br><br>
-  <label for="capacidadeCaminhao">Capacidade (kg):</label>
-  <input type="number" id="capacidadeCaminhao" value="10000"><br><br>
-  <button onclick="criarCaminhao()">Criar Caminhão</button><br><br>
-
-  <label for="carga">Carga (kg):</label>
-  <input type="number" id="carga" value="1000">
-
-  <button onclick="carregarCaminhao()">Carregar</button>
-  <button onclick="descarregarCaminhao()">Descarregar</button>
-  <button onclick="ligarCaminhao()">Ligar</button>
-  <button onclick="desligarCaminhao()">Desligar</button>
-  <button onclick="acelerarCaminhao()">Acelerar</button>
-  <button onclick="exibirCapacidade()">Exibir Capacidade</button><br><br>
-
-  <p id="infoCaminhao"></p>
-
-
-  <img src="imagens/caminhão-basculante-resistente-ilustração-colorida-do-vetor-dos-desenhos-animados-do-equipamento-da-maquinaria-de-construção-91736334.webp"
-    alt="">
-
-  <script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
-
 </html>
