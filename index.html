@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Garagem Inteligente</title>
-    <link rel="stylesheet" href="estilo.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
     <h1>Garagem Inteligente</h1>
@@ -26,8 +27,18 @@
     <button onclick="exibirInformacoes()">Exibir Informações</button>
 
     <div id="informacoesVeiculo">
-        <!-- Informações do veículo selecionado serão exibidas aqui -->
     </div>
+
+    <img id="imagemVeiculo" src="carro-imagem.webp">
+
+    <div id="barraProgresso">
+        <div class="bolinha"></div>
+        <div class="bolinha"></div>
+        <div class="bolinha"></div>
+        <div class="bolinha"></div>
+        <div class="bolinha"></div>
+    </div>
+    <div id="velocidadeAtual">0 km/h</div>
 
     <script src="script.js"></script>
 </body>

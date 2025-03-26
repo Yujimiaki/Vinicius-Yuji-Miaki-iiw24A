@@ -1,0 +1,69 @@
+/* estilo.css */
+body {
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  background-color: #f4f4f4;
+}
+
+h1, h2 {
+  color: #333;
+  text-align: center;
+}
+
+button {
+  padding: 10px 15px;
+  margin: 5px;
+  border: none;
+  background-color: #5cb85c;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #449d44;
+}
+
+#informacoesVeiculo {
+  margin-top: 20px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background-color: #fff;
+  text-align: center;
+}
+
+#barraProgresso {
+  width: 200px;
+  height: 20px;
+  background-color: #ddd;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  margin-top: 20px;
+}
+
+.bolinha {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: #fff;
+  border: 2px solid #fff;
+  transition: background-color 0.3s ease;
+}
+
+.bolinha.ativa {
+  background-color: limegreen;
+  border: 2px solid darkgreen;
+}
+
+#velocidadeAtual {
+  text-align: center;
+  margin-top: 10px;
+  font-weight: bold;
+}
