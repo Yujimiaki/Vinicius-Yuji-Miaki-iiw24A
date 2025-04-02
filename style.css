@@ -1,69 +1,521 @@
-/* estilo.css */
-body {
-  font-family: Arial, sans-serif;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 20px;
-  background-color: #f4f4f4;
+/* Reset Básico e Variáveis de Cor */
+:root {
+  --cor-primaria: #007bff; /* Azul */
+  --cor-secundaria: #6c757d; /* Cinza */
+  --cor-sucesso: #28a745; /* Verde */
+  --cor-perigo: #dc3545; /* Vermelho */
+  --cor-aviso: #ffc107; /* Amarelo */
+  --cor-info: #17a2b8; /* Azul Claro */
+  --cor-fundo: #f0f2f5;
+  --cor-fundo-card: #ffffff;
+  --cor-texto: #212121;
+  --cor-texto-claro: #ffffff;
+  --cor-borda: #dee2e6;
+  --sombra-card: 0 2px 4px rgba(0, 0, 0, 0.08), 0 8px 16px rgba(0, 0, 0, 0.08);
+  --border-radius-padrao: 8px;
 }
 
-h1, h2 {
-  color: #333;
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: var(--cor-fundo);
+  color: var(--cor-texto);
+  line-height: 1.6;
+  display: flex; /* Necessário para centralizar app-container se ele tiver max-width */
+  justify-content: center;
+  min-height: 100vh; /* Garante que o body ocupe pelo menos a altura da tela */
+}
+
+/* Layout Principal */
+#app-container {
+  display: flex;
+  width: 100%;
+  max-width: 1600px; /* Limita largura máxima */
+  min-height: 100vh; /* Ocupa a altura total */
+  background-color: var(--cor-fundo-card); /* Fundo branco para o container */
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1); /* Sombra mais sutil */
+}
+
+#sidebar {
+  width: 320px; /* Largura um pouco maior */
+  flex-shrink: 0; /* Impede que a sidebar encolha */
+  background-color: #f8f9fa; /* Fundo levemente cinza para sidebar */
+  padding: 25px;
+  border-right: 1px solid var(--cor-borda);
+  display: flex;
+  flex-direction: column;
+  gap: 25px; /* Espaço entre seções */
+  overflow-y: auto; /* Scroll se conteúdo for maior */
+}
+
+.sidebar-header {
+  text-align: center;
+  margin-bottom: 15px;
+  color: var(--cor-primaria);
+}
+.sidebar-header h1 {
+  font-size: 1.7em; /* Ajuste */
+  margin-top: 8px;
+  font-weight: 700;
+}
+.sidebar-header i {
+  font-size: 2.2em;
+}
+
+
+#main-content {
+  flex: 1; /* Ocupa o resto do espaço */
+  padding: 35px;
+  overflow-y: auto; /* Scroll para o conteúdo principal */
+  position: relative; /* Para posicionar a notificação */
+}
+
+/* Estilo Card Genérico */
+.card {
+  background-color: var(--cor-fundo-card);
+  border-radius: var(--border-radius-padrao);
+  box-shadow: var(--sombra-card);
+  padding: 25px; /* Padding maior nos cards */
+  margin-bottom: 25px;
+}
+
+.sidebar-section {
+  padding: 20px; /* Padding ajustado na sidebar */
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05); /* Sombra mais sutil */
+}
+.sidebar-section h2 {
+  font-size: 1.25em; /* Ajuste */
+  margin-bottom: 18px;
+  color: var(--cor-secundaria);
+  border-bottom: 1px solid var(--cor-borda);
+  padding-bottom: 10px;
+  font-weight: 600;
+}
+.sidebar-section h2 i {
+  margin-right: 10px;
+}
+
+
+/* Formulários */
+form div {
+  margin-bottom: 15px; /* Mais espaço */
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #555;
+}
+label i {
+  margin-right: 6px;
+  color: var(--cor-secundaria);
+  width: 14px; /* Alinhamento */
   text-align: center;
 }
 
-button {
-  padding: 10px 15px;
-  margin: 5px;
-  border: none;
-  background-color: #5cb85c;
-  color: white;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
+input[type="text"],
+input[type="number"],
+input[type="datetime-local"],
+select {
+  width: 100%;
+  padding: 11px 14px; /* Padding ajustado */
+  border: 1px solid var(--cor-borda);
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-family: 'Poppins', sans-serif;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+input:focus, select:focus {
+  border-color: var(--cor-primaria);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+}
+::placeholder {
+  color: #a0a0a0;
+  font-style: italic;
+  font-size: 0.9rem;
 }
 
+/* Botões */
+button {
+  padding: 11px 20px; /* Padding ajustado */
+  margin: 5px 3px;
+  border: none;
+  background-color: var(--cor-primaria);
+  color: var(--cor-texto-claro);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: 'Poppins', sans-serif;
+  transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  vertical-align: middle; /* Alinha melhor com texto ao redor */
+}
 button:hover {
-  background-color: #449d44;
+  filter: brightness(1.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+button:active {
+  transform: translateY(1px);
+  filter: brightness(0.95);
+}
+button:disabled {
+  background-color: #adb5bd; /* Cinza mais claro para desabilitado */
+  cursor: not-allowed;
+  opacity: 0.65;
+   box-shadow: none;
+   filter: none;
+}
+
+form button[type="submit"] {
+  width: 100%;
+  margin-top: 12px;
+  background-color: var(--cor-sucesso);
+}
+form button[type="submit"]:hover {
+   filter: brightness(1.1);
+}
+
+/* Botões Específicos (Cores) */
+.botao-especial { background-color: var(--cor-aviso); color: var(--cor-texto); }
+.botao-perigo { background-color: var(--cor-perigo); }
+#botaoTurbo { background-color: #fd7e14; } /* Laranja para boost */
+#botaoTurbo:hover { filter: brightness(1.1); }
+#botaoCarregar, #botaoDescarregar { background-color: var(--cor-info); }
+
+#botoesAcoes button {
+  display: inline-flex; /* Garante que fiquem na linha */
+}
+
+
+/* Painel Veículo Selecionado */
+#painelVeiculoSelecionado {
+  animation: fadeIn 0.5s ease-out; /* Animação de entrada */
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+
+#painelVeiculoSelecionado h2,
+#painelVeiculoSelecionado h3 {
+  margin-top: 0;
+  margin-bottom: 25px; /* Mais espaço */
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--cor-borda);
+  color: var(--cor-primaria);
+  font-weight: 700;
+}
+#painelVeiculoSelecionado h3 {
+   color: var(--cor-secundaria);
+   font-size: 1.15em;
+}
+#painelVeiculoSelecionado h3 i { margin-right: 10px;}
+
+.vehicle-header {
+  display: flex;
+  align-items: flex-start; /* Alinha no topo */
+  gap: 30px; /* Mais espaço */
+  margin-bottom: 35px;
+  flex-wrap: wrap;
+}
+#imagemVeiculo {
+  max-width: 180px; /* Imagem maior */
+  height: auto;
+  border-radius: var(--border-radius-padrao);
+  object-fit: cover;
+  border: 1px solid var(--cor-borda);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.08);
 }
 
 #informacoesVeiculo {
-  margin-top: 20px;
-  padding: 15px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  background-color: #fff;
+  flex: 1;
+  min-width: 250px; /* Largura mínima */
+}
+#informacoesVeiculo h2 { /* Modelo/Tipo */
+   margin-bottom: 15px;
+   border: none;
+   padding: 0;
+   color: #333; /* Cor mais escura */
+   font-size: 1.8em;
+   font-weight: 700;
+   line-height: 1.2;
+}
+#informacoesVeiculo p {
+  margin-bottom: 8px; /* Mais espaço */
+  font-size: 1rem;
+  color: #555;
+}
+#informacoesVeiculo p i.fas {
+  color: var(--cor-secundaria);
+  margin-right: 10px;
+  width: 18px;
   text-align: center;
 }
+#info-status-motor .status-on { color: var(--cor-sucesso); }
+#info-status-motor .status-off { color: var(--cor-perigo); }
+#info-status-motor .fa-circle { font-size: 0.8em; vertical-align: middle; margin-right: 4px;} /* Ajuste ícone status */
 
+#info-especifica { margin-top: 15px; padding-top: 10px; border-top: 1px dashed var(--cor-borda); }
+#info-especifica p { font-style: normal; color: #444; font-weight: 600; }
+#info-especifica p span { font-weight: 400; color: #666; margin-left: 5px;}
+
+
+/* Velocímetro */
+.velocimetro-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 30px;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: var(--border-radius-padrao);
+}
+#velocidadeAtual {
+  font-size: 1.6em; /* Maior */
+  font-weight: 700;
+  color: var(--cor-primaria);
+  margin-bottom: 12px;
+}
 #barraProgresso {
-  width: 200px;
-  height: 20px;
-  background-color: #ddd;
+  width: 95%;
+  max-width: 450px;
+  height: 20px; /* Um pouco maior */
+  background-color: #e9ecef;
   border-radius: 10px;
   display: flex;
   align-items: center;
-  justify-content: space-around;
-  margin-top: 20px;
+  justify-content: space-between;
+  padding: 0 5px;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
 }
-
 .bolinha {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background-color: #fff;
-  border: 2px solid #fff;
-  transition: background-color 0.3s ease;
+  background-color: #ced4da;
+  border: none;
+  transition: background-color 0.4s ease;
 }
-
 .bolinha.ativa {
-  background-color: limegreen;
-  border: 2px solid darkgreen;
+  background-color: var(--cor-sucesso);
+  /* Adicionar uma pequena sombra talvez? */
+  /* box-shadow: 0 0 5px var(--cor-sucesso); */
 }
 
-#velocidadeAtual {
+/* Container de Botões */
+.botoes-container {
+  margin-bottom: 35px;
   text-align: center;
-  margin-top: 10px;
+  padding-top: 15px; /* Espaço acima */
+}
+.botoes-container hr {
+  margin: 20px auto;
+  width: 80%;
+  border: none;
+  border-top: 1px solid var(--cor-borda);
+}
+
+/* Histórico e Agendamentos */
+.manutencao-container {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 30px; /* Mais espaço */
+  margin-top: 30px;
+}
+
+@media (min-width: 992px) {
+  .manutencao-container {
+      grid-template-columns: 1fr 1fr;
+  }
+}
+
+.maintenance-list {
+   padding: 20px; /* Mais padding */
+   background-color: #f8f9fa;
+   box-shadow: 0 1px 2px rgba(0,0,0,0.05); /* Sombra sutil interna */
+}
+.maintenance-list h3 {
+  font-size: 1.15em;
+  color: var(--cor-secundaria);
+  margin-top: 0;
+  margin-bottom: 18px;
+  border-bottom: 1px solid var(--cor-borda);
+  padding-bottom: 10px;
+}
+.maintenance-list ul {
+  list-style: none;
+  padding: 0;
+  max-height: 280px;
+  overflow-y: auto;
+  /* Estilizar a barra de scroll (opcional, depende do navegador) */
+  scrollbar-width: thin;
+  scrollbar-color: var(--cor-secundaria) var(--cor-fundo);
+}
+.maintenance-list ul::-webkit-scrollbar { width: 8px; }
+.maintenance-list ul::-webkit-scrollbar-track { background: var(--cor-fundo); border-radius: 4px;}
+.maintenance-list ul::-webkit-scrollbar-thumb { background-color: var(--cor-secundaria); border-radius: 4px; border: 2px solid var(--cor-fundo); }
+
+.maintenance-list li {
+  padding: 12px 8px; /* Mais padding */
+  border-bottom: 1px dotted var(--cor-borda);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  line-height: 1.4;
+  transition: background-color 0.2s ease;
+}
+.maintenance-list li:hover {
+  background-color: #e9ecef; /* Fundo ao passar o mouse */
+}
+.maintenance-list li:last-child { border-bottom: none; }
+.maintenance-list li .fa-times { /* Ícone dentro do botão de remover */
+   pointer-events: none; /* Para garantir que o clique vá para o botão */
+}
+
+
+.botao-remover-item {
+  background-color: transparent;
+  color: var(--cor-perigo);
+  border: none;
+  font-size: 1rem;
   font-weight: bold;
+  cursor: pointer;
+  padding: 2px 5px; /* Ajuste padding */
+  margin-left: 12px;
+  opacity: 0.6; /* Menos visível por padrão */
+   transition: opacity 0.2s ease, color 0.2s ease;
+   border-radius: 4px; /* Pequeno radius */
+}
+.botao-remover-item:hover {
+  opacity: 1;
+  background-color: rgba(220, 53, 69, 0.1); /* Fundo leve ao passar */
+}
+
+
+/* Área de Notificação */
+#notification-area {
+  position: fixed;
+  top: 25px;
+  right: 25px;
+  padding: 16px 28px; /* Mais padding */
+  border-radius: var(--border-radius-padrao);
+  color: var(--cor-texto-claro);
+  z-index: 1050; /* Acima de quase tudo */
+  min-width: 280px;
+  max-width: 400px; /* Limita largura */
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25); /* Sombra mais forte */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  opacity: 0;
+  transform: translateX(20px); /* Animação da direita */
+  transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); /* Curva de animação */
+}
+#notification-area.show {
+  opacity: 1;
+  transform: translateX(0);
+}
+/* Tipos de Notificação */
+#notification-area.info { background-color: var(--cor-info); }
+#notification-area.success { background-color: var(--cor-sucesso); }
+#notification-area.warning { background-color: var(--cor-aviso); color: var(--cor-texto); } /* Texto escuro no aviso */
+#notification-area.error { background-color: var(--cor-perigo); }
+
+#notification-message {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+#notification-area .close-btn {
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: 1.6rem;
+  font-weight: bold;
+  cursor: pointer;
+  padding: 0 0 0 18px; /* Mais espaço */
+  line-height: 1;
+  opacity: 0.8;
+  text-shadow: 0 1px 0 rgba(0,0,0,0.1); /* Sombra sutil */
+}
+#notification-area .close-btn:hover { opacity: 1; }
+
+/* Mensagem "Selecione um veículo" */
+#mensagem-selecione {
+  text-align: center;
+  padding: 50px 30px;
+  color: var(--cor-secundaria);
+  font-size: 1.1em;
+  border: 2px dashed var(--cor-borda); /* Borda tracejada */
+  background-color: #f8f9fa;
+}
+#mensagem-selecione h2 {
+  color: var(--cor-info);
+  margin-bottom: 15px;
+  font-size: 1.5em;
+}
+#mensagem-selecione h2 i { margin-right: 10px; }
+
+/* Responsividade */
+@media (max-width: 992px) { /* Ajuste breakpoint */
+   #sidebar {
+       width: 280px; /* Sidebar um pouco menor */
+   }
+   #main-content {
+       padding: 25px;
+   }
+}
+
+@media (max-width: 768px) {
+  body { display: block; } /* Remove flex para permitir scroll normal */
+  #app-container {
+      flex-direction: column;
+      min-height: none; /* Remove min-height */
+  }
+  #sidebar {
+      width: 100%;
+      border-right: none;
+      border-bottom: 1px solid var(--cor-borda);
+      max-height: none; /* Remove altura máxima */
+      overflow-y: visible; /* Remove scroll da sidebar */
+      padding: 20px;
+  }
+  #main-content {
+      padding: 20px;
+      overflow-y: visible; /* Remove scroll do main */
+  }
+  .vehicle-header {
+      flex-direction: column;
+      align-items: center; /* Centraliza */
+      text-align: center;
+      gap: 15px;
+  }
+  #imagemVeiculo { max-width: 150px; }
+  #informacoesVeiculo { min-width: auto; } /* Remove largura mínima */
+
+   .manutencao-container {
+      grid-template-columns: 1fr; /* Garante uma coluna */
+  }
+   #notification-area { /* Ajusta posição da notificação */
+       top: 10px;
+       right: 10px;
+       left: 10px; /* Ocupa largura em telas pequenas */
+       width: auto;
+       max-width: none;
+   }
 }
