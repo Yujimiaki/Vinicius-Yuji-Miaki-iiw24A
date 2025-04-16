@@ -49,7 +49,7 @@
             <!-- Área de Notificações -->
             <div id="notification-area" class="notification" style="display: none;">
                 <span id="notification-message"></span>
-                <button onclick="hideNotification()" class="close-btn">×</button>
+                <button class="close-btn">×</button> <!-- Removido onclick, JS cuida disso -->
             </div>
 
 
@@ -83,12 +83,24 @@
                     <div class="status-motor-container">
                         <i class="fas fa-power-off"></i> Status: <span id="info-status-motor"><i class='fas fa-circle status-off'></i> Desligado</span>
                     </div>
+
+                    <!-- ##### NOVO VELOCÍMETRO SVG ##### -->
                     <div id="barraProgressoContainer" style="display: none;" class="velocimetro-container">
-                        <div id="velocidadeAtual">0 km/h</div>
-                        <div id="barraProgresso" title="Velocidade Atual">
-                            <div class="bolinha"></div><div class="bolinha"></div><div class="bolinha"></div><div class="bolinha"></div><div class="bolinha"></div>
-                        </div>
+                        <svg viewBox="0 0 120 120" class="velocimetro-svg">
+                            <!-- Trilha de fundo -->
+                            <path class="velocimetro-trilha"
+                                  d="M 20 100 A 40 40 0 1 1 100 100"
+                                  fill="none" />
+                            <!-- Progresso (velocidade) -->
+                            <path class="velocimetro-progresso"
+                                  d="M 20 100 A 40 40 0 1 1 100 100"
+                                  fill="none" />
+                        </svg>
+                        <!-- O texto da velocidade AGORA fica AQUI FORA do SVG -->
+                        <div id="velocidadeAtual" class="velocimetro-texto">0 km/h</div>
                     </div>
+                    <!-- ##### FIM NOVO VELOCÍMETRO SVG ##### -->
+
                     <div id="info-especifica"></div>
                     <div id="botoesAcoes" class="botoes-container">
                         <button onclick="interagir('ligar')" title="Ligar Motor"><i class="fas fa-play"></i> Ligar</button>
@@ -182,6 +194,9 @@
     </dialog>
 
     <!-- Link para seu arquivo JavaScript -->
-    <script src="script.js"></script>
+    <!-- Link para seu arquivo JavaScript (MODIFICADO) -->
+<script type="module" src="js/principal.js"></script>
+</body>
+</html>
 </body>
 </html>

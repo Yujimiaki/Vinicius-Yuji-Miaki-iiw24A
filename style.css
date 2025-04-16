@@ -446,7 +446,8 @@
   #info-especifica p i { color: var(--cor-secundaria); margin-right: 8px;}
 
 
-  /* Velocímetro */
+  /* ---------- VELOCÍMETRO (ESTILOS ANTIGOS COMENTADOS) ---------- */
+  /*
   .velocimetro-container {
     display: flex;
     flex-direction: column;
@@ -480,12 +481,61 @@
     border-radius: 50%;
     background-color: #ced4da;
     transition: background-color 0.4s ease;
-    flex-grow: 1; /* Ocupa espaço */
-    margin: 0 2px; /* Espaço entre bolinhas */
+    flex-grow: 1; // Ocupa espaço /
+    margin: 0 2px; // Espaço entre bolinhas /
   }
   .bolinha.ativa {
     background-color: var(--cor-sucesso);
   }
+  */
+  /* --- NOVO ESTILO VELOCÍMETRO SVG --- */
+  .velocimetro-container {
+    position: relative; /* Para posicionar o texto absoluto */
+    width: 180px;      /* Tamanho do velocímetro */
+    height: 100px;     /* Altura (menos que largura por ser um arco) */
+    margin: 15px auto 25px auto; /* Centraliza e adiciona margens */
+    display: flex; /* Mantém flex para caso precise alinhar algo mais tarde */
+    justify-content: center;
+    align-items: flex-end; /* Alinha o SVG na base */
+  }
+
+  .velocimetro-svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible; /* Permite que stroke-linecap 'round' apareça fora */
+  }
+
+  .velocimetro-trilha,
+  .velocimetro-progresso {
+    stroke-width: 12;     /* Espessura da linha do arco */
+    stroke-linecap: round; /* Bordas arredondadas */
+    transform-origin: center center; /* Garante rotação/transformação a partir do centro */
+    fill: none; /* IMPORTANTE: Garante que não há preenchimento */
+  }
+
+  .velocimetro-trilha {
+    stroke: #e9ecef; /* Cor cinza claro para o fundo */
+  }
+
+  .velocimetro-progresso {
+    stroke: var(--cor-primaria); /* Cor inicial (azul) para o progresso */
+    /* A cor pode ser alterada via JS com base na velocidade */
+    stroke-dasharray: 251.2; /* Comprimento total aproximado do arco (ajustar se o 'd' mudar) */
+    stroke-dashoffset: 251.2; /* Começa 'vazio' (totalmente deslocado) */
+    transition: stroke-dashoffset 0.4s ease-out, stroke 0.4s ease; /* Animação suave de progresso e cor */
+  }
+
+  .velocimetro-texto { /* ID #velocidadeAtual agora tem esta classe */
+    position: absolute; /* Posiciona sobre o SVG */
+    bottom: 5px;       /* Ajuste fino da posição vertical */
+    left: 50%;
+    transform: translateX(-50%); /* Centraliza horizontalmente */
+    font-size: 1.8em; /* Tamanho maior para a velocidade */
+    font-weight: 700;
+    color: var(--cor-texto); /* Cor do texto principal */
+    line-height: 1;
+  }
+  /* --- FIM NOVO ESTILO VELOCÍMETRO --- */
 
 
   /* Abas (Tabs) */
@@ -564,7 +614,7 @@
     }
   }
 
- 
+
   .maintenance-list h3 {
     font-size: 1.1em;
     color: var(--cor-secundaria);
@@ -743,6 +793,15 @@
      dialog#modalAdicionarVeiculo h2 { font-size: 1.3em; }
      .modal-actions { justify-content: space-between; }
 
+     /* Ajuste velocímetro em telas menores se necessário */
+     .velocimetro-container {
+        width: 150px;
+        height: 80px;
+     }
+     .velocimetro-texto {
+        font-size: 1.5em;
+     }
+
   }
 
   @media (max-width: 576px) {
@@ -759,5 +818,17 @@
          left: 10px;
          width: auto;
          max-width: none;
+     }
+     /* Ajuste velocímetro em telas muito pequenas */
+     .velocimetro-container {
+        width: 120px;
+        height: 70px;
+     }
+     .velocimetro-texto {
+        font-size: 1.3em;
+        bottom: 2px;
+     }
+     .velocimetro-trilha, .velocimetro-progresso {
+         stroke-width: 10;
      }
   }
