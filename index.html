@@ -49,7 +49,7 @@
             <!-- Área de Notificações -->
             <div id="notification-area" class="notification" style="display: none;">
                 <span id="notification-message"></span>
-                <button class="close-btn">×</button> <!-- Removido onclick, JS cuida disso -->
+                <button class="close-btn">×</button>
             </div>
 
 
@@ -57,15 +57,17 @@
             <div id="painelVeiculoSelecionado" style="display: none;" class="card">
 
                 <div class="vehicle-header">
-                     <!-- ===== AQUI ESTÁ A TAG DA IMAGEM ===== -->
-                     <img id="imagemVeiculo" src="imagens/carro_normal.png" alt="Imagem do Veículo">
-                     <!-- ====================================== -->
+                     <!-- ===== Imagem do Veículo ===== -->
+                     <!-- <-- ALTERADO: Verifique se o nome 'caminhao.png' está correto -->
+                
+                     <!-- ============================ -->
                      <div id="informacoesVeiculo">
                          <h2 id="info-modelo-tipo">Modelo (Tipo)</h2>
                          <p><i class="fas fa-palette"></i> Cor: <span id="info-cor">N/A</span></p>
                          <p><i class="fas fa-id-card"></i> ID: <span id="info-id" class="info-id-text">N/A</span></p>
                      </div>
-                     <button onclick="interagir('removerVeiculo')" id="botaoRemoverVeiculoHeader" class="botao-remover-header" title="Remover este veículo da garagem"><i class="fas fa-trash-alt"></i></button>
+                     <!-- <-- ALTERADO: Removido onclick, será tratado no JS -->
+                     <button id="botaoRemoverVeiculoHeader" class="botao-remover-header" title="Remover este veículo da garagem"><i class="fas fa-trash-alt"></i></button>
                  </div>
 
                  <!-- Navegação por Abas -->
@@ -84,32 +86,30 @@
                         <i class="fas fa-power-off"></i> Status: <span id="info-status-motor"><i class='fas fa-circle status-off'></i> Desligado</span>
                     </div>
 
-                    <!-- ##### NOVO VELOCÍMETRO SVG ##### -->
+                    <!-- Velocímetro SVG -->
                     <div id="barraProgressoContainer" style="display: none;" class="velocimetro-container">
                         <svg viewBox="0 0 120 120" class="velocimetro-svg">
-                            <!-- Trilha de fundo -->
                             <path class="velocimetro-trilha"
                                   d="M 20 100 A 40 40 0 1 1 100 100"
                                   fill="none" />
-                            <!-- Progresso (velocidade) -->
                             <path class="velocimetro-progresso"
                                   d="M 20 100 A 40 40 0 1 1 100 100"
                                   fill="none" />
                         </svg>
-                        <!-- O texto da velocidade AGORA fica AQUI FORA do SVG -->
                         <div id="velocidadeAtual" class="velocimetro-texto">0 km/h</div>
                     </div>
-                    <!-- ##### FIM NOVO VELOCÍMETRO SVG ##### -->
+                    <!-- Fim Velocímetro SVG -->
 
                     <div id="info-especifica"></div>
                     <div id="botoesAcoes" class="botoes-container">
-                        <button onclick="interagir('ligar')" title="Ligar Motor"><i class="fas fa-play"></i> Ligar</button>
-                        <button onclick="interagir('desligar')" title="Desligar Motor"><i class="fas fa-stop"></i> Desligar</button>
-                        <button onclick="interagir('acelerar')" title="Acelerar"><i class="fas fa-tachometer-alt"></i> Acelerar</button>
-                        <button onclick="interagir('frear')" title="Frear"><i class="fas fa-hand-paper"></i> Frear</button>
-                        <button onclick="interagir('ativarTurbo')" id="botaoTurbo" class="botao-especial" title="Ativar Boost Turbo (Uso único!)"><i class="fas fa-rocket"></i> Boost</button>
-                        <button onclick="interagir('carregar')" id="botaoCarregar" class="botao-especial" title="Carregar Caminhão"><i class="fas fa-truck-loading"></i> Carregar</button>
-                        <button onclick="interagir('descarregar')" id="botaoDescarregar" class="botao-especial" title="Descarregar Caminhão"><i class="fas fa-truck-moving"></i> Descarregar</button>
+                        <!-- <-- ALTERADO: Removido onclick, será tratado no JS -->
+                        <button data-action="ligar" title="Ligar Motor"><i class="fas fa-play"></i> Ligar</button>
+                        <button data-action="desligar" title="Desligar Motor"><i class="fas fa-stop"></i> Desligar</button>
+                        <button data-action="acelerar" title="Acelerar"><i class="fas fa-tachometer-alt"></i> Acelerar</button>
+                        <button data-action="frear" title="Frear"><i class="fas fa-hand-paper"></i> Frear</button>
+                        <button data-action="ativarTurbo" id="botaoTurbo" class="botao-especial" title="Ativar Boost Turbo (Uso único!)"><i class="fas fa-rocket"></i> Boost</button>
+                        <button data-action="carregar" id="botaoCarregar" class="botao-especial" title="Carregar Caminhão"><i class="fas fa-truck-loading"></i> Carregar</button>
+                        <button data-action="descarregar" id="botaoDescarregar" class="botao-especial" title="Descarregar Caminhão"><i class="fas fa-truck-moving"></i> Descarregar</button>
                     </div>
                 </div>
 
@@ -163,7 +163,7 @@
 
     <!-- Modal para Adicionar Veículo -->
     <dialog id="modalAdicionarVeiculo">
-        <form id="formNovoVeiculo">
+        <form id="formNovoVeiculo" novalidate> <!-- novalidate para controlarmos as validações -->
              <h2><i class="fas fa-plus-circle"></i> Adicionar Novo Veículo</h2>
              <div>
                  <label for="novoVeiculoTipo">Tipo:</label>
@@ -194,9 +194,8 @@
     </dialog>
 
     <!-- Link para seu arquivo JavaScript -->
-    <!-- Link para seu arquivo JavaScript (MODIFICADO) -->
-<script type="module" src="js/principal.js"></script>
-</body>
-</html>
+    <!-- <-- ALTERADO: Corrigido type="module" e caminho (assumindo que principal.js está em js/) -->
+    <script type="module" src="js/principal.js"></script>
+    <!-- <-- ALTERADO: Removida duplicação de body/html -->
 </body>
 </html>
