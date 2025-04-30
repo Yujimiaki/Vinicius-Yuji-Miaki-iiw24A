@@ -1,834 +1,301 @@
 /* Reset Básico e Variáveis de Cor */
 :root {
-    --cor-primaria: #007bff; /* Azul */
-    --cor-secundaria: #6c757d; /* Cinza */
-    --cor-sucesso: #28a745; /* Verde */
-    --cor-perigo: #dc3545; /* Vermelho */
-    --cor-aviso: #ffc107; /* Amarelo */
-    --cor-info: #17a2b8; /* Azul Claro */
-    --cor-fundo: #f0f2f5;
-    --cor-fundo-card: #ffffff;
-    --cor-texto: #212121;
-    --cor-texto-claro: #ffffff;
-    --cor-borda: #dee2e6;
-    --sombra-card: 0 2px 4px rgba(0, 0, 0, 0.08), 0 8px 16px rgba(0, 0, 0, 0.08);
-    --border-radius-padrao: 8px;
-    --sidebar-width: 300px; /* Largura da sidebar */
-  }
+  --cor-primaria: #007bff; /* Azul */
+  --cor-secundaria: #6c757d; /* Cinza */
+  --cor-sucesso: #28a745; /* Verde */
+  --cor-perigo: #dc3545; /* Vermelho */
+  --cor-aviso: #ffc107; /* Amarelo */
+  --cor-info: #17a2b8; /* Azul Claro */
+  --cor-fundo: #f0f2f5;
+  --cor-fundo-card: #ffffff;
+  --cor-texto: #212121;
+  --cor-texto-claro: #ffffff;
+  --cor-borda: #dee2e6;
+  --sombra-card: 0 2px 4px rgba(0, 0, 0, 0.08), 0 8px 16px rgba(0, 0, 0, 0.08);
+  --border-radius-padrao: 8px;
+  --sidebar-width: 300px;
+  --velocimetro-path-length: 251.2; /* Será atualizado por JS */
+}
 
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-  body {
-    font-family: 'Poppins', sans-serif;
-    background-color: var(--cor-fundo);
-    color: var(--cor-texto);
-    line-height: 1.6;
-    min-height: 100vh;
-  }
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: var(--cor-fundo);
+  color: var(--cor-texto);
+  line-height: 1.6;
+  min-height: 100vh;
+}
 
-  /* Layout Principal */
-  #app-container {
-    display: flex;
-    width: 100%;
-    min-height: 100vh;
-  }
+/* Layout Principal */
+#app-container { display: flex; width: 100%; min-height: 100vh; }
+#sidebar {
+  width: var(--sidebar-width);
+  flex-shrink: 0; background-color: #f8f9fa; padding: 25px;
+  border-right: 1px solid var(--cor-borda); display: flex; flex-direction: column;
+  gap: 25px; overflow-y: auto; height: 100vh; position: sticky; top: 0;
+}
+.sidebar-header { text-align: center; margin-bottom: 10px; color: var(--cor-primaria); }
+.sidebar-header h1 { font-size: 1.7em; margin-top: 8px; font-weight: 700; }
+.sidebar-header i { font-size: 2.2em; }
+#main-content { flex: 1; padding: 35px; overflow-y: auto; position: relative; }
 
-  #sidebar {
-    width: var(--sidebar-width);
-    flex-shrink: 0;
-    background-color: #f8f9fa;
-    padding: 25px;
-    border-right: 1px solid var(--cor-borda);
-    display: flex;
-    flex-direction: column;
-    gap: 25px;
-    overflow-y: auto;
-    height: 100vh;
-    position: sticky;
-    top: 0;
-  }
+/* Estilo Card Genérico */
+.card {
+  background-color: var(--cor-fundo-card); border-radius: var(--border-radius-padrao);
+  box-shadow: var(--sombra-card); padding: 20px; margin-bottom: 25px;
+  border: 1px solid var(--cor-borda);
+}
+.card-inner {
+  background-color: #fdfdfd; border-radius: calc(var(--border-radius-padrao) - 4px);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.04); padding: 18px;
+  border: 1px solid #e9ecef; margin-bottom: 15px;
+}
 
-  .sidebar-header {
-    text-align: center;
-    margin-bottom: 10px;
-    color: var(--cor-primaria);
-  }
-  .sidebar-header h1 {
-    font-size: 1.7em;
-    margin-top: 8px;
-    font-weight: 700;
-  }
-  .sidebar-header i {
-    font-size: 2.2em;
-  }
+/* Títulos */
+.lista-veiculos-container h2, .sidebar-section h2, .maintenance-list h3, #formManutencaoContainer h3 {
+  font-size: 1.15em; margin-bottom: 15px; color: var(--cor-secundaria);
+  border-bottom: 1px solid var(--cor-borda); padding-bottom: 10px; font-weight: 600;
+}
+.lista-veiculos-container h2 i, .sidebar-section h2 i, .maintenance-list h3 i, #formManutencaoContainer h3 i { margin-right: 10px; }
+#formManutencaoContainer h3 { font-size: 1.25em; }
 
-  #main-content {
-    flex: 1;
-    padding: 35px;
-    overflow-y: auto;
-    position: relative;
-  }
+/* Botões Gerais e Específicos */
+button {
+  padding: 10px 18px; margin: 5px 3px; border: none;
+  background-color: var(--cor-primaria); color: var(--cor-texto-claro);
+  border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 600;
+  font-family: 'Poppins', sans-serif;
+  transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease, filter 0.2s ease;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; vertical-align: middle;
+}
+button:hover { filter: brightness(1.1); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); }
+button:active { transform: translateY(1px); filter: brightness(0.95); }
+button:disabled { background-color: #adb5bd; cursor: not-allowed; opacity: 0.65; box-shadow: none; filter: none; }
 
-  /* Estilo Card Genérico */
-  .card {
-    background-color: var(--cor-fundo-card);
-    border-radius: var(--border-radius-padrao);
-    box-shadow: var(--sombra-card);
-    padding: 20px;
-    margin-bottom: 25px;
-    border: 1px solid var(--cor-borda);
-  }
-  .card-inner {
-    background-color: #fdfdfd;
-    border-radius: calc(var(--border-radius-padrao) - 4px);
-    box-shadow: inset 0 1px 2px rgba(0,0,0,0.04);
-    padding: 18px;
-    border: 1px solid #e9ecef;
-    margin-bottom: 15px;
-  }
+.botao-sidebar-add { width: 100%; padding: 12px 20px; font-size: 1.05rem; background-color: var(--cor-sucesso); margin-bottom: 10px; }
+.botao-sidebar-add:hover { box-shadow: 0 4px 8px rgba(40, 167, 69, 0.2); }
+.botao-especial { background-color: var(--cor-aviso); color: var(--cor-texto); }
+#botaoTurbo { background-color: #fd7e14; }
+#botaoCarregar, #botaoDescarregar { background-color: var(--cor-info); }
+.botao-perigo { background-color: var(--cor-perigo); }
+.botao-cancelar { background-color: var(--cor-secundaria); }
+.botao-info { background-color: var(--cor-info); } /* Adicionado para botão API */
+.botao-info:hover { box-shadow: 0 4px 8px rgba(23, 162, 184, 0.2); }
+.botao-remover-header {
+  background-color: transparent; color: var(--cor-perigo); border: 1px solid var(--cor-perigo);
+  padding: 6px 10px; border-radius: 50px; font-size: 0.85rem; margin-left: auto; align-self: flex-start;
+}
+.botao-remover-header:hover { background-color: var(--cor-perigo); color: white; box-shadow: 0 2px 5px rgba(220, 53, 69, 0.3); }
+.botao-remover-item {
+  background-color: transparent; color: var(--cor-perigo); border: none; font-size: 0.9rem;
+  cursor: pointer; padding: 2px 4px; margin-left: 8px; opacity: 0.5;
+  transition: opacity 0.2s ease, color 0.2s ease, background-color 0.2s ease; border-radius: 4px; flex-shrink: 0;
+}
+.maintenance-list li:hover .botao-remover-item { opacity: 1; }
+.botao-remover-item:hover { background-color: rgba(220, 53, 69, 0.1); color: #a02533; }
 
-  .lista-veiculos-container h2, .sidebar-section h2 {
-    font-size: 1.15em;
-    margin-bottom: 15px;
-    color: var(--cor-secundaria);
-    border-bottom: 1px solid var(--cor-borda);
-    padding-bottom: 10px;
-    font-weight: 600;
-  }
-  .lista-veiculos-container h2 i, .sidebar-section h2 i {
-    margin-right: 10px;
-  }
+/* Formulários */
+form div { margin-bottom: 15px; }
+label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem; color: #555; }
+label i { margin-right: 6px; color: var(--cor-secundaria); width: 14px; text-align: center; }
+input[type="text"], input[type="number"], input[type="datetime-local"], select {
+  width: 100%; padding: 11px 14px; border: 1px solid var(--cor-borda); border-radius: 6px;
+  font-size: 0.95rem; font-family: 'Poppins', sans-serif; transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+input:focus, select:focus { border-color: var(--cor-primaria); outline: none; box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15); }
+::placeholder { color: #a0a0a0; font-style: italic; font-size: 0.9rem; }
+#formManutencaoContainer button[type="submit"] { width: 100%; margin-top: 10px; background-color: var(--cor-info); }
 
-  /* Botão Adicionar na Sidebar */
-  .botao-sidebar-add {
-    width: 100%;
-    padding: 12px 20px;
-    font-size: 1.05rem;
-    background-color: var(--cor-sucesso);
-    border: none;
-    color: var(--cor-texto-claro);
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 600;
-    font-family: 'Poppins', sans-serif;
-    transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 10px;
-  }
-  .botao-sidebar-add:hover {
-    filter: brightness(1.1);
-    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.2);
-  }
-  .botao-sidebar-add:active {
-    transform: translateY(1px);
-    filter: brightness(0.95);
-  }
+/* Lista Veículos Sidebar */
+.lista-veiculos-container { flex-grow: 1; display: flex; flex-direction: column; }
+#listaVeiculosSidebar {
+  list-style: none; padding: 0; margin: 0 -15px -15px -15px; overflow-y: auto; flex-grow: 1;
+  scrollbar-width: thin; scrollbar-color: var(--cor-secundaria) #f8f9fa;
+}
+#listaVeiculosSidebar::-webkit-scrollbar { width: 6px; }
+#listaVeiculosSidebar::-webkit-scrollbar-track { background: #f8f9fa; border-radius: 3px;}
+#listaVeiculosSidebar::-webkit-scrollbar-thumb { background-color: var(--cor-secundaria); border-radius: 3px; }
+#listaVeiculosSidebar li {
+  padding: 12px 18px; cursor: pointer; border-bottom: 1px solid var(--cor-borda);
+  transition: background-color 0.2s ease, color 0.2s ease; font-size: 0.95rem;
+  display: flex; align-items: center; gap: 10px;
+}
+#listaVeiculosSidebar li:last-child { border-bottom: none; }
+#listaVeiculosSidebar li:hover { background-color: #e9ecef; }
+#listaVeiculosSidebar li.selecionado { background-color: var(--cor-primaria); color: var(--cor-texto-claro); font-weight: 600; }
+#listaVeiculosSidebar li.selecionado i { color: var(--cor-texto-claro); }
+#listaVeiculosSidebar li i { color: var(--cor-secundaria); width: 18px; text-align: center; font-size: 1.1em; }
+#listaVeiculosSidebar li.placeholder { padding: 20px; text-align: center; font-style: italic; color: #888; cursor: default; background-color: transparent; }
+#listaVeiculosSidebar li.placeholder:hover { background-color: transparent; }
 
-  /* Lista de Veículos na Sidebar */
-  .lista-veiculos-container {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-  }
-  #listaVeiculosSidebar {
-    list-style: none;
-    padding: 0;
-    margin: 0 -15px -15px -15px;
-    overflow-y: auto;
-    flex-grow: 1;
-    scrollbar-width: thin;
-    scrollbar-color: var(--cor-secundaria) #f8f9fa;
-  }
-  #listaVeiculosSidebar::-webkit-scrollbar { width: 6px; }
-  #listaVeiculosSidebar::-webkit-scrollbar-track { background: #f8f9fa; border-radius: 3px;}
-  #listaVeiculosSidebar::-webkit-scrollbar-thumb { background-color: var(--cor-secundaria); border-radius: 3px; }
+/* Modal Adicionar Veículo */
+dialog#modalAdicionarVeiculo {
+  border: none; border-radius: var(--border-radius-padrao); box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  padding: 30px 35px; min-width: 450px; max-width: 550px; margin: auto;
+}
+dialog#modalAdicionarVeiculo::backdrop { background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(3px); }
+dialog#modalAdicionarVeiculo h2 { font-size: 1.5em; margin-bottom: 25px; color: var(--cor-primaria); text-align: center; border-bottom: 1px solid var(--cor-borda); padding-bottom: 15px; }
+dialog#modalAdicionarVeiculo h2 i { margin-right: 10px; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 15px; margin-top: 25px; padding-top: 20px; border-top: 1px solid var(--cor-borda); }
+.modal-actions button { min-width: 120px; }
+.modal-actions button[type="submit"] { background-color: var(--cor-sucesso); }
 
-  #listaVeiculosSidebar li {
-    padding: 12px 18px;
-    cursor: pointer;
-    border-bottom: 1px solid var(--cor-borda);
-    transition: background-color 0.2s ease, color 0.2s ease;
-    font-size: 0.95rem;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-  #listaVeiculosSidebar li:last-child {
-    border-bottom: none;
-  }
-  #listaVeiculosSidebar li:hover {
-    background-color: #e9ecef;
-  }
-  #listaVeiculosSidebar li.selecionado {
-    background-color: var(--cor-primaria);
-    color: var(--cor-texto-claro);
-    font-weight: 600;
-  }
-  #listaVeiculosSidebar li.selecionado i {
-    color: var(--cor-texto-claro);
-  }
-  #listaVeiculosSidebar li i {
-    color: var(--cor-secundaria);
-    width: 18px;
-    text-align: center;
-    font-size: 1.1em;
-  }
-  #listaVeiculosSidebar li.placeholder {
-    padding: 20px;
-    text-align: center;
-    font-style: italic;
-    color: #888;
-    cursor: default;
-    background-color: transparent;
-  }
-   #listaVeiculosSidebar li.placeholder:hover {
-      background-color: transparent;
-  }
+/* Painel Veículo Selecionado */
+#painelVeiculoSelecionado { animation: fadeIn 0.5s ease-out; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
+.vehicle-header { display: flex; align-items: center; gap: 30px; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid var(--cor-borda); flex-wrap: wrap; }
+#imagemVeiculo { max-width: 150px; height: auto; min-height: 80px; border-radius: var(--border-radius-padrao); object-fit: contain; border: 1px solid var(--cor-borda); box-shadow: 0 2px 5px rgba(0,0,0,0.08); background-color: #f8f9fa; }
+#informacoesVeiculo { flex: 1; min-width: 200px; }
+#informacoesVeiculo h2 { margin-bottom: 10px; border: none; padding: 0; color: #333; font-size: 1.8em; font-weight: 700; line-height: 1.2; }
+#informacoesVeiculo p { margin-bottom: 6px; font-size: 0.95rem; color: #555; display: flex; align-items: center; }
+#informacoesVeiculo p i.fas { color: var(--cor-secundaria); margin-right: 10px; width: 18px; text-align: center; }
+.info-id-text { display: inline-block; word-break: break-all; margin-right: 10px; }
 
-  /* Formulários */
-  form div {
-    margin-bottom: 15px;
-  }
+/* Status Motor */
+.status-motor-container { font-size: 1rem; font-weight: 600; color: #555; margin-bottom: 20px; text-align: center; padding: 10px; background-color: #f8f9fa; border-radius: 6px; }
+.status-motor-container i.fa-power-off { margin-right: 8px; color: var(--cor-secundaria);}
+#info-status-motor .status-on { color: var(--cor-sucesso); font-weight: bold;}
+#info-status-motor .status-off { color: var(--cor-perigo); font-weight: bold;}
+#info-status-motor .fa-circle { font-size: 0.8em; vertical-align: middle; margin-right: 4px;}
 
-  label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: 600;
-    font-size: 0.9rem;
-    color: #555;
-  }
-  label i {
-    margin-right: 6px;
-    color: var(--cor-secundaria);
-    width: 14px;
-    text-align: center;
-  }
+/* Velocímetro */
+.velocimetro-container { display: flex; flex-direction: column; align-items: center; margin-bottom: 25px; padding: 15px; background-color: #f8f9fa; border-radius: var(--border-radius-padrao); }
+.velocimetro-svg { width: 100%; max-width: 180px; height: auto; transform: rotate(-90deg); }
+.velocimetro-trilha { stroke-width: 10; stroke: #e9ecef; }
+.velocimetro-progresso {
+  stroke-width: 10; stroke: var(--cor-primaria); stroke-linecap: round;
+  stroke-dasharray: var(--velocimetro-path-length); stroke-dashoffset: var(--velocimetro-path-length);
+  transition: stroke-dashoffset 0.4s ease-out, stroke 0.4s ease-out;
+}
+.velocimetro-texto { font-size: 1.5em; font-weight: 700; color: var(--cor-primaria); margin-top: -10px; text-align: center; }
 
-  input[type="text"],
-  input[type="number"],
-  input[type="datetime-local"],
-  select {
-    width: 100%;
-    padding: 11px 14px;
-    border: 1px solid var(--cor-borda);
-    border-radius: 6px;
-    font-size: 0.95rem;
-    font-family: 'Poppins', sans-serif;
-    transition: border-color 0.2s ease, box-shadow 0.2s ease;
-  }
-  input:focus, select:focus {
-    border-color: var(--cor-primaria);
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
-  }
-  ::placeholder {
-    color: #a0a0a0;
-    font-style: italic;
-    font-size: 0.9rem;
-  }
+/* Infos Específicas e Botões Ações*/
+#info-especifica { margin-top: 20px; margin-bottom: 20px; padding: 15px; border: 1px dashed var(--cor-borda); border-radius: 6px; text-align: center; background-color: #fafafa; min-height: 50px; }
+#info-especifica p { font-style: normal; color: #444; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;}
+#info-especifica p:last-child { margin-bottom: 0; }
+#info-especifica p span { font-weight: 400; color: #666; }
+#info-especifica p i { color: var(--cor-secundaria); flex-shrink: 0; }
+.botoes-container { display: flex; flex-wrap: wrap; justify-content: center; margin-top: 20px; }
+#botoesAcoes button { flex-basis: calc(33.33% - 10px); margin: 5px; }
 
-  /* Botões Gerais */
-  button {
-    padding: 10px 18px;
-    margin: 5px 3px;
-    border: none;
-    background-color: var(--cor-primaria);
-    color: var(--cor-texto-claro);
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    font-weight: 600;
-    font-family: 'Poppins', sans-serif;
-    transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    vertical-align: middle;
-  }
-  button:hover {
-    filter: brightness(1.1);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  }
-  button:active {
-    transform: translateY(1px);
-    filter: brightness(0.95);
-  }
-  button:disabled {
-    background-color: #adb5bd;
-    cursor: not-allowed;
-    opacity: 0.65;
-     box-shadow: none;
-     filter: none;
-  }
+/* Abas (Tabs) */
+nav.tabs-veiculo { display: flex; border-bottom: 2px solid var(--cor-borda); margin-bottom: 25px; }
+.tab-link { padding: 12px 25px; border: none; background: none; cursor: pointer; font-size: 1rem; font-weight: 600; color: var(--cor-secundaria); border-bottom: 3px solid transparent; margin-bottom: -2px; transition: color 0.2s ease, border-bottom-color 0.2s ease; gap: 8px; }
+.tab-link:hover { color: var(--cor-primaria); }
+.tab-link.active { color: var(--cor-primaria); border-bottom-color: var(--cor-primaria); }
+.tab-content { display: none; padding-top: 10px; }
+.tab-content.active { display: block; animation: fadeIn 0.4s ease-out; }
 
-  /* Botões Específicos (Cores e Estilos) */
-  .botao-especial { background-color: var(--cor-aviso); color: var(--cor-texto); }
-  .botao-perigo { background-color: var(--cor-perigo); }
-  .botao-cancelar { background-color: var(--cor-secundaria); }
-
-  #botaoTurbo { background-color: #fd7e14; }
-  #botaoTurbo:hover { filter: brightness(1.1); }
-  #botaoCarregar, #botaoDescarregar { background-color: var(--cor-info); }
-
-  #botoesAcoes button {
-    flex-basis: calc(33.33% - 10px);
-    margin: 5px;
-  }
-  .botoes-container {
-     display: flex;
-     flex-wrap: wrap;
-     justify-content: center;
-     margin-top: 20px;
-  }
-
-  /* Botão Remover no Header */
-  .botao-remover-header {
-    background-color: transparent;
-    color: var(--cor-perigo);
-    border: 1px solid var(--cor-perigo);
-    padding: 6px 10px;
-    border-radius: 50px;
-    font-size: 0.85rem;
-    margin-left: auto;
-    align-self: flex-start;
-  }
-  .botao-remover-header:hover {
-    background-color: var(--cor-perigo);
-    color: white;
-    box-shadow: 0 2px 5px rgba(220, 53, 69, 0.3);
-  }
-  .info-id-text {
-     display: inline-block;
-     word-break: break-all;
-     margin-right: 10px;
-     /* background-color: #eee; /* Debug */
-  }
+/* Aba Manutenção */
+#formManutencaoContainer { margin-bottom: 30px; padding: 25px; background-color: #f8f9fa; border-radius: var(--border-radius-padrao); border: 1px solid var(--cor-borda); }
+.manutencao-container { display: grid; grid-template-columns: 1fr; gap: 25px; margin-top: 10px; }
+@media (min-width: 992px) { .manutencao-container { grid-template-columns: 1fr 1fr; } }
+.maintenance-list ul { list-style: none; padding: 0; max-height: 250px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--cor-secundaria) var(--cor-fundo-card); }
+.maintenance-list ul::-webkit-scrollbar { width: 8px; }
+.maintenance-list ul::-webkit-scrollbar-track { background: #f0f2f5; border-radius: 4px;}
+.maintenance-list ul::-webkit-scrollbar-thumb { background-color: #ccc; border-radius: 4px; border: 2px solid #f0f2f5; }
+.maintenance-list ul::-webkit-scrollbar-thumb:hover { background-color: var(--cor-secundaria); }
+.maintenance-list li { padding: 10px 5px; border-bottom: 1px dotted #e0e0e0; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; line-height: 1.4; transition: background-color 0.2s ease; }
+.maintenance-list li:hover { background-color: #f0f5ff; }
+.maintenance-list li:last-child { border-bottom: none; }
+.maintenance-list li span { flex-grow: 1; margin-right: 8px;}
+.maintenance-list li.placeholder { font-style: italic; color: #888; text-align: center; padding: 15px; border-bottom: none; background-color: transparent !important; } /* Estilo Placeholder */
 
 
-  /* Modal Adicionar Veículo */
-  dialog#modalAdicionarVeiculo {
-    border: none;
-    border-radius: var(--border-radius-padrao);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-    padding: 30px 35px;
-    min-width: 450px;
-    max-width: 550px;
-    margin: auto;
-  }
-  dialog#modalAdicionarVeiculo::backdrop {
-    background-color: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(3px);
-  }
-  dialog#modalAdicionarVeiculo h2 {
-    font-size: 1.5em;
-    margin-bottom: 25px;
-    color: var(--cor-primaria);
-    text-align: center;
-    border-bottom: 1px solid var(--cor-borda);
-    padding-bottom: 15px;
-  }
-  dialog#modalAdicionarVeiculo h2 i { margin-right: 10px; }
-  .modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 15px;
-    margin-top: 25px;
-    padding-top: 20px;
-    border-top: 1px solid var(--cor-borda);
-  }
-  .modal-actions button {
-    min-width: 120px;
-  }
-  .modal-actions button[type="submit"] {
-      background-color: var(--cor-sucesso);
-  }
+/* Área de Notificação */
+#notification-area {
+  position: fixed; top: 20px; right: 20px; padding: 14px 25px; border-radius: var(--border-radius-padrao);
+  color: var(--cor-texto-claro); z-index: 1050; min-width: 280px; max-width: 400px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25); display: flex; justify-content: space-between;
+  align-items: center; opacity: 0; transform: translateX(20px);
+  transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+#notification-area.show { opacity: 1; transform: translateX(0); }
+#notification-area.info { background-color: var(--cor-info); }
+#notification-area.success { background-color: var(--cor-sucesso); }
+#notification-area.warning { background-color: var(--cor-aviso); color: var(--cor-texto); }
+#notification-area.error { background-color: var(--cor-perigo); }
+#notification-message { font-weight: 600; font-size: 0.9rem; }
+#notification-area .close-btn { background: none; border: none; color: inherit; font-size: 1.5rem; font-weight: bold; cursor: pointer; padding: 0 0 0 15px; line-height: 1; opacity: 0.7; text-shadow: none; }
+#notification-area.warning .close-btn { color: var(--cor-texto); }
+#notification-area .close-btn:hover { opacity: 1; }
 
+/* Mensagem "Selecione um veículo" */
+#mensagem-selecione { text-align: center; padding: 60px 40px; color: var(--cor-secundaria); font-size: 1.1em; border: 2px dashed var(--cor-borda); background-color: #fdfdfd; margin-top: 40px; }
+#mensagem-selecione h2 { color: var(--cor-info); margin-bottom: 20px; font-size: 1.6em; }
+#mensagem-selecione h2 i { margin-right: 12px; }
 
-  /* Painel Veículo Selecionado */
-  #painelVeiculoSelecionado {
-    animation: fadeIn 0.5s ease-out;
-  }
+/* ======================================== */
+/* == Estilos para Detalhes Extras (API) == */
+/* ======================================== */
+.detalhes-extras-container { margin-top: 25px; padding-top: 20px; border-top: 1px solid var(--cor-borda); text-align: center; }
+#btnVerDetalhesExtras { margin-bottom: 15px; min-width: 200px; }
+#detalhesExtrasVeiculo {
+  margin-top: 15px; padding: 18px; background-color: #f8f9fa; border: 1px solid #e9ecef;
+  border-radius: 6px; text-align: left; min-height: 50px; animation: fadeIn 0.5s ease-out;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+}
+#detalhesExtrasVeiculo p { margin-bottom: 12px; line-height: 1.6; color: #343a40; font-size: 0.9rem; display: flex; align-items: flex-start; }
+#detalhesExtrasVeiculo p:last-child { margin-bottom: 0; }
+#detalhesExtrasVeiculo strong { color: var(--cor-secundaria); margin-right: 8px; font-weight: 600; flex-shrink: 0; }
+#detalhesExtrasVeiculo i.fas { margin-right: 10px; color: var(--cor-info); width: 18px; text-align: center; margin-top: 2px; flex-shrink: 0; }
+#detalhesExtrasVeiculo i.fa-dollar-sign { color: var(--cor-sucesso); }
+#detalhesExtrasVeiculo i.fa-exclamation-circle { color: var(--cor-aviso); }
+#detalhesExtrasVeiculo i.fa-exclamation-triangle { color: var(--cor-perigo); }
+#detalhesExtrasVeiculo i.fa-search { color: var(--cor-secundaria); }
+#detalhesExtrasVeiculo .recall-pendente { color: var(--cor-perigo); font-weight: bold; background-color: rgba(220, 53, 69, 0.1); padding: 2px 5px; border-radius: 4px; margin-left: 5px; }
+#detalhesExtrasVeiculo .recall-ok { color: var(--cor-sucesso); font-weight: normal; margin-left: 5px; }
+#detalhesExtrasVeiculo .loading-feedback, #detalhesExtrasVeiculo .error-feedback, #detalhesExtrasVeiculo .notfound-feedback { font-style: italic; color: var(--cor-secundaria); text-align: center; padding: 10px 0; display: flex; align-items: center; justify-content: center; gap: 8px;}
+#detalhesExtrasVeiculo .error-feedback { color: var(--cor-perigo); font-weight: bold; font-style: normal; }
+#detalhesExtrasVeiculo .fa-spinner { animation: spin 1.5s linear infinite; }
+@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .vehicle-header {
-    display: flex;
-    align-items: center;
-    gap: 30px;
-    margin-bottom: 30px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--cor-borda);
-    flex-wrap: wrap;
-  }
-
-  /* ===== ESTILO DA IMAGEM ===== */
-  #imagemVeiculo {
-    max-width: 150px;
-    height: auto;
-    min-height: 80px; /* Altura mínima para evitar colapso se imagem não carregar */
-    border-radius: var(--border-radius-padrao);
-    object-fit: contain; /* 'contain' para não cortar, 'cover' se preferir preencher */
-    border: 1px solid var(--cor-borda);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.08);
-    background-color: #f8f9fa; /* Cor de fundo caso imagem falhe */
-  }
-  /* =========================== */
-
-  #informacoesVeiculo {
-    flex: 1;
-    min-width: 200px;
-  }
-  #informacoesVeiculo h2 {
-     margin-bottom: 10px;
-     border: none;
-     padding: 0;
-     color: #333;
-     font-size: 1.8em;
-     font-weight: 700;
-     line-height: 1.2;
-  }
-  #informacoesVeiculo p {
-    margin-bottom: 6px;
-    font-size: 0.95rem;
-    color: #555;
-    display: flex;
-    align-items: center;
-  }
-  #informacoesVeiculo p i.fas {
-    color: var(--cor-secundaria);
-    margin-right: 10px;
-    width: 18px;
-    text-align: center;
-  }
-
-  /* Status Motor */
-  .status-motor-container {
-    font-size: 1rem;
-    font-weight: 600;
-    color: #555;
-    margin-bottom: 20px;
-    text-align: center;
-    padding: 10px;
-    background-color: #f8f9fa;
-    border-radius: 6px;
-  }
-  .status-motor-container i.fa-power-off { margin-right: 8px; color: var(--cor-secundaria);}
-  #info-status-motor .status-on { color: var(--cor-sucesso); font-weight: bold;}
-  #info-status-motor .status-off { color: var(--cor-perigo); font-weight: bold;}
-  #info-status-motor .fa-circle { font-size: 0.8em; vertical-align: middle; margin-right: 4px;}
-
-  /* Infos Específicas */
-  #info-especifica {
-    margin-top: 20px;
-    margin-bottom: 20px;
-    padding: 15px;
-    border: 1px dashed var(--cor-borda);
-    border-radius: 6px;
-    text-align: center;
-    background-color: #fafafa; /* Fundo leve */
-    min-height: 50px; /* Altura mínima para não sumir se vazio */
-  }
-  #info-especifica p { font-style: normal; color: #444; font-weight: 600; margin-bottom: 8px; }
-  #info-especifica p:last-child { margin-bottom: 0; }
-  #info-especifica p span { font-weight: 400; color: #666; margin-left: 5px;}
-  #info-especifica p i { color: var(--cor-secundaria); margin-right: 8px;}
-
-
-  /* ---------- VELOCÍMETRO (ESTILOS ANTIGOS COMENTADOS) ---------- */
-  /*
-  .velocimetro-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-bottom: 25px;
-    padding: 15px;
-    background-color: #f8f9fa;
-    border-radius: var(--border-radius-padrao);
-  }
-  #velocidadeAtual {
-    font-size: 1.5em;
-    font-weight: 700;
-    color: var(--cor-primaria);
-    margin-bottom: 10px;
-  }
-  #barraProgresso {
-    width: 95%;
-    max-width: 400px;
-    height: 18px;
-    background-color: #e9ecef;
-    border-radius: 9px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 4px;
-    box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
-  }
-  .bolinha {
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    background-color: #ced4da;
-    transition: background-color 0.4s ease;
-    flex-grow: 1; // Ocupa espaço /
-    margin: 0 2px; // Espaço entre bolinhas /
-  }
-  .bolinha.ativa {
-    background-color: var(--cor-sucesso);
-  }
-  */
-  /* --- NOVO ESTILO VELOCÍMETRO SVG --- */
-  .velocimetro-container {
-    position: relative; /* Para posicionar o texto absoluto */
-    width: 180px;      /* Tamanho do velocímetro */
-    height: 100px;     /* Altura (menos que largura por ser um arco) */
-    margin: 15px auto 25px auto; /* Centraliza e adiciona margens */
-    display: flex; /* Mantém flex para caso precise alinhar algo mais tarde */
-    justify-content: center;
-    align-items: flex-end; /* Alinha o SVG na base */
-  }
-
-  .velocimetro-svg {
-    width: 100%;
-    height: 100%;
-    overflow: visible; /* Permite que stroke-linecap 'round' apareça fora */
-  }
-
-  .velocimetro-trilha,
-  .velocimetro-progresso {
-    stroke-width: 12;     /* Espessura da linha do arco */
-    stroke-linecap: round; /* Bordas arredondadas */
-    transform-origin: center center; /* Garante rotação/transformação a partir do centro */
-    fill: none; /* IMPORTANTE: Garante que não há preenchimento */
-  }
-
-  .velocimetro-trilha {
-    stroke: #e9ecef; /* Cor cinza claro para o fundo */
-  }
-
-  .velocimetro-progresso {
-    stroke: var(--cor-primaria); /* Cor inicial (azul) para o progresso */
-    /* A cor pode ser alterada via JS com base na velocidade */
-    stroke-dasharray: 251.2; /* Comprimento total aproximado do arco (ajustar se o 'd' mudar) */
-    stroke-dashoffset: 251.2; /* Começa 'vazio' (totalmente deslocado) */
-    transition: stroke-dashoffset 0.4s ease-out, stroke 0.4s ease; /* Animação suave de progresso e cor */
-  }
-
-  .velocimetro-texto { /* ID #velocidadeAtual agora tem esta classe */
-    position: absolute; /* Posiciona sobre o SVG */
-    bottom: 5px;       /* Ajuste fino da posição vertical */
-    left: 50%;
-    transform: translateX(-50%); /* Centraliza horizontalmente */
-    font-size: 1.8em; /* Tamanho maior para a velocidade */
-    font-weight: 700;
-    color: var(--cor-texto); /* Cor do texto principal */
-    line-height: 1;
-  }
-  /* --- FIM NOVO ESTILO VELOCÍMETRO --- */
-
-
-  /* Abas (Tabs) */
-  nav.tabs-veiculo {
-    display: flex;
-    border-bottom: 2px solid var(--cor-borda);
-    margin-bottom: 25px;
-  }
-  .tab-link {
-    padding: 12px 25px;
-    border: none;
-    background: none;
-    cursor: pointer;
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--cor-secundaria);
-    border-bottom: 3px solid transparent;
-    margin-bottom: -2px;
-    transition: color 0.2s ease, border-bottom-color 0.2s ease;
-    gap: 8px;
-  }
-  .tab-link:hover {
-    color: var(--cor-primaria);
-  }
-  .tab-link.active {
-    color: var(--cor-primaria);
-    border-bottom-color: var(--cor-primaria);
-  }
-  .tab-content {
-    display: none;
-    padding-top: 10px;
-  }
-  .tab-content.active {
-    display: block;
-    animation: fadeIn 0.4s ease-out;
-  }
-
-  /* Estilos dentro da Aba Manutenção */
-  #formManutencaoContainer {
-      margin-bottom: 30px;
-      padding: 25px;
-      background-color: #f8f9fa;
-      border-radius: var(--border-radius-padrao);
-      border: 1px solid var(--cor-borda);
-  }
-   #formManutencaoContainer h3 {
-        font-size: 1.25em;
-        margin-bottom: 20px;
-        color: var(--cor-secundaria);
-        border-bottom: 1px solid var(--cor-borda);
-        padding-bottom: 10px;
-        font-weight: 600;
-   }
-   #formManutencaoContainer h3 i { margin-right: 10px;}
-
-   #formManutencaoContainer button[type="submit"] {
-        width: 100%;
-        margin-top: 10px;
-        background-color: var(--cor-info);
-   }
-   #formManutencaoContainer button[type="submit"]:hover {
-       filter: brightness(1.1);
-   }
-
-  /* Histórico e Agendamentos */
-  .manutencao-container {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 25px;
-    margin-top: 10px;
-  }
-
-  @media (min-width: 992px) {
-    .manutencao-container {
-        grid-template-columns: 1fr 1fr;
-    }
-  }
-
-
-  .maintenance-list h3 {
-    font-size: 1.1em;
-    color: var(--cor-secundaria);
-    margin-top: 0;
-    margin-bottom: 15px;
-    border-bottom: 1px solid var(--cor-borda);
-    padding-bottom: 10px;
-  }
-  .maintenance-list ul {
-    list-style: none;
-    padding: 0;
-    max-height: 250px;
-    overflow-y: auto;
-    scrollbar-width: thin;
-    scrollbar-color: var(--cor-secundaria) var(--cor-fundo-card);
-  }
-  .maintenance-list ul::-webkit-scrollbar { width: 8px; }
-  .maintenance-list ul::-webkit-scrollbar-track { background: #f0f2f5; border-radius: 4px;}
-  .maintenance-list ul::-webkit-scrollbar-thumb { background-color: #ccc; border-radius: 4px; border: 2px solid #f0f2f5; }
-  .maintenance-list ul::-webkit-scrollbar-thumb:hover { background-color: var(--cor-secundaria); }
-
-  .maintenance-list li {
-    padding: 10px 5px;
-    border-bottom: 1px dotted #e0e0e0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.85rem;
-    line-height: 1.4;
-    transition: background-color 0.2s ease;
-  }
-  .maintenance-list li:hover {
-    background-color: #f0f5ff;
-  }
-  .maintenance-list li:last-child { border-bottom: none; }
-  .maintenance-list li span { flex-grow: 1; margin-right: 8px;}
-
-
-  .botao-remover-item {
-    background-color: transparent;
-    color: var(--cor-perigo);
-    border: none;
-    font-size: 0.9rem;
-    cursor: pointer;
-    padding: 2px 4px;
-    margin-left: 8px;
-    opacity: 0.5;
-     transition: opacity 0.2s ease, color 0.2s ease;
-     border-radius: 4px;
-     flex-shrink: 0;
-  }
-  .maintenance-list li:hover .botao-remover-item {
-      opacity: 1;
-  }
-  .botao-remover-item:hover {
-    opacity: 1;
-    background-color: rgba(220, 53, 69, 0.1);
-    color: #a02533;
-  }
-
-
-  /* Área de Notificação */
-  #notification-area {
-    position: fixed;
-    top: 20px;
-    right: 20px;
-    padding: 14px 25px;
-    border-radius: var(--border-radius-padrao);
-    color: var(--cor-texto-claro);
-    z-index: 1050;
-    min-width: 280px;
-    max-width: 400px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    opacity: 0;
-    transform: translateX(20px);
-    transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-  }
-  #notification-area.show {
-    opacity: 1;
-    transform: translateX(0);
-  }
-  /* Tipos de Notificação */
-  #notification-area.info { background-color: var(--cor-info); }
-  #notification-area.success { background-color: var(--cor-sucesso); }
-  #notification-area.warning { background-color: var(--cor-aviso); color: var(--cor-texto); }
-  #notification-area.error { background-color: var(--cor-perigo); }
-
-  #notification-message {
-    font-weight: 600;
-    font-size: 0.9rem;
-  }
-
-  #notification-area .close-btn {
-    background: none;
-    border: none;
-    color: inherit;
-    font-size: 1.5rem;
-    font-weight: bold;
-    cursor: pointer;
-    padding: 0 0 0 15px;
-    line-height: 1;
-    opacity: 0.7;
-    text-shadow: none;
-  }
-   #notification-area.warning .close-btn { color: var(--cor-texto); }
-  #notification-area .close-btn:hover { opacity: 1; }
-
-  /* Mensagem "Selecione um veículo" */
-  #mensagem-selecione {
-    text-align: center;
-    padding: 60px 40px;
-    color: var(--cor-secundaria);
-    font-size: 1.1em;
-    border: 2px dashed var(--cor-borda);
-    background-color: #fdfdfd;
-    margin-top: 40px;
-  }
-  #mensagem-selecione h2 {
-    color: var(--cor-info);
-    margin-bottom: 20px;
-    font-size: 1.6em;
-  }
-  #mensagem-selecione h2 i { margin-right: 12px; }
-
-  /* Responsividade */
-  @media (max-width: 1200px) {
-    :root {
-        --sidebar-width: 260px;
-    }
-    #sidebar { width: var(--sidebar-width); padding: 20px; }
-    #main-content { padding: 25px; }
-  }
-
-  @media (max-width: 992px) {
-    #app-container {
-        flex-direction: column;
-    }
-    #sidebar {
-        width: 100%;
-        height: auto;
-        position: static;
-        border-right: none;
-        border-bottom: 1px solid var(--cor-borda);
-        flex-direction: row;
-        flex-wrap: wrap;
-        gap: 15px;
-        padding: 15px;
-    }
-    .sidebar-header { display: none; }
-    .botao-sidebar-add { width: auto; flex-grow: 1; }
-    .lista-veiculos-container {
-        width: 100%;
-        order: 3;
-        max-height: 200px;
-    }
-    .lista-veiculos-container h2 { display: none; }
-    #listaVeiculosSidebar { margin: 0; }
-
-    #main-content { padding: 20px; }
-    .vehicle-header { flex-direction: column; align-items: center; text-align: center; gap: 15px;}
-    .botao-remover-header { margin-left: 0; align-self: center; margin-top: 10px; }
-    nav.tabs-veiculo { justify-content: center; }
-    .tab-link { padding: 10px 15px; font-size: 0.9rem; }
-
-    .manutencao-container { grid-template-columns: 1fr; }
-    #botoesAcoes button { flex-basis: calc(50% - 10px); }
-
-    dialog#modalAdicionarVeiculo {
-        min-width: 90vw;
-        max-width: 95vw;
-        padding: 20px;
-    }
-     dialog#modalAdicionarVeiculo h2 { font-size: 1.3em; }
-     .modal-actions { justify-content: space-between; }
-
-     /* Ajuste velocímetro em telas menores se necessário */
-     .velocimetro-container {
-        width: 150px;
-        height: 80px;
-     }
-     .velocimetro-texto {
-        font-size: 1.5em;
-     }
-
-  }
-
-  @media (max-width: 576px) {
-    #main-content { padding: 15px; }
-    #painelVeiculoSelecionado, .card { padding: 15px; }
-    .tab-link { padding: 8px 10px; font-size: 0.85rem; }
-    #botoesAcoes button { flex-basis: calc(100% - 10px); }
-    .botao-sidebar-add { font-size: 0.95rem; padding: 10px 15px;}
-    #listaVeiculosSidebar li { padding: 10px 12px; font-size: 0.9rem;}
-
-    #notification-area {
-         top: 10px;
-         right: 10px;
-         left: 10px;
-         width: auto;
-         max-width: none;
-     }
-     /* Ajuste velocímetro em telas muito pequenas */
-     .velocimetro-container {
-        width: 120px;
-        height: 70px;
-     }
-     .velocimetro-texto {
-        font-size: 1.3em;
-        bottom: 2px;
-     }
-     .velocimetro-trilha, .velocimetro-progresso {
-         stroke-width: 10;
-     }
-  }
+/* Responsividade */
+@media (max-width: 1200px) {
+  :root { --sidebar-width: 260px; }
+  #sidebar { width: var(--sidebar-width); padding: 20px; }
+  #main-content { padding: 25px; }
+}
+@media (max-width: 992px) {
+  #app-container { flex-direction: column; }
+  #sidebar { width: 100%; height: auto; position: static; border-right: none; border-bottom: 1px solid var(--cor-borda); flex-direction: row; flex-wrap: wrap; gap: 15px; padding: 15px; }
+  .sidebar-header { display: none; }
+  .botao-sidebar-add { width: auto; flex-grow: 1; }
+  .lista-veiculos-container { width: 100%; order: 3; max-height: 200px; }
+  .lista-veiculos-container h2 { display: none; }
+  #listaVeiculosSidebar { margin: 0; }
+  #main-content { padding: 20px; }
+  .vehicle-header { flex-direction: column; align-items: center; text-align: center; gap: 15px;}
+  #imagemVeiculo { max-width: 120px; }
+  .botao-remover-header { margin-left: 0; align-self: center; margin-top: 10px; }
+  nav.tabs-veiculo { justify-content: center; }
+  .tab-link { padding: 10px 15px; font-size: 0.9rem; }
+  .manutencao-container { grid-template-columns: 1fr; }
+  #botoesAcoes button { flex-basis: calc(50% - 10px); }
+  dialog#modalAdicionarVeiculo { min-width: 90vw; max-width: 95vw; padding: 20px; }
+  dialog#modalAdicionarVeiculo h2 { font-size: 1.3em; }
+  .modal-actions { justify-content: space-between; }
+  .velocimetro-svg { max-width: 150px; }
+  .velocimetro-texto { font-size: 1.3em; }
+  #btnVerDetalhesExtras { width: 90%; } /* Botão API mais largo */
+}
+@media (max-width: 576px) {
+  #main-content { padding: 15px; }
+  #painelVeiculoSelecionado, .card { padding: 15px; }
+  .tab-link { padding: 8px 10px; font-size: 0.85rem; }
+  #botoesAcoes button { flex-basis: calc(100% - 10px); }
+  .botao-sidebar-add { font-size: 0.95rem; padding: 10px 15px;}
+  #listaVeiculosSidebar li { padding: 10px 12px; font-size: 0.9rem;}
+  #notification-area { top: 10px; right: 10px; left: 10px; width: auto; max-width: none; }
+  .vehicle-header { gap: 10px; }
+  #imagemVeiculo { max-width: 100px; }
+  #informacoesVeiculo h2 { font-size: 1.5em;}
+  #informacoesVeiculo p { font-size: 0.9rem;}
+  .velocimetro-svg { max-width: 130px; }
+  .velocimetro-texto { font-size: 1.2em; }
+  dialog#modalAdicionarVeiculo { padding: 15px; }
+  #btnVerDetalhesExtras { width: 100%; } /* Botão API largura total */
+  #detalhesExtrasVeiculo p { font-size: 0.85rem; }
+}

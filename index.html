@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Garagem Inteligente V3 - Interface Unificada</title>
+    <title>Garagem Inteligente V3 - API Sim</title>
 
     <!-- Google Fonts (Poppins) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -13,107 +13,88 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-    <!-- Link para seu arquivo CSS -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Container Principal da Aplicação -->
     <div id="app-container">
 
         <!-- Barra Lateral -->
         <aside id="sidebar">
             <div class="sidebar-header">
-                <i class="fas fa-warehouse"></i> <!-- Ícone Garagem -->
-                <h1>Garagem V3</h1>
+                <i class="fas fa-warehouse"></i><h1>Garagem V3</h1>
             </div>
-
-            <!-- Botão para Abrir Modal de Adicionar Veículo -->
             <button id="btnAbrirModalAdicionar" class="botao-sidebar-add">
                 <i class="fas fa-plus-circle"></i> Adicionar Novo Veículo
             </button>
-
-             <!-- Seção Lista de Veículos -->
              <div class="lista-veiculos-container card">
                  <h2><i class="fas fa-car"></i> Meus Veículos</h2>
                  <ul id="listaVeiculosSidebar">
-                     <!-- Lista será preenchida pelo JS -->
                      <li class="placeholder">Nenhum veículo na garagem.</li>
                  </ul>
              </div>
-
         </aside>
 
         <!-- Conteúdo Principal -->
         <main id="main-content">
 
-            <!-- Área de Notificações -->
             <div id="notification-area" class="notification" style="display: none;">
                 <span id="notification-message"></span>
                 <button class="close-btn">×</button>
             </div>
 
-
-            <!-- Painel do Veículo Selecionado (Só aparece se um veículo for selecionado) -->
+            <!-- Painel do Veículo Selecionado -->
             <div id="painelVeiculoSelecionado" style="display: none;" class="card">
 
                 <div class="vehicle-header">
-                     <!-- ===== Imagem do Veículo ===== -->
-                     <!-- <-- ALTERADO: Verifique se o nome 'caminhao.png' está correto -->
-                
-                     <!-- ============================ -->
+                     <img id="imagemVeiculo" src="imagens/carro_normal.png" alt="Imagem do veículo">
                      <div id="informacoesVeiculo">
                          <h2 id="info-modelo-tipo">Modelo (Tipo)</h2>
                          <p><i class="fas fa-palette"></i> Cor: <span id="info-cor">N/A</span></p>
                          <p><i class="fas fa-id-card"></i> ID: <span id="info-id" class="info-id-text">N/A</span></p>
                      </div>
-                     <!-- <-- ALTERADO: Removido onclick, será tratado no JS -->
-                     <button id="botaoRemoverVeiculoHeader" class="botao-remover-header" title="Remover este veículo da garagem"><i class="fas fa-trash-alt"></i></button>
+                     <button id="botaoRemoverVeiculoHeader" class="botao-remover-header" title="Remover este veículo"><i class="fas fa-trash-alt"></i></button>
                  </div>
 
-                 <!-- Navegação por Abas -->
                  <nav class="tabs-veiculo">
-                    <button class="tab-link active" data-tab="tab-visao-geral">
-                        <i class="fas fa-tachometer-alt"></i> Visão Geral
-                    </button>
-                    <button class="tab-link" data-tab="tab-manutencao">
-                        <i class="fas fa-wrench"></i> Manutenção
-                    </button>
+                    <button class="tab-link active" data-tab="tab-visao-geral"><i class="fas fa-tachometer-alt"></i> Visão Geral</button>
+                    <button class="tab-link" data-tab="tab-manutencao"><i class="fas fa-wrench"></i> Manutenção</button>
                 </nav>
 
-                <!-- Conteúdo da Aba Visão Geral -->
+                <!-- Aba Visão Geral -->
                 <div id="tab-visao-geral" class="tab-content active">
-                    <div class="status-motor-container">
+                    <div class="status-motor-container" style="display: none;">
                         <i class="fas fa-power-off"></i> Status: <span id="info-status-motor"><i class='fas fa-circle status-off'></i> Desligado</span>
                     </div>
-
-                    <!-- Velocímetro SVG -->
                     <div id="barraProgressoContainer" style="display: none;" class="velocimetro-container">
                         <svg viewBox="0 0 120 120" class="velocimetro-svg">
-                            <path class="velocimetro-trilha"
-                                  d="M 20 100 A 40 40 0 1 1 100 100"
-                                  fill="none" />
-                            <path class="velocimetro-progresso"
-                                  d="M 20 100 A 40 40 0 1 1 100 100"
-                                  fill="none" />
+                            <path class="velocimetro-trilha" d="M 20 100 A 40 40 0 1 1 100 100" fill="none" />
+                            <path class="velocimetro-progresso" d="M 20 100 A 40 40 0 1 1 100 100" fill="none" />
                         </svg>
                         <div id="velocidadeAtual" class="velocimetro-texto">0 km/h</div>
                     </div>
-                    <!-- Fim Velocímetro SVG -->
-
                     <div id="info-especifica"></div>
                     <div id="botoesAcoes" class="botoes-container">
-                        <!-- <-- ALTERADO: Removido onclick, será tratado no JS -->
-                        <button data-action="ligar" title="Ligar Motor"><i class="fas fa-play"></i> Ligar</button>
-                        <button data-action="desligar" title="Desligar Motor"><i class="fas fa-stop"></i> Desligar</button>
+                        <button data-action="ligar" title="Ligar"><i class="fas fa-play"></i> Ligar</button>
+                        <button data-action="desligar" title="Desligar"><i class="fas fa-stop"></i> Desligar</button>
                         <button data-action="acelerar" title="Acelerar"><i class="fas fa-tachometer-alt"></i> Acelerar</button>
                         <button data-action="frear" title="Frear"><i class="fas fa-hand-paper"></i> Frear</button>
-                        <button data-action="ativarTurbo" id="botaoTurbo" class="botao-especial" title="Ativar Boost Turbo (Uso único!)"><i class="fas fa-rocket"></i> Boost</button>
+                        <button data-action="ativarTurbo" id="botaoTurbo" class="botao-especial" title="Turbo Boost"><i class="fas fa-rocket"></i> Boost</button>
                         <button data-action="carregar" id="botaoCarregar" class="botao-especial" title="Carregar Caminhão"><i class="fas fa-truck-loading"></i> Carregar</button>
                         <button data-action="descarregar" id="botaoDescarregar" class="botao-especial" title="Descarregar Caminhão"><i class="fas fa-truck-moving"></i> Descarregar</button>
                     </div>
+
+                    <!-- Seção Detalhes Extras (API Simulada) -->
+                    <div class="detalhes-extras-container">
+                        <button id="btnVerDetalhesExtras" class="botao-info" style="display: none;">
+                            <i class="fas fa-info-circle"></i> Ver Detalhes Extras (API)
+                        </button>
+                        <div id="detalhesExtrasVeiculo" class="detalhes-extras-resultado card-inner" style="display: none;">
+                            <!-- Conteúdo preenchido via JS -->
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Conteúdo da Aba Manutenção -->
+                <!-- Aba Manutenção -->
                 <div id="tab-manutencao" class="tab-content">
                     <div id="formManutencaoContainer">
                         <h3><i class="fas fa-calendar-plus"></i> Registrar / Agendar Manutenção</h3>
@@ -123,16 +104,16 @@
                                <input type="datetime-local" id="manutencaoDataHora" required>
                            </div>
                            <div>
-                               <label for="manutencaoTipo"><i class="fas fa-tools"></i> Tipo de Serviço:</label>
+                               <label for="manutencaoTipo"><i class="fas fa-tools"></i> Tipo:</label>
                                <input type="text" id="manutencaoTipo" placeholder="Ex: Troca de óleo" required>
                            </div>
                            <div>
                                <label for="manutencaoCusto"><i class="fas fa-dollar-sign"></i> Custo (R$):</label>
-                               <input type="text" id="manutencaoCusto" placeholder="Ex: 150,50 (Opcional para agendar)">
+                               <input type="text" id="manutencaoCusto" placeholder="Ex: 150,50 (Opcional)">
                            </div>
                            <div>
-                               <label for="manutencaoDescricao"><i class="fas fa-info-circle"></i> Descrição (Opcional):</label>
-                               <input type="text" id="manutencaoDescricao" placeholder="Detalhes adicionais">
+                               <label for="manutencaoDescricao"><i class="fas fa-info-circle"></i> Descrição:</label>
+                               <input type="text" id="manutencaoDescricao" placeholder="Detalhes (Opcional)">
                            </div>
                            <button type="submit"><i class="fas fa-save"></i> Salvar Registro</button>
                         </form>
@@ -140,30 +121,26 @@
                     <div class="manutencao-container">
                         <div id="historicoManutencao" class="maintenance-list card-inner">
                             <h3><i class="fas fa-history"></i> Histórico</h3>
-                            <ul class="lista-itens"><!-- Preenchido JS --></ul>
+                            <ul class="lista-itens"></ul>
                         </div>
                         <div id="agendamentosFuturos" class="maintenance-list card-inner">
                             <h3><i class="fas fa-calendar-check"></i> Agendamentos</h3>
-                            <ul class="lista-itens"><!-- Preenchido JS --></ul>
+                            <ul class="lista-itens"></ul>
                         </div>
                    </div>
                 </div>
-
             </div>
 
-             <!-- Mensagem para quando nenhum veículo está selecionado -->
             <div id="mensagem-selecione" style="display: block;" class="card">
                 <h2><i class="fas fa-info-circle"></i> Bem-vindo à Garagem V3!</h2>
-                <p>Adicione um novo veículo usando o botão na barra lateral ou selecione um veículo existente para ver os detalhes e interagir.</p>
+                <p>Adicione ou selecione um veículo para interagir.</p>
             </div>
-
         </main>
-
     </div>
 
-    <!-- Modal para Adicionar Veículo -->
+    <!-- Modal Adicionar Veículo -->
     <dialog id="modalAdicionarVeiculo">
-        <form id="formNovoVeiculo" novalidate> <!-- novalidate para controlarmos as validações -->
+        <form id="formNovoVeiculo" novalidate>
              <h2><i class="fas fa-plus-circle"></i> Adicionar Novo Veículo</h2>
              <div>
                  <label for="novoVeiculoTipo">Tipo:</label>
@@ -187,15 +164,12 @@
                  <input type="number" id="novoVeiculoCapacidade" min="1" placeholder="Ex: 10000">
              </div>
              <div class="modal-actions">
-                 <button type="submit"><i class="fas fa-save"></i> Adicionar Veículo</button>
+                 <button type="submit"><i class="fas fa-save"></i> Adicionar</button>
                  <button type="button" id="btnFecharModalAdicionar" class="botao-cancelar"><i class="fas fa-times"></i> Cancelar</button>
              </div>
         </form>
     </dialog>
 
-    <!-- Link para seu arquivo JavaScript -->
-    <!-- <-- ALTERADO: Corrigido type="module" e caminho (assumindo que principal.js está em js/) -->
     <script type="module" src="js/principal.js"></script>
-    <!-- <-- ALTERADO: Removida duplicação de body/html -->
 </body>
 </html>

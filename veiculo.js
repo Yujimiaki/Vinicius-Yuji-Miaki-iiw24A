@@ -1,7 +1,7 @@
 // js/models/Veiculo.js
 'use strict';
 
-import Manutencao from './manutenção.js'; // <-- ALTERADO: Nome do arquivo corrigido
+import Manutencao from './manutençao.js'; // <-- ALTERADO: Nome do arquivo corrigido
 
 /**
  * Representa a classe base para qualquer veículo na garagem.

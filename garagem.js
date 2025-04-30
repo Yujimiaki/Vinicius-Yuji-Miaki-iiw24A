@@ -2,11 +2,10 @@
 'use strict';
 
 import Veiculo from './veiculo.js';
-import Carro from './carro.js';
-import CarroEsportivo from './carroesportivo.js'; // <-- ALTERADO: Nome do arquivo
-import Caminhao from './caminhão.js';            // <-- ALTERADO: Nome do arquivo
-import Manutencao from './manutenção.js';        // <-- ALTERADO: Nome do arquivo
-// <-- ALTERADO: Removido import de showNotification
+import Carro from './Carro.js';
+import CarroEsportivo from './Carroesportivo.js'; // <-- CORRIGIDO: Nome do arquivo/classe
+import Caminhao from './caminhao.js';            // <-- CORRIGIDO: Nome do arquivo
+import Manutencao from './manutençao.js';        // <-- CORRIGIDO: Nome do arquivo
 
 /**
  * Gerencia a coleção de veículos e o veículo atualmente selecionado.
@@ -24,14 +23,13 @@ export default class Garagem {
      * @returns {{success: boolean, message?: string}} Objeto com resultado.
      * @public
      */
-    adicionarVeiculo(veiculo) { // <-- ALTERADO: Retorna objeto
+    adicionarVeiculo(veiculo) {
         if (!(veiculo instanceof Veiculo)) {
             console.error("Tentativa de adicionar objeto inválido à garagem:", veiculo);
             return { success: false, message: "Erro interno: Tipo de objeto inválido para adicionar." };
         }
         if (this.veiculos.some(v => v.id === veiculo.id)) {
              console.warn(`Veículo com ID ${veiculo.id} (${veiculo.modelo}) já existe.`);
-             // Adiciona uma verificação por modelo e cor também, pode ser útil
              if (this.veiculos.some(v => v.modelo.toLowerCase() === veiculo.modelo.toLowerCase() && v.cor.toLowerCase() === veiculo.cor.toLowerCase())) {
                 return { success: false, message: `Um veículo ${veiculo.modelo} ${veiculo.cor} já existe na garagem.` };
              }
@@ -40,7 +38,7 @@ export default class Garagem {
         this.veiculos.push(veiculo);
         console.log(`Veículo ${veiculo.modelo} (ID: ${veiculo.id}, Tipo: ${veiculo.constructor.name}) adicionado.`);
         this.veiculos.sort((a, b) => a.modelo.localeCompare(b.modelo));
-        return { success: true }; // <-- ALTERADO
+        return { success: true };
     }
 
     /**
@@ -49,7 +47,7 @@ export default class Garagem {
      * @returns {boolean} True se removido, false caso contrário.
      * @public
      */
-    removerVeiculo(idVeiculo) { // <-- ALTERADO: Simplificado, retorna boolean
+    removerVeiculo(idVeiculo) {
         const index = this.veiculos.findIndex(v => v.id === idVeiculo);
         if (index > -1) {
             const removido = this.veiculos.splice(index, 1)[0];
@@ -129,7 +127,6 @@ export default class Garagem {
             // console.log(`Garagem salva no LocalStorage com ${this.veiculos.length} veículo(s).`);
         } catch (error) {
             console.error("Erro CRÍTICO ao salvar garagem no LocalStorage:", error);
-            // Considerar notificar o usuário aqui, talvez usando um alert como fallback
             alert("ERRO CRÍTICO: Não foi possível salvar os dados da garagem. Mudanças recentes podem ser perdidas.");
         }
     }
@@ -167,10 +164,9 @@ export default class Garagem {
                         .map(mObj => {
                             if (mObj && mObj._tipoClasse === 'Manutencao') {
                                 try {
-                                    // Recria usando ISO string ou null se não tiver data
                                     const manut = new Manutencao(mObj.dataISO, mObj.tipo, mObj.custo, mObj.descricao);
                                     if(mObj.id) manut.id = mObj.id;
-                                    return manut.isValidDate() ? manut : null; // Valida data após recriar
+                                    return manut.isValidDate() ? manut : null;
                                 } catch(manutError) {
                                     console.error("Erro ao recriar Manutencao:", mObj, manutError);
                                     return null;
@@ -187,8 +183,7 @@ export default class Garagem {
                         case 'Carro':
                             veiculo = new Carro(obj.modelo, obj.cor, obj.id, obj.ligado, obj.velocidade);
                             break;
-                        case 'CarroEsportivo':
-                            // <-- ALTERADO: Nome da classe
+                        case 'CarroEsportivo': // <-- CORRIGIDO: Nome da classe
                             veiculo = new CarroEsportivo(obj.modelo, obj.cor, obj.id, obj.ligado, obj.velocidade, obj.turboBoostUsado || false);
                             break;
                         case 'Caminhao':
@@ -229,11 +224,11 @@ export default class Garagem {
      * @returns {Array<string>} Uma lista de mensagens de notificação para agendamentos próximos.
      * @public
      */
-    verificarAgendamentosProximos() { // <-- ALTERADO: Retorna lista de mensagens
+    verificarAgendamentosProximos() {
         const agora = new Date();
         const doisDiasEmMillis = 2 * 24 * 60 * 60 * 1000;
         const limite = new Date(agora.getTime() + doisDiasEmMillis);
-        let notificacoesParaMostrar = []; // Armazena objetos {data, msg}
+        let notificacoesParaMostrar = [];
 
         this.veiculos.forEach(veiculo => {
             veiculo.historicoManutencao.forEach(manutencao => {
@@ -268,8 +263,6 @@ export default class Garagem {
         } else {
             console.log("Nenhum agendamento próximo encontrado.");
         }
-
-        // Retorna apenas as mensagens
-        return notificacoesParaMostrar.map(n => n.msg); // <-- ALTERADO
+        return notificacoesParaMostrar.map(n => n.msg);
     }
 }
