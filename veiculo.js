@@ -1,7 +1,7 @@
 // js/models/Veiculo.js
 'use strict';
 
-import Manutencao from './manutençao.js'; // <-- ALTERADO: Nome do arquivo corrigido
+import Manutencao from './manutençao.js';
 
 /**
  * Representa a classe base para qualquer veículo na garagem.
@@ -25,7 +25,7 @@ export default class Veiculo {
 
         this.modelo = modelo.trim();
         this.cor = cor.trim();
-        this.historicoManutencao = [];
+        this.historicoManutencao = []; // Array de instâncias de Manutencao
         this.id = id || Date.now().toString(36) + Math.random().toString(36).substring(2);
     }
 
@@ -35,13 +35,13 @@ export default class Veiculo {
      * @returns {{success: boolean, message?: string}} Objeto indicando sucesso e mensagem opcional.
      * @public
      */
-    adicionarManutencao(manutencao) { // <-- ALTERADO: Retorna objeto
+    adicionarManutencao(manutencao) {
         if (!(manutencao instanceof Manutencao)) {
              console.error("Tipo inválido passado para adicionarManutencao:", manutencao);
              return { success: false, message: "Erro interno: Tipo de manutenção inválido." };
         }
 
-        const validacao = manutencao.validarDados(); // <-- ALTERADO: Usa retorno da validação
+        const validacao = manutencao.validarDados();
         if (!validacao.valido) {
              console.warn(`Dados inválidos para a manutenção a ser adicionada: ${manutencao.tipo}. Motivo: ${validacao.mensagemErro}`);
              return { success: false, message: validacao.mensagemErro || "Dados da manutenção inválidos." };
@@ -53,14 +53,16 @@ export default class Veiculo {
         }
 
         this.historicoManutencao.push(manutencao);
+        // A ordenação principal da lista de manutenções (para garantir que as funções de formatação funcionem corretamente)
+        // é melhor feita aqui, uma vez, ao adicionar/carregar, do que repetidamente nas funções de formatação.
         this.historicoManutencao.sort((a, b) => {
             if (!a.isValidDate() && !b.isValidDate()) return 0;
-            if (!a.isValidDate()) return 1;
-            if (!b.isValidDate()) return -1;
-            return b.data.getTime() - a.data.getTime();
+            if (!a.isValidDate()) return 1; // Datas inválidas no final
+            if (!b.isValidDate()) return -1; // Datas inválidas no final
+            return b.data.getTime() - a.data.getTime(); // Mais recentes primeiro
         });
         console.log(`Manutenção/Agendamento adicionado para ${this.modelo}: ${manutencao.retornarFormatada(true)}`);
-        return { success: true }; // <-- ALTERADO
+        return { success: true };
     }
 
     /**
@@ -69,7 +71,7 @@ export default class Veiculo {
      * @returns {boolean} Retorna true se a manutenção foi encontrada e removida, false caso contrário.
      * @public
      */
-    removerManutencao(idManutencao) { // <-- ALTERADO: Simplificado, retorna apenas boolean
+    removerManutencao(idManutencao) {
         const index = this.historicoManutencao.findIndex(m => m.id === idManutencao);
         if (index > -1) {
             const removida = this.historicoManutencao.splice(index, 1)[0];
@@ -81,50 +83,38 @@ export default class Veiculo {
     }
 
     /**
-     * Retorna um array com as manutenções passadas formatadas como strings.
+     * Retorna um array com as manutenções passadas formatadas como objetos {id, texto}.
+     * A lista já está ordenada pela data (mais recentes primeiro).
      * @returns {Array<{id: string, texto: string}>} Lista de objetos com id e texto formatado.
      * @public
      */
     getHistoricoPassadoFormatado() {
         const agora = new Date();
-        return this._getManutencoesFormatadas(item => item.isValidDate() && item.data < agora, false);
+        return this.historicoManutencao
+            .filter(item => item.isValidDate() && item.data < agora)
+            .map(manutencao => ({
+                id: manutencao.id,
+                texto: manutencao.retornarFormatada(true) // Inclui horário para histórico
+            }));
+        // Não é necessário re-ordenar aqui se a lista principal já está ordenada.
     }
 
     /**
-     * Retorna um array com os agendamentos futuros formatados como strings.
+     * Retorna um array com os agendamentos futuros formatados como objetos {id, texto}.
+     * A lista é filtrada e depois re-ordenada para agendamentos (mais próximos primeiro).
      * @returns {Array<{id: string, texto: string}>} Lista de objetos com id e texto formatado.
      * @public
      */
     getAgendamentosFuturosFormatados() {
          const agora = new Date();
-         return this._getManutencoesFormatadas(item => item.isValidDate() && item.data >= agora, true);
+         return this.historicoManutencao
+             .filter(item => item.isValidDate() && item.data >= agora)
+             .sort((a, b) => a.data.getTime() - b.data.getTime()) // Agendamentos: mais próximos primeiro
+             .map(manutencao => ({
+                 id: manutencao.id,
+                 texto: manutencao.retornarFormatada(true) // Inclui horário para agendamentos
+             }));
     }
-
-    /**
-     * Método auxiliar para filtrar e formatar manutenções.
-     * @param {function(Manutencao): boolean} filtro - Função para filtrar.
-     * @param {boolean} [ordenarAscendente=false] - Se true, ordena por data crescente.
-     * @returns {Array<{id: string, texto: string}>} Lista de objetos formatados.
-     * @protected
-     */
-    _getManutencoesFormatadas(filtro, ordenarAscendente = false) {
-        let resultado = this.historicoManutencao
-            .filter(filtro)
-            .map(manutencao => ({
-                id: manutencao.id,
-                texto: manutencao.retornarFormatada(true)
-            }));
-
-        resultado.sort((a, b) => {
-             const mA = this.historicoManutencao.find(m => m.id === a.id);
-             const mB = this.historicoManutencao.find(m => m.id === b.id);
-             if (!mA || !mB || !mA.isValidDate() || !mB.isValidDate()) return 0;
-             const diff = mA.data.getTime() - mB.data.getTime();
-             return ordenarAscendente ? diff : -diff;
-         });
-        return resultado;
-    }
-
 
     /**
      * Retorna um objeto com as informações básicas do veículo (ID, modelo, cor).
@@ -146,7 +136,7 @@ export default class Veiculo {
      */
     toJSON() {
         return {
-            _tipoClasse: this.constructor.name,
+            _tipoClasse: this.constructor.name, // Dinamicamente pega o nome da classe
             modelo: this.modelo,
             cor: this.cor,
             id: this.id,

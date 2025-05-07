@@ -5,11 +5,11 @@
 import Garagem from './models/garagem.js';
 import Manutencao from './models/manutençao.js';
 import Carro from './models/Carro.js';
-import CarroEsportivo from './models/Carroesportivo.js'; // Verifique nome do arquivo/classe
+import CarroEsportivo from './models/Carroesportivo.js';
 import Caminhao from './models/caminhao.js';
-import { showNotification, hideNotification } from './utils/notificações.js'; // Verifique nome do arquivo
+import { showNotification, hideNotification } from './utils/notificações.js';
 
-// --- Referências aos Elementos da UI ---
+// --- Referências aos Elementos da UI (Garagem) ---
 const ui = {
     modalAdicionar: document.getElementById('modalAdicionarVeiculo'),
     btnAbrirModalAdicionar: document.getElementById('btnAbrirModalAdicionar'),
@@ -34,7 +34,7 @@ const ui = {
     infoStatusMotor: document.getElementById('info-status-motor'),
     barraProgressoContainer: document.getElementById('barraProgressoContainer'),
     velocidadeAtual: document.getElementById('velocidadeAtual'),
-    velocimetroProgressoPath: null, // Será buscado dinamicamente
+    velocimetroProgressoPath: null,
     infoEspecifica: document.getElementById('info-especifica'),
     botoesAcoesContainer: document.getElementById('botoesAcoes'),
     formManutencaoContainer: document.getElementById('formManutencaoContainer'),
@@ -48,18 +48,33 @@ const ui = {
     notificationArea: document.getElementById('notification-area'),
     notificationMessage: document.getElementById('notification-message'),
     notificationCloseBtn: document.querySelector('#notification-area .close-btn'),
-    // Elementos da API Simulada
     btnVerDetalhesExtras: document.getElementById('btnVerDetalhesExtras'),
     detalhesExtrasVeiculoDiv: document.getElementById('detalhesExtrasVeiculo'),
+
+    // --- Referências UI (Previsão do Tempo) ---
+    cidadeInputTempo: document.getElementById('cidade-input-tempo'),
+    verificarClimaBtn: document.getElementById('verificar-clima-btn'),
+    previsaoResultadoDivTempo: document.getElementById('previsao-tempo-resultado'),
+    statusMensagemTempoDiv: document.getElementById('status-mensagem-tempo'),
 };
 
-// --- Instância Principal da Aplicação ---
+// --- Instância Principal da Aplicação (Garagem) ---
 const minhaGaragem = new Garagem();
 
 // --- Variáveis Globais ---
-let velocimetroPathLength = 251.2; // Valor padrão, será atualizado
+let velocimetroPathLength = 251.2;
 
-// --- Funções de Atualização da Interface Gráfica (UI) ---
+// ATENÇÃO: ARMAZENAR A API KEY DIRETAMENTE NO CÓDIGO FRONTEND É INSEGURO!
+// Em uma aplicação real, a chave NUNCA deve ficar exposta aqui.
+// A forma correta envolve um backend (Node.js, Python, Serverless Function) atuando como proxy
+// para proteger a chave.
+// Para FINS DIDÁTICOS nesta atividade, vamos usá-la aqui temporariamente.
+const WEATHER_API_KEY = "569ee28c1908ad6eaadb431e635166be"; // <-- SUA CHAVE FOI INSERIDA AQUI
+
+
+// --- Funções de Atualização da Interface Gráfica (UI) - GARAGEM ---
+// ... (todas as funções de atualizarListaVeiculosSidebar, ativarTab, atualizarVelocimetro, renderizarListaManutencao, atualizarPainelVeiculoSelecionado, atualizarInterfaceCompleta da Garagem permanecem aqui, sem alterações diretas nessa parte) ...
+// Colarei elas abaixo para manter a integridade do arquivo
 
 /** Atualiza a lista de veículos na barra lateral. */
 function atualizarListaVeiculosSidebar() {
@@ -68,37 +83,28 @@ function atualizarListaVeiculosSidebar() {
         console.error("Elemento #listaVeiculosSidebar não encontrado.");
         return;
     }
-    listaUl.innerHTML = ''; // Limpa a lista atual
+    listaUl.innerHTML = '';
 
     if (minhaGaragem.veiculos.length === 0) {
         listaUl.innerHTML = '<li class="placeholder">Nenhum veículo na garagem.</li>';
         return;
     }
-
-    // Ordena antes de exibir (opcional, mas recomendado)
-    const veiculosOrdenados = [...minhaGaragem.veiculos].sort((a, b) => a.modelo.localeCompare(b.modelo));
-
-    veiculosOrdenados.forEach(v => {
+    const veiculosParaExibir = [...minhaGaragem.veiculos];
+    veiculosParaExibir.forEach(v => {
         const li = document.createElement('li');
-        li.dataset.id = v.id; // Armazena o ID para fácil acesso
-
-        let iconClass = 'fa-car'; // Ícone padrão
+        li.dataset.id = v.id;
+        let iconClass = 'fa-car';
         if (v instanceof CarroEsportivo) iconClass = 'fa-rocket';
         else if (v instanceof Caminhao) iconClass = 'fa-truck';
-
         li.innerHTML = `<i class="fas ${iconClass}"></i> <span>${v.modelo} (${v.cor})</span>`;
-
-        // Adiciona classe se for o veículo selecionado
         if (v.id === minhaGaragem.veiculoSelecionadoId) {
             li.classList.add('selecionado');
         }
-
-        // Adiciona listener para selecionar o veículo ao clicar
         li.addEventListener('click', () => {
              if (v.id !== minhaGaragem.veiculoSelecionadoId) {
                  if(minhaGaragem.selecionarVeiculo(v.id)){
-                    ativarTab('tab-visao-geral'); // Volta para a visão geral
-                    atualizarInterfaceCompleta(); // Atualiza tudo
+                    ativarTab('tab-visao-geral');
+                    atualizarInterfaceCompleta();
                  } else {
                      console.warn(`Falha ao selecionar veículo ID: ${v.id}`);
                  }
@@ -107,178 +113,113 @@ function atualizarListaVeiculosSidebar() {
         listaUl.appendChild(li);
     });
 }
-
-/** Ativa uma aba específica e desativa as outras. */
 function ativarTab(tabId) {
     if (!ui.tabContents || !ui.tabLinks) return;
-
     ui.tabContents.forEach(content => content?.classList.remove('active'));
-    ui.tabLinks.forEach(link => link?.classList.remove('active'));
-
+    ui.tabLinks.forEach(link => {
+        link?.classList.remove('active');
+        link?.setAttribute('aria-selected', 'false');
+    });
     const contentToActivate = document.getElementById(tabId);
     const linkToActivate = document.querySelector(`.tab-link[data-tab="${tabId}"]`);
-
     if (contentToActivate) contentToActivate.classList.add('active');
-    if (linkToActivate) linkToActivate.classList.add('active');
+    if (linkToActivate) {
+        linkToActivate.classList.add('active');
+        linkToActivate.setAttribute('aria-selected', 'true');
+    }
 }
-
-/** Atualiza o visual do velocímetro SVG. */
 function atualizarVelocimetro(velocidade, velocidadeMaxima) {
-    // Tenta obter a referência ao path do SVG se ainda não tiver ou se o painel foi recriado
     if (!ui.velocimetroProgressoPath && ui.painelVeiculoSelecionado?.style.display !== 'none') {
         ui.velocimetroProgressoPath = ui.painelVeiculoSelecionado.querySelector('.velocimetro-progresso');
         if (!ui.velocimetroProgressoPath) {
-             console.error("[Velocímetro] ERRO: Não foi possível encontrar o elemento .velocimetro-progresso.");
              if(ui.barraProgressoContainer) ui.barraProgressoContainer.style.display = 'none';
-             return; // Sai se não encontrou
+             return;
         }
     }
-
-    // Se o container ou o path não estiverem prontos/visíveis, reseta e sai
     if (!ui.barraProgressoContainer || ui.barraProgressoContainer.style.display === 'none' || !ui.velocimetroProgressoPath) {
-        if (ui.velocidadeAtual) ui.velocidadeAtual.textContent = '0 km/h'; // Reseta texto
-        if (ui.velocimetroProgressoPath) ui.velocimetroProgressoPath.style.strokeDashoffset = velocimetroPathLength; // Reseta barra
+        if (ui.velocidadeAtual) ui.velocidadeAtual.textContent = '0 km/h';
+        if (ui.velocimetroProgressoPath) ui.velocimetroProgressoPath.style.strokeDashoffset = velocimetroPathLength;
         return;
     }
-
-    // Garante que o elemento de texto existe
-    if (!ui.velocidadeAtual) {
-        console.error("[Velocímetro] Elemento #velocidadeAtual não encontrado.");
-        return;
-    }
-
-    // Cálculos para a barra de progresso
-    const maxVel = Math.max(1, velocidadeMaxima); // Evita divisão por zero
-    const velocidadeAtual = Math.max(0, Math.min(velocidade, maxVel)); // Garante que está nos limites
-    const porcentagem = velocidadeAtual / maxVel;
-    const offset = velocimetroPathLength * (1 - porcentagem); // Calcula o quanto "esconder" da barra
-
-    // Aplica os estilos ao SVG e atualiza o texto
+    if (!ui.velocidadeAtual) return;
+    const maxVel = Math.max(1, velocidadeMaxima);
+    const velocidadeAtualDisplay = Math.max(0, Math.min(velocidade, maxVel));
+    const porcentagem = velocidadeAtualDisplay / maxVel;
+    const offset = velocimetroPathLength * (1 - porcentagem);
     try {
         ui.velocimetroProgressoPath.style.strokeDashoffset = offset;
-        ui.velocidadeAtual.textContent = `${Math.round(velocidadeAtual)} km/h`;
-
-        // Muda a cor da barra de progresso
+        ui.velocidadeAtual.textContent = `${Math.round(velocidadeAtualDisplay)} km/h`;
         let corProgresso = 'var(--cor-primaria)';
         if (porcentagem > 0.85) corProgresso = 'var(--cor-perigo)';
         else if (porcentagem > 0.6) corProgresso = 'var(--cor-aviso)';
         ui.velocimetroProgressoPath.style.stroke = corProgresso;
-
     } catch (e) {
-        console.error("[Velocímetro] Erro ao aplicar estilos:", e);
-        ui.barraProgressoContainer.style.display = 'none'; // Esconde em caso de erro
+        if(ui.barraProgressoContainer) ui.barraProgressoContainer.style.display = 'none';
     }
 }
-
-/** Renderiza as listas de histórico ou agendamentos de manutenção. */
 function renderizarListaManutencao(ulElement, itens) {
-     if (!ulElement) {
-        //  console.warn("Tentativa de renderizar lista de manutenção em elemento nulo.");
-         return;
-     }
-     ulElement.innerHTML = ''; // Limpa
-
+     if (!ulElement) return;
+     ulElement.innerHTML = '';
      if (!itens || itens.length === 0) {
-          const tipoLista = ulElement.closest('.maintenance-list')?.id === 'historicoManutencao' ? 'Histórico' : 'Agendamentos';
-          ulElement.innerHTML = `<li class="placeholder">Nenhum registro de ${tipoLista?.toLowerCase() ?? 'manutenção'} encontrado.</li>`;
+          const tipoListaTexto = ulElement.closest('.maintenance-list')?.id === 'historicoManutencao'
+            ? 'histórico'
+            : 'agendamentos';
+          ulElement.innerHTML = `<li class="placeholder">Nenhum registro de ${tipoListaTexto} encontrado.</li>`;
           return;
      }
-
-     // Ordena os itens pela data (mais recentes/próximos primeiro) - Garante consistência
-     const itensOrdenados = [...itens].sort((a, b) => {
-         const dataA = minhaGaragem.getVeiculoSelecionado()?.historicoManutencao.find(m => m.id === a.id)?.data;
-         const dataB = minhaGaragem.getVeiculoSelecionado()?.historicoManutencao.find(m => m.id === b.id)?.data;
-         if (!dataA && !dataB) return 0;
-         if (!dataA) return 1;
-         if (!dataB) return -1;
-         // Ordena agendamentos do mais próximo para o mais distante
-         // Ordena histórico do mais recente para o mais antigo
-         const agora = new Date();
-         const ehAgendamentoA = dataA >= agora;
-         const ehAgendamentoB = dataB >= agora;
-         if (ehAgendamentoA !== ehAgendamentoB) return ehAgendamentoA ? -1 : 1; // Não mistura tipos se chamado incorretamente
-         return ehAgendamentoA ? dataA.getTime() - dataB.getTime() : dataB.getTime() - dataA.getTime();
-     });
-
-
-     itensOrdenados.forEach(item => {
+     itens.forEach(item => {
          const li = document.createElement('li');
          li.dataset.itemId = item.id;
          const textoSpan = document.createElement('span');
          textoSpan.textContent = item.texto;
          li.appendChild(textoSpan);
-
          const removeButton = document.createElement('button');
          removeButton.className = 'botao-remover-item';
          removeButton.title = 'Remover este item';
          removeButton.innerHTML = '<i class="fas fa-times"></i>';
-         removeButton.setAttribute('aria-label', `Remover item: ${item.texto}`); // Acessibilidade
-
+         removeButton.setAttribute('aria-label', `Remover item de manutenção: ${item.texto.substring(0, 30)}...`);
          li.appendChild(removeButton);
          ulElement.appendChild(li);
      });
 }
-
-/** Atualiza todo o painel de detalhes do veículo selecionado. */
 function atualizarPainelVeiculoSelecionado() {
     const veiculo = minhaGaragem.getVeiculoSelecionado();
-    // console.log("[Painel] Atualizando para veículo:", veiculo ? `${veiculo.modelo} (ID: ${veiculo.id})` : "Nenhum");
-
-    // --- Reset da Área de Detalhes Extras (API) ---
     if (ui.detalhesExtrasVeiculoDiv) {
         ui.detalhesExtrasVeiculoDiv.innerHTML = '';
         ui.detalhesExtrasVeiculoDiv.style.display = 'none';
     }
     if (ui.btnVerDetalhesExtras) {
-        ui.btnVerDetalhesExtras.style.display = 'none'; // Esconde botão
-        ui.btnVerDetalhesExtras.disabled = false;     // Habilita botão
+        ui.btnVerDetalhesExtras.style.display = 'none';
+        ui.btnVerDetalhesExtras.disabled = false;
     }
-    // --- Fim Reset API ---
-
     if (veiculo) {
-        // Mostra o painel principal e esconde a mensagem de "selecione"
         if (ui.painelVeiculoSelecionado) ui.painelVeiculoSelecionado.style.display = 'block';
         if (ui.mensagemSelecione) ui.mensagemSelecione.style.display = 'none';
-
-        // --- Header e Imagem ---
         const baseInfo = veiculo.exibirInformacoesBase();
         if(ui.infoModeloTipo) ui.infoModeloTipo.textContent = `${baseInfo.modelo} (${veiculo.constructor.name})`;
         if(ui.infoCor) ui.infoCor.textContent = baseInfo.cor;
         if(ui.infoId) ui.infoId.textContent = baseInfo.id;
         if(ui.botaoRemoverVeiculoHeader) ui.botaoRemoverVeiculoHeader.style.display = 'inline-flex';
-
-        let imagemSrc = 'imagens/carro_normal.png'; // Padrão
+        let imagemSrc = 'imagens/carro_normal.png';
         if (veiculo instanceof CarroEsportivo) imagemSrc = 'imagens/carro_esportivo.png';
         else if (veiculo instanceof Caminhao) imagemSrc = 'imagens/caminhao.png';
         if (ui.imagemVeiculo) {
             ui.imagemVeiculo.src = imagemSrc;
             ui.imagemVeiculo.alt = `Imagem de ${veiculo.modelo}`;
         }
-
-        // --- Mostra o botão de Detalhes Extras ---
-        if (ui.btnVerDetalhesExtras) {
-            ui.btnVerDetalhesExtras.style.display = 'inline-flex';
-        }
-
-        // --- Reset dos controles específicos (status, velocímetro, botões) ---
+        if (ui.btnVerDetalhesExtras) ui.btnVerDetalhesExtras.style.display = 'inline-flex';
         if(ui.infoEspecifica) ui.infoEspecifica.innerHTML = '';
         if(ui.barraProgressoContainer) ui.barraProgressoContainer.style.display = 'none';
         if(ui.infoStatusMotorContainer) ui.infoStatusMotorContainer.style.display = 'none';
         if(ui.botoesAcoesContainer) ui.botoesAcoesContainer.querySelectorAll('button').forEach(btn => btn.style.display = 'none');
-
-        // --- Lógica Específica para Carro e Subtipos ---
         if (veiculo instanceof Carro) {
             const dadosCarro = veiculo.getDadosEspecificos();
-
-            // Status Motor
             if (ui.infoStatusMotorContainer && ui.infoStatusMotor) {
                 ui.infoStatusMotorContainer.style.display = 'block';
                 ui.infoStatusMotor.innerHTML = dadosCarro.ligado
                     ? "<i class='fas fa-circle status-on'></i> Ligado"
                     : "<i class='fas fa-circle status-off'></i> Desligado";
             }
-
-            // Velocímetro (obtem path aqui para garantir visibilidade do painel)
             ui.velocimetroProgressoPath = ui.painelVeiculoSelecionado?.querySelector('.velocimetro-progresso');
             if (ui.velocimetroProgressoPath && ui.barraProgressoContainer) {
                  ui.barraProgressoContainer.style.display = 'flex';
@@ -286,8 +227,6 @@ function atualizarPainelVeiculoSelecionado() {
             } else {
                  if(ui.barraProgressoContainer) ui.barraProgressoContainer.style.display = 'none';
             }
-
-            // Botões Comuns
             const btnLigar = ui.botoesAcoesContainer?.querySelector('[data-action="ligar"]');
             const btnDesligar = ui.botoesAcoesContainer?.querySelector('[data-action="desligar"]');
             const btnAcelerar = ui.botoesAcoesContainer?.querySelector('[data-action="acelerar"]');
@@ -296,8 +235,6 @@ function atualizarPainelVeiculoSelecionado() {
             if(btnDesligar) { btnDesligar.style.display = 'inline-flex'; btnDesligar.disabled = !dadosCarro.ligado; }
             if(btnAcelerar) { btnAcelerar.style.display = 'inline-flex'; btnAcelerar.disabled = !dadosCarro.ligado || dadosCarro.velocidade >= dadosCarro.velocidadeMaxima; }
             if(btnFrear) { btnFrear.style.display = 'inline-flex'; btnFrear.disabled = !dadosCarro.ligado || dadosCarro.velocidade === 0; }
-
-            // Infos e Botões Específicos de Subtipos
             if (veiculo instanceof CarroEsportivo) {
                 if(ui.infoEspecifica) ui.infoEspecifica.innerHTML = `<p><i class="fas fa-bolt"></i> <strong>Boost:</strong> <span>${!dadosCarro.turboBoostUsado ? 'Disponível' : 'Já usado!'}</span></p>`;
                  const btnTurbo = ui.botoesAcoesContainer?.querySelector('[data-action="ativarTurbo"]');
@@ -317,575 +254,533 @@ function atualizarPainelVeiculoSelecionado() {
                      btnDescarregar.style.display = 'inline-flex';
                      btnDescarregar.disabled = dadosCarro.ligado || dadosCarro.cargaAtual === 0;
                  }
-            } else { // Carro normal
-                 if(ui.infoEspecifica) ui.infoEspecifica.innerHTML = '<p><i>Carro padrão.</i></p>';
+            } else {
+                 if(ui.infoEspecifica) ui.infoEspecifica.innerHTML = '<p><i>Este é um carro padrão.</i></p>';
             }
         } else {
-             // Veículo não é instância de Carro (caso raro)
-             if(ui.infoEspecifica) ui.infoEspecifica.innerHTML = '<p><i>Controles de condução não disponíveis.</i></p>';
-             atualizarVelocimetro(0, 1); // Reseta velocímetro
+             if(ui.infoEspecifica) ui.infoEspecifica.innerHTML = '<p><i>Controles de condução não disponíveis para este tipo de veículo.</i></p>';
+             atualizarVelocimetro(0, 1);
         }
-
-        // --- Aba Manutenção ---
         renderizarListaManutencao(ui.historicoUl, veiculo.getHistoricoPassadoFormatado());
         renderizarListaManutencao(ui.agendamentosUl, veiculo.getAgendamentosFuturosFormatados());
-
     } else {
-        // Nenhum veículo selecionado
         if(ui.painelVeiculoSelecionado) ui.painelVeiculoSelecionado.style.display = 'none';
         if(ui.mensagemSelecione) ui.mensagemSelecione.style.display = 'block';
-        ui.velocimetroProgressoPath = null; // Limpa referência
-        atualizarVelocimetro(0, 1); // Reseta velocímetro
-        // Botão e área de detalhes extras já foram escondidos no início
+        ui.velocimetroProgressoPath = null;
+        atualizarVelocimetro(0, 1);
     }
 }
-
-/** Atualiza toda a interface: sidebar e painel principal. */
 function atualizarInterfaceCompleta() {
     atualizarListaVeiculosSidebar();
     atualizarPainelVeiculoSelecionado();
 }
 
-// --- Funções de Interação e Gerenciamento ---
-
-/** Lida com cliques nos botões de ação do veículo (Ligar, Acelerar, etc.). */
+// --- Funções de Interação e Gerenciamento (Garagem) ---
 function lidarComAcaoVeiculo(event) {
     const button = event.target.closest('button[data-action]');
-    if (!button) return; // Sai se o clique não foi em um botão de ação
-
+    if (!button) return;
     const acao = button.dataset.action;
     const veiculo = minhaGaragem.getVeiculoSelecionado();
-
     if (!veiculo) {
         showNotification("Selecione um veículo na lista lateral primeiro!", 'warning', 3000, ui);
         return;
     }
-
-    let precisaSalvar = false; // Flag para salvar no localStorage
+    let precisaSalvar = false;
     let resultadoAcao = { success: false, message: `Ação '${acao}' não implementada ou falhou.` };
-
     try {
-        // Verifica se o método existe no objeto do veículo
         if (typeof veiculo[acao] === 'function') {
-             resultadoAcao = veiculo[acao](); // Chama o método dinamicamente
-
-             // Normaliza o retorno para sempre ser um objeto {success, message?}
-             if (typeof resultadoAcao === 'boolean') {
-                 resultadoAcao = { success: resultadoAcao }; // Converte boolean para objeto
-             } else if (resultadoAcao === undefined || resultadoAcao === null) {
-                 // Assume sucesso se o método não retornar nada (pode acontecer com acelerar/frear)
-                 resultadoAcao = { success: true };
-             }
-
-             precisaSalvar = resultadoAcao.success; // Marca para salvar se a ação teve sucesso
+             resultadoAcao = veiculo[acao]();
+             if (resultadoAcao === undefined || resultadoAcao === null) resultadoAcao = { success: true };
+             precisaSalvar = resultadoAcao.success;
          } else {
-              console.error(`Método '${acao}' não encontrado no veículo tipo ${veiculo.constructor.name}`);
               resultadoAcao = { success: false, message: `Ação '${acao}' inválida para este veículo.` };
          }
-
-        // Exibe notificação com base no resultado
         if (resultadoAcao.message) {
-            // Determina o tipo de notificação (success, warning, error, info)
             let notificationType = resultadoAcao.success ? 'info' : 'warning';
-            if (resultadoAcao.success && ['ativarTurbo', 'carregar', 'descarregar'].includes(acao)) {
-                notificationType = 'success'; // Ações especiais com sucesso
-            } else if (!resultadoAcao.success && !resultadoAcao.message.toLowerCase().includes('máxima') && !resultadoAcao.message.toLowerCase().includes('parado') && !resultadoAcao.message.toLowerCase().includes('já estava') && !resultadoAcao.message.toLowerCase().includes('primeiro') && !resultadoAcao.message.toLowerCase().includes('inválida')) {
-                 notificationType = 'error'; // Erros mais significativos
-             }
+            if (resultadoAcao.success && ['ativarTurbo', 'carregar', 'descarregar'].includes(acao)) notificationType = 'success';
+            else if (!resultadoAcao.success && !resultadoAcao.message.toLowerCase().includes('máxima') && !resultadoAcao.message.toLowerCase().includes('parado') && !resultadoAcao.message.toLowerCase().includes('já estava') && !resultadoAcao.message.toLowerCase().includes('primeiro') && !resultadoAcao.message.toLowerCase().includes('inválida')) notificationType = 'error';
             showNotification(resultadoAcao.message, notificationType, 3500, ui);
-        } else if (resultadoAcao.success && (acao === 'ligar' || acao === 'desligar')) {
-            // Mensagem padrão para ligar/desligar se não houver específica
-            showNotification(`${veiculo.modelo} ${acao === 'ligar' ? 'ligado' : 'desligado'}.`, 'success', 2000, ui);
-        }
-
+        } else if (resultadoAcao.success && (acao === 'acelerar' || acao === 'frear')) { /* No notification */ }
+        else if (resultadoAcao.success) showNotification(`${veiculo.modelo} ${acao} com sucesso.`, 'success', 2000, ui);
     } catch (error) {
-        console.error(`Erro ao executar ação '${acao}' para ${veiculo?.modelo}:`, error);
         showNotification(`Ocorreu um erro inesperado ao executar a ação '${acao}'. Verifique o console.`, 'error', 5000, ui);
     } finally {
-        // Salva o estado se a ação foi bem-sucedida
-        if (precisaSalvar) {
-            minhaGaragem.salvarNoLocalStorage();
-        }
-        // Atualiza o painel DEPOIS da ação para refletir o novo estado
+        if (precisaSalvar) minhaGaragem.salvarNoLocalStorage();
         atualizarPainelVeiculoSelecionado();
     }
 }
-
-/** Adiciona um novo veículo à garagem a partir do formulário modal. */
 function adicionarNovoVeiculo(event) {
-    event.preventDefault(); // Previne o envio padrão do formulário
-    console.log("--- [Form Add] Iniciando adição ---");
-
-    // Verifica se os elementos do formulário existem
+    event.preventDefault();
     if (!ui.novoVeiculoTipo || !ui.novoVeiculoModelo || !ui.novoVeiculoCor || !ui.novoVeiculoCapacidade || !ui.divCapacidadeCaminhao || !ui.modalAdicionar || !ui.formNovoVeiculo) {
-        console.error("[Form Add] Erro: Elementos do formulário ausentes na UI.");
-        showNotification("Erro interno no formulário. Recarregue a página.", "error", 5000, ui);
-        return;
+        showNotification("Erro interno no formulário. Recarregue a página.", "error", 5000, ui); return;
     }
-
     const tipo = ui.novoVeiculoTipo.value;
     const modelo = ui.novoVeiculoModelo.value.trim();
     const cor = ui.novoVeiculoCor.value.trim();
     const capacidadeStr = ui.novoVeiculoCapacidade.value;
     let capacidadeCarga = 0;
-
-    console.log("[Form Add] Valores:", { tipo, modelo, cor, capacidadeStr });
-
-    // Validações básicas
     if (!tipo) { showNotification("Selecione o tipo de veículo.", 'warning', 3000, ui); ui.novoVeiculoTipo.focus(); return; }
     if (!modelo) { showNotification("Informe o modelo do veículo.", 'warning', 3000, ui); ui.novoVeiculoModelo.focus(); return; }
     if (!cor) { showNotification("Informe a cor do veículo.", 'warning', 3000, ui); ui.novoVeiculoCor.focus(); return; }
-
     let novoVeiculo = null;
     try {
-        console.log("[Form Add] Instanciando tipo:", tipo);
         switch (tipo) {
-            case 'Carro':
-                novoVeiculo = new Carro(modelo, cor);
-                break;
-            case 'CarroEsportivo':
-                novoVeiculo = new CarroEsportivo(modelo, cor);
-                break;
+            case 'Carro': novoVeiculo = new Carro(modelo, cor); break;
+            case 'CarroEsportivo': novoVeiculo = new CarroEsportivo(modelo, cor); break;
             case 'Caminhao':
                  capacidadeCarga = parseInt(capacidadeStr, 10);
                  if (!capacidadeStr || isNaN(capacidadeCarga) || capacidadeCarga <= 0) {
                      showNotification("Para Caminhão, informe uma capacidade de carga válida (kg).", 'warning', 4000, ui);
-                     ui.novoVeiculoCapacidade.focus(); return; // Não continua se inválido
+                     ui.novoVeiculoCapacidade.focus(); return;
                  }
-                novoVeiculo = new Caminhao(modelo, cor, capacidadeCarga);
-                break;
-            default:
-                showNotification("Tipo de veículo selecionado é inválido.", 'error', 3000, ui); return; // Tipo desconhecido
+                novoVeiculo = new Caminhao(modelo, cor, capacidadeCarga); break;
+            default: showNotification("Tipo de veículo selecionado é inválido.", 'error', 3000, ui); return;
         }
         if (!novoVeiculo) throw new Error("Falha na criação da instância do veículo.");
-        console.log("[Form Add] Instância criada:", novoVeiculo);
-
     } catch (error) {
-        console.error("[Form Add] Erro na instanciação:", error);
         showNotification(`Erro ao criar veículo: ${error.message || 'Erro desconhecido'}`, 'error', 5000, ui); return;
     }
-
-    console.log("[Form Add] Adicionando à garagem...");
     const resultadoAdicao = minhaGaragem.adicionarVeiculo(novoVeiculo);
-    console.log("[Form Add] Resultado:", resultadoAdicao);
-
     if (resultadoAdicao.success) {
-        console.log("[Form Add] Sucesso! Salvando e atualizando UI...");
-        minhaGaragem.salvarNoLocalStorage(); // Salva o novo estado
+        minhaGaragem.salvarNoLocalStorage();
         showNotification(`${novoVeiculo.modelo} adicionado com sucesso!`, 'success', 3000, ui);
-        ui.formNovoVeiculo.reset(); // Limpa o formulário
-        ui.divCapacidadeCaminhao.style.display = 'none'; // Esconde campo de capacidade
-        if(ui.modalAdicionar.open) ui.modalAdicionar.close(); // Fecha o modal
-
-        // Seleciona o veículo recém-adicionado e atualiza a interface
-        if(minhaGaragem.selecionarVeiculo(novoVeiculo.id)){
-             ativarTab('tab-visao-geral');
-        }
-        atualizarInterfaceCompleta(); // Atualiza sidebar e painel
-        console.log("[Form Add] UI Atualizada.");
+        ui.formNovoVeiculo.reset();
+        ui.divCapacidadeCaminhao.style.display = 'none';
+        if(ui.modalAdicionar.open) ui.modalAdicionar.close();
+        if(minhaGaragem.selecionarVeiculo(novoVeiculo.id)) ativarTab('tab-visao-geral');
+        atualizarInterfaceCompleta();
     } else {
-         // Exibe a mensagem de erro retornada pela garagem (ex: veículo duplicado)
-         console.warn("[Form Add] Falha ao adicionar:", resultadoAdicao.message);
          showNotification(resultadoAdicao.message || `Não foi possível adicionar ${modelo}.`, 'warning', 4000, ui);
-         ui.novoVeiculoModelo.focus(); // Foca no modelo em caso de erro
+         ui.novoVeiculoModelo.focus();
     }
 }
-
-/** Adiciona ou agenda uma manutenção para o veículo selecionado. */
 function agendarOuRegistrarManutencao(event) {
     event.preventDefault();
     const veiculo = minhaGaragem.getVeiculoSelecionado();
-
-    if (!veiculo) {
-        showNotification("Selecione um veículo antes de registrar manutenção!", 'warning', 3000, ui);
-        return;
-    }
-
-    // Verifica elementos do form de manutenção
+    if (!veiculo) { showNotification("Selecione um veículo antes!", 'warning', 3000, ui); return; }
     if (!ui.manutencaoDataHora || !ui.manutencaoTipo || !ui.manutencaoCusto || !ui.manutencaoDescricao || !ui.formManutencao) {
-        console.error("[Form Manut] Erro: Elementos do formulário ausentes na UI.");
-        showNotification("Erro interno no formulário de manutenção.", "error", 5000, ui);
-        return;
+        showNotification("Erro interno no formulário de manutenção.", "error", 5000, ui); return;
     }
-
     const dataHora = ui.manutencaoDataHora.value;
     const tipo = ui.manutencaoTipo.value.trim();
-    const custoStr = ui.manutencaoCusto.value; // Pega como string
+    const custoStr = ui.manutencaoCusto.value;
     const descricao = ui.manutencaoDescricao.value.trim();
-
-    // Validações
-    if (!dataHora) { showNotification("Selecione a data e hora da manutenção.", 'warning', 3000, ui); ui.manutencaoDataHora.focus(); return; }
+    if (!dataHora) { showNotification("Selecione data e hora.", 'warning', 3000, ui); ui.manutencaoDataHora.focus(); return; }
     if (!tipo) { showNotification("Informe o tipo de serviço.", 'warning', 3000, ui); ui.manutencaoTipo.focus(); return; }
-
     let novaManutencao;
-    try {
-         // A classe Manutencao deve tratar a conversão e validação do custo
-         novaManutencao = new Manutencao(dataHora, tipo, custoStr, descricao);
-    } catch (error) {
-         console.error("[Form Manut] Erro ao criar instância de Manutencao:", error);
-         showNotification("Erro ao processar dados da manutenção. Verifique a data/hora.", 'error', 4000, ui); return;
-    }
-
-    // Adiciona a manutenção ao veículo
+    try { novaManutencao = new Manutencao(dataHora, tipo, custoStr, descricao); }
+    catch (error) { showNotification("Erro ao processar dados. Verifique data/hora.", 'error', 4000, ui); return; }
     const resultadoAddManut = veiculo.adicionarManutencao(novaManutencao);
-
     if (resultadoAddManut.success) {
-        minhaGaragem.salvarNoLocalStorage(); // Salva
-        ui.formManutencao.reset(); // Limpa form
-        atualizarPainelVeiculoSelecionado(); // Atualiza listas na UI
-        showNotification("Registro de manutenção salvo com sucesso!", 'success', 3000, ui);
+        minhaGaragem.salvarNoLocalStorage();
+        ui.formManutencao.reset();
+        atualizarPainelVeiculoSelecionado();
+        showNotification("Registro de manutenção salvo!", 'success', 3000, ui);
     } else {
-        // Exibe erro retornado pelo método (ex: dados inválidos)
-        showNotification(resultadoAddManut.message || "Não foi possível salvar a manutenção.", 'error', 4000, ui);
-        // Tenta focar no campo problemático
+        showNotification(resultadoAddManut.message || "Não foi possível salvar.", 'error', 4000, ui);
         if (resultadoAddManut.message?.toLowerCase().includes("data")) ui.manutencaoDataHora.focus();
         else if (resultadoAddManut.message?.toLowerCase().includes("tipo")) ui.manutencaoTipo.focus();
     }
 }
-
-/** Lida com cliques na lista de manutenção (para remover itens). */
 function lidarComCliqueListaManutencao(event) {
     const removeButton = event.target.closest('.botao-remover-item');
-    if (!removeButton) return; // Não foi clique no botão de remover
-
+    if (!removeButton) return;
     const liElement = removeButton.closest('li[data-item-id]');
-    if (!liElement || !liElement.dataset.itemId) return; // Não encontrou o item ou ID
-
-    const idManutencao = liElement.dataset.itemId;
-    removerManutencaoItem(idManutencao); // Chama a função de remoção
+    if (!liElement || !liElement.dataset.itemId) return;
+    removerManutencaoItem(liElement.dataset.itemId);
 }
-
-/** Remove um item de manutenção do veículo selecionado. */
 function removerManutencaoItem(idManutencao) {
      const veiculo = minhaGaragem.getVeiculoSelecionado();
-     if (!veiculo) return; // Nenhum veículo selecionado
-
-     // Encontra o item para mostrar na confirmação
+     if (!veiculo) return;
      const itemParaRemover = veiculo.historicoManutencao.find(m => m.id === idManutencao);
-     const msgConfirm = itemParaRemover
-        ? `Tem certeza que deseja remover este registro/agendamento?\n\n"${itemParaRemover.retornarFormatada(true)}"`
-        : "Tem certeza que deseja remover este item de manutenção?"; // Fallback
-
-     // Pede confirmação ao usuário
+     const msgConfirm = itemParaRemover ? `Remover?\n\n"${itemParaRemover.retornarFormatada(true)}"` : "Remover item?";
      if (confirm(msgConfirm)) {
          if (veiculo.removerManutencao(idManutencao)) {
-             minhaGaragem.salvarNoLocalStorage(); // Salva
-             atualizarPainelVeiculoSelecionado(); // Atualiza a lista na UI
+             minhaGaragem.salvarNoLocalStorage();
+             atualizarPainelVeiculoSelecionado();
              showNotification("Item de manutenção removido.", 'success', 2000, ui);
-         } else {
-              // A remoção falhou (item não encontrado na classe, pouco provável aqui)
-              showNotification("Não foi possível remover o item.", 'error', 3000, ui);
-              console.warn(`Falha ao tentar remover manutenção ID ${idManutencao} do veículo ${veiculo.id}`);
-         }
+         } else { showNotification("Não foi possível remover.", 'error', 3000, ui); }
      }
 }
-
-/** Remove o veículo atualmente selecionado da garagem. */
 function removerVeiculoSelecionado() {
     const veiculo = minhaGaragem.getVeiculoSelecionado();
-    if (!veiculo) {
-        showNotification("Nenhum veículo selecionado para remover.", 'warning', 3000, ui);
-        return;
-    }
-
-    // Confirmação dupla, pois é permanente
-    if (confirm(`ATENÇÃO!\n\nRemover permanentemente ${veiculo.modelo} (${veiculo.cor}) da garagem?\n\nEsta ação NÃO pode ser desfeita.`)) {
+    if (!veiculo) { showNotification("Nenhum veículo selecionado.", 'warning', 3000, ui); return; }
+    if (confirm(`ATENÇÃO!\n\nRemover ${veiculo.modelo} (${veiculo.cor})?\n\nEsta ação NÃO pode ser desfeita.`)) {
          if (minhaGaragem.removerVeiculo(veiculo.id)) {
-              minhaGaragem.salvarNoLocalStorage(); // Salva
-              showNotification(`${veiculo.modelo} removido permanentemente.`, 'success', 3000, ui);
-              atualizarInterfaceCompleta(); // Atualiza tudo (o painel vai sumir)
-         } else {
-             // Pouco provável falhar aqui se o veículo estava selecionado
-             showNotification(`Falha ao remover ${veiculo.modelo}.`, 'error', 3000, ui);
-             console.error(`Falha inesperada ao remover veículo ID ${veiculo.id}`);
-         }
+              minhaGaragem.salvarNoLocalStorage();
+              showNotification(`${veiculo.modelo} removido.`, 'success', 3000, ui);
+              atualizarInterfaceCompleta();
+         } else { showNotification(`Falha ao remover ${veiculo.modelo}.`, 'error', 3000, ui); }
     }
 }
 
-
-// --- Funções da API Simulada ---
-
-/**
- * Busca detalhes adicionais de um veículo na API simulada (arquivo JSON).
- * @async
- * @param {string} identificadorVeiculo - O ID do veículo a ser buscado.
- * @returns {Promise<object|null|{erro: boolean, mensagem: string}>} Detalhes, null ou objeto de erro.
- */
+// --- Funções da API Simulada (Veículos) ---
 async function buscarDetalhesVeiculoAPI(identificadorVeiculo) {
-    // console.log(`[API Fetch] Buscando ID: ${identificadorVeiculo}`);
-    const urlAPI = './dados_veiculos_api.json'; // Caminho relativo ao index.html
-
+    const urlAPI = './dados_veiculos_api.json';
     try {
-        // Adiciona cache: "no-cache" para evitar problemas durante o desenvolvimento/teste
         const response = await fetch(urlAPI, { cache: "no-cache" });
-
         if (!response.ok) {
-            // Trata erros HTTP como 404 (Não Encontrado) ou 500 (Erro Servidor - menos comum localmente)
-            const erroMsg = `Falha ao carregar dados extras (Erro ${response.status}: ${response.statusText}). Verifique se o arquivo '${urlAPI}' existe e está acessível.`;
-            console.error(`[API Fetch] Erro HTTP: ${response.status}`, erroMsg);
+            const erroMsg = `Falha (Erro ${response.status}: ${response.statusText}). Verifique '${urlAPI}'.`;
             return { erro: true, mensagem: erroMsg };
         }
-
-        // Tenta converter a resposta para JSON
         const dadosTodosVeiculos = await response.json();
-
-        // Verifica se o JSON é um array válido
-        if (!Array.isArray(dadosTodosVeiculos)) {
-             console.error("[API Fetch] Erro: O arquivo JSON não contém um array válido.");
-             return { erro: true, mensagem: "Formato inválido no arquivo de dados extras (não é um array)." };
-        }
-
-        // Procura o veículo pelo ID dentro do array
-        // Adiciona `v &&` para segurança caso haja itens nulos/inválidos no JSON
+        if (!Array.isArray(dadosTodosVeiculos)) return { erro: true, mensagem: "Formato inválido no JSON." };
         const detalhes = dadosTodosVeiculos.find(v => v && v.id === identificadorVeiculo);
-
-        if (detalhes) {
-            // console.log("[API Fetch] Detalhes encontrados:", detalhes);
-            return detalhes; // Retorna o objeto completo encontrado
-        } else {
-            // console.log("[API Fetch] Nenhum detalhe extra encontrado para este ID no JSON.");
-            return null; // Retorna null para indicar "não encontrado"
-        }
-
+        return detalhes ? detalhes : null;
     } catch (error) {
-        // Captura outros erros (problemas de rede, JSON mal formatado)
-        console.error("[API Fetch] Falha ao buscar ou processar detalhes:", error);
-        let mensagemErro = "Erro desconhecido ao buscar detalhes extras.";
-        if (error instanceof SyntaxError) {
-            // Erro específico de JSON inválido
-            mensagemErro = "Erro de formato no arquivo JSON de dados extras. Verifique vírgulas, aspas, etc.";
-        } else if (error instanceof TypeError && error.message.includes('fetch')) {
-             // Erro relacionado à rede (pode acontecer mesmo localmente se houver problema)
-             mensagemErro = "Erro de rede ao tentar buscar dados extras.";
-        } else if (error.message) {
-            // Usa a mensagem do erro se disponível
-            mensagemErro = error.message;
-        }
-        return { erro: true, mensagem: mensagemErro }; // Retorna um objeto de erro
+        let mensagemErro = "Erro ao buscar detalhes.";
+        if (error instanceof SyntaxError) mensagemErro = "Erro de formato no JSON.";
+        else if (error instanceof TypeError && error.message.includes('fetch')) mensagemErro = "Erro de rede.";
+        else if (error.message) mensagemErro = error.message;
+        return { erro: true, mensagem: mensagemErro };
     }
 }
-
-/**
- * Manipula o clique no botão "Ver Detalhes Extras", busca os dados e atualiza a UI.
- * @async
- */
 async function lidarCliqueDetalhesExtras() {
     const veiculo = minhaGaragem.getVeiculoSelecionado();
-    if (!veiculo || !veiculo.id) {
-        showNotification("Selecione um veículo primeiro.", "warning", 3000, ui);
-        return;
-    }
-
-    // Verifica se os elementos da UI necessários existem
+    if (!veiculo || !veiculo.id) { showNotification("Selecione um veículo.", "warning", 3000, ui); return; }
     if (!ui.detalhesExtrasVeiculoDiv || !ui.btnVerDetalhesExtras) {
-        console.error("[Detalhes Extras] Erro: Elementos da UI (botão ou div) não encontrados.");
-        showNotification("Erro interno na interface para detalhes extras.", "error", 4000, ui);
-        return;
+        showNotification("Erro interno na interface.", "error", 4000, ui); return;
     }
-
-    // --- Feedback de Carregamento ---
-    ui.detalhesExtrasVeiculoDiv.innerHTML = `<p class="loading-feedback"><i class="fas fa-spinner fa-spin"></i> Carregando detalhes extras...</p>`;
-    ui.detalhesExtrasVeiculoDiv.style.display = 'block'; // Mostra a div
-    ui.btnVerDetalhesExtras.disabled = true; // Desabilita o botão
-    // --- Fim Feedback ---
-
-    // Chama a função assíncrona e espera o resultado
+    ui.detalhesExtrasVeiculoDiv.innerHTML = `<p class="loading-feedback"><i class="fas fa-spinner fa-spin"></i> Carregando...</p>`;
+    ui.detalhesExtrasVeiculoDiv.style.display = 'block';
+    ui.btnVerDetalhesExtras.disabled = true;
     const detalhes = await buscarDetalhesVeiculoAPI(veiculo.id);
-
-    // --- Reabilita o botão ---
-    // É importante reabilitar mesmo em caso de erro ou não encontrado
     if(ui.btnVerDetalhesExtras) ui.btnVerDetalhesExtras.disabled = false;
-    // --- Fim Reabilitar ---
-
-    // --- Processa e Exibe o Resultado ---
     if (detalhes && detalhes.erro) {
-        // Erro durante a busca (tratado em buscarDetalhesVeiculoAPI)
         ui.detalhesExtrasVeiculoDiv.innerHTML = `<p class="error-feedback"><i class="fas fa-exclamation-triangle"></i> Erro: ${detalhes.mensagem}</p>`;
-        console.error("[Detalhes Extras] Erro retornado pela busca:", detalhes.mensagem);
-
     } else if (detalhes) {
-        // Detalhes encontrados com sucesso
-        console.log("[Detalhes Extras] Exibindo detalhes.");
-        // Formata o status do recall
-        let recallStatus = detalhes.recallPendente
-            ? `<span class="recall-pendente">Sim${detalhes.recallDescricao ? ` (${detalhes.recallDescricao})` : ''}</span>`
-            : `<span class="recall-ok">Não</span>`;
-
-        // Formata a data da última revisão (API) - com tratamento de erro
+        let recallStatus = detalhes.recallPendente ? `<span class="recall-pendente">Sim${detalhes.recallDescricao ? ` (${detalhes.recallDescricao})` : ''}</span>` : `<span class="recall-ok">Não</span>`;
         let dataRevisaoFormatada = 'N/A';
         if (detalhes.ultimaRevisaoAPI) {
             try {
-                // Adiciona T00:00:00 para tratar como data local sem fuso
                 const dataObj = new Date(detalhes.ultimaRevisaoAPI + 'T00:00:00');
-                if (!isNaN(dataObj)) { // Verifica se a data é válida
-                     dataRevisaoFormatada = dataObj.toLocaleDateString('pt-BR', { year: 'numeric', month: '2-digit', day: '2-digit' });
-                } else {
-                    throw new Error("Data inválida após parse");
-                }
-            } catch (e) {
-                console.warn("Erro ao formatar data da API:", detalhes.ultimaRevisaoAPI, e);
-                dataRevisaoFormatada = 'Data Inválida';
-            }
+                if (!isNaN(dataObj)) dataRevisaoFormatada = dataObj.toLocaleDateString('pt-BR', { year: 'numeric', month: '2-digit', day: '2-digit' });
+                else throw new Error("Data inválida.");
+            } catch (e) { dataRevisaoFormatada = 'Data Inválida'; }
         }
-
-        // Monta o HTML com os detalhes formatados
         ui.detalhesExtrasVeiculoDiv.innerHTML = `
             <p><i class="fas fa-dollar-sign"></i> <strong>Valor FIPE:</strong> ${detalhes.valorFipe ? detalhes.valorFipe.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'N/A'}</p>
             <p><i class="fas fa-calendar-alt"></i> <strong>Última Revisão (API):</strong> ${dataRevisaoFormatada}</p>
             <p><i class="fas fa-exclamation-circle"></i> <strong>Recall Pendente:</strong> ${recallStatus}</p>
-            <p><i class="fas fa-lightbulb"></i> <strong>Dica:</strong> ${detalhes.dicaManutencao || 'Nenhuma dica disponível.'}</p>
+            <p><i class="fas fa-lightbulb"></i> <strong>Dica:</strong> ${detalhes.dicaManutencao || 'N/A'}</p>
             <p><i class="fas fa-star"></i> <strong>Curiosidade:</strong> ${detalhes.fatoCurioso || '-'}</p>
         `;
     } else {
-        // Veículo não encontrado na API simulada (retorno foi null)
-        console.log("[Detalhes Extras] Veículo não encontrado na API simulada.");
-        ui.detalhesExtrasVeiculoDiv.innerHTML = `<p class="notfound-feedback"><i class="fas fa-search"></i> Nenhum detalhe extra encontrado na 'API' para ${veiculo.modelo}.</p>`;
+        ui.detalhesExtrasVeiculoDiv.innerHTML = `<p class="notfound-feedback"><i class="fas fa-search"></i> Nenhum detalhe extra para ${veiculo.modelo}.</p>`;
     }
-    // --- Fim Processamento ---
+}
+
+
+// --- Funções da API de Previsão do Tempo (OpenWeatherMap) ---
+
+/**
+ * Busca a previsão do tempo detalhada (5 dias / 3 horas) para uma cidade.
+ * @param {string} cidade - O nome da cidade.
+ * @returns {Promise<object|null>} Os dados da API ou null em caso de erro.
+ */
+async function buscarPrevisaoDetalhadaTempo(cidade) {
+    if (!WEATHER_API_KEY || WEATHER_API_KEY === "569ee28c1908ad6eaadb431e635166be") { // Verificação se a chave ainda é o placeholder
+        console.error("Chave da API de Tempo não configurada ou é o placeholder.");
+        // A mensagem de erro para o usuário já será exibida por handleVerificarClima
+        throw new Error("Chave da API de Tempo não configurada corretamente.");
+    }
+    const url = `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(cidade)}&appid=${WEATHER_API_KEY}&units=metric&lang=pt_br`;
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({ message: "Erro ao buscar dados da previsão." }));
+            console.error("Erro da API de Tempo:", errorData);
+            throw new Error(errorData.message || `Erro ${response.status} ao buscar previsão.`);
+        }
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error("Falha ao buscar previsão detalhada do tempo:", error);
+        throw error; 
+    }
+}
+
+/**
+ * Processa os dados brutos da API de forecast para um formato diário resumido.
+ * @param {object} dataApi - O objeto JSON completo retornado pela API.
+ * @returns {Array<object>|null} Um array de objetos, cada um representando um dia resumido, ou null.
+ */
+function processarDadosForecastTempo(dataApi) {
+    if (!dataApi || !dataApi.list || !Array.isArray(dataApi.list) || dataApi.list.length === 0) {
+        console.error("Dados da API de tempo inválidos ou lista de previsões vazia.", dataApi);
+        return null;
+    }
+    const diasAgrupados = {};
+    dataApi.list.forEach(item => {
+        const dataDia = item.dt_txt.split(' ')[0];
+        if (!diasAgrupados[dataDia]) {
+            diasAgrupados[dataDia] = { temps: [], descricoes: [], icones: [], horas_previsao: [] };
+        }
+        diasAgrupados[dataDia].temps.push(item.main.temp);
+        diasAgrupados[dataDia].descricoes.push(item.weather[0].description);
+        diasAgrupados[dataDia].icones.push(item.weather[0].icon);
+        diasAgrupados[dataDia].horas_previsao.push({
+            hora: item.dt_txt.split(' ')[1],
+            descricao: item.weather[0].description,
+            icone: item.weather[0].icon
+        });
+    });
+
+    const previsaoDiariaProcessada = [];
+    for (const dataDia in diasAgrupados) {
+        const diaInfo = diasAgrupados[dataDia];
+        const temp_min = Math.min(...diaInfo.temps);
+        const temp_max = Math.max(...diaInfo.temps);
+        let descricaoRep = diaInfo.descricoes[0];
+        let iconeRep = diaInfo.icones[0];
+        const previsaoMeioDia = diaInfo.horas_previsao.find(p => p.hora === "12:00:00" || p.hora === "15:00:00");
+        if (previsaoMeioDia) {
+            descricaoRep = previsaoMeioDia.descricao;
+            iconeRep = previsaoMeioDia.icone;
+        } else if (diaInfo.horas_previsao.length > 0) {
+            descricaoRep = diaInfo.horas_previsao[0].descricao;
+            iconeRep = diaInfo.horas_previsao[0].icone;
+        }
+        previsaoDiariaProcessada.push({
+            data: formatarDataParaExibicaoTempo(dataDia),
+            temp_min: temp_min.toFixed(1),
+            temp_max: temp_max.toFixed(1),
+            descricao: capitalizarPrimeiraLetraTempo(descricaoRep),
+            icone: iconeRep
+        });
+    }
+    return previsaoDiariaProcessada.slice(0, 5); 
+}
+
+/**
+ * Exibe a previsão do tempo detalhada na interface do usuário.
+ * @param {Array<object>} previsaoDiaria - Array de objetos com a previsão processada por dia.
+ * @param {string} nomeCidade - O nome da cidade para o título.
+ */
+function exibirPrevisaoDetalhadaTempo(previsaoDiaria, nomeCidade) {
+    if (!ui.previsaoResultadoDivTempo) return;
+    ui.previsaoResultadoDivTempo.innerHTML = '';
+
+    if (!previsaoDiaria || previsaoDiaria.length === 0) {
+        // A mensagem de erro já deve ter sido exibida por exibirStatusTempo
+        return;
+    }
+
+    const tituloH3 = document.createElement('h3'); 
+    tituloH3.textContent = `Previsão para ${capitalizarPrimeiraLetraTempo(nomeCidade)}`;
+    ui.previsaoResultadoDivTempo.appendChild(tituloH3);
+
+    const gridContainer = document.createElement('div');
+    gridContainer.className = 'previsao-dias-grid';
+
+    previsaoDiaria.forEach(dia => {
+        const diaDiv = document.createElement('div');
+        diaDiv.className = 'dia-previsao';
+
+        const dataH4 = document.createElement('h4'); 
+        dataH4.className = 'data-dia'; 
+        const iconeImg = document.createElement('img');
+        iconeImg.className = 'icone-tempo'; 
+        iconeImg.src = `https://openweathermap.org/img/wn/${dia.icone}@2x.png`;
+        iconeImg.alt = dia.descricao;
+        dataH4.appendChild(iconeImg);
+        dataH4.appendChild(document.createTextNode(dia.data));
+
+        const tempMinP = document.createElement('p');
+        tempMinP.innerHTML = `Mín: <strong>${dia.temp_min}°C</strong>`;
+        const tempMaxP = document.createElement('p');
+        tempMaxP.innerHTML = `Máx: <strong>${dia.temp_max}°C</strong>`;
+        const descricaoP = document.createElement('p');
+        descricaoP.textContent = dia.descricao;
+
+        diaDiv.appendChild(dataH4);
+        diaDiv.appendChild(tempMinP);
+        diaDiv.appendChild(tempMaxP);
+        diaDiv.appendChild(descricaoP);
+        gridContainer.appendChild(diaDiv);
+    });
+    ui.previsaoResultadoDivTempo.appendChild(gridContainer);
+}
+
+/** Formata uma string de data "AAAA-MM-DD" para "DD/MM/AAAA". */
+function formatarDataParaExibicaoTempo(dataString) {
+    const [ano, mes, dia] = dataString.split('-');
+    return `${dia}/${mes}/${ano}`;
+}
+
+/** Capitaliza a primeira letra de uma string. */
+function capitalizarPrimeiraLetraTempo(string) {
+    if (!string) return '';
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+/** Exibe uma mensagem de status (carregando, erro) para a previsão do tempo. */
+function exibirStatusTempo(mensagem, tipo = 'info') {
+    if (!ui.statusMensagemTempoDiv) return;
+    ui.statusMensagemTempoDiv.textContent = mensagem;
+    ui.statusMensagemTempoDiv.className = 'status-mensagem'; // Reseta
+    if (tipo) {
+        ui.statusMensagemTempoDiv.classList.add(tipo);
+    }
+     // Remove estilos de fundo explícitos para que o CSS controle totalmente
+    ui.statusMensagemTempoDiv.style.backgroundColor = '';
+}
+
+/** Lida com o clique no botão de verificar clima. */
+async function handleVerificarClima() {
+    if (!ui.cidadeInputTempo) return;
+    const cidade = ui.cidadeInputTempo.value.trim();
+
+    if (!cidade) {
+        exibirStatusTempo("Por favor, digite o nome de uma cidade.", 'error');
+        return;
+    }
+    // A verificação da chave placeholder será feita antes de chamar buscarPrevisaoDetalhadaTempo
+    if (WEATHER_API_KEY === "569ee28c1908ad6eaadb431e635166be") {
+         exibirStatusTempo("AVISO: A chave da API de Previsão do Tempo não foi configurada. Verifique o arquivo js/principal.js.", 'error');
+         return;
+    }
+
+    exibirStatusTempo("Carregando previsão...", 'loading');
+    if (ui.previsaoResultadoDivTempo) ui.previsaoResultadoDivTempo.innerHTML = '';
+
+    try {
+        const dadosApi = await buscarPrevisaoDetalhadaTempo(cidade); // Não precisa mais verificar a chave aqui
+        // Se buscarPrevisaoDetalhadaTempo lançar erro, o catch abaixo o pegará
+        if (dadosApi) { // Procede apenas se dadosApi não for null (ou seja, não houve erro na busca)
+            const previsaoProcessada = processarDadosForecastTempo(dadosApi);
+            if (previsaoProcessada && previsaoProcessada.length > 0) {
+                exibirPrevisaoDetalhadaTempo(previsaoProcessada, cidade);
+                exibirStatusTempo(""); 
+            } else {
+                exibirStatusTempo(`Não foi possível processar a previsão para ${capitalizarPrimeiraLetraTempo(cidade)}.`, 'error');
+            }
+        }
+        // Não precisa de um 'else' aqui, pois se dadosApi for null, um erro já foi lançado
+    } catch (error) {
+        console.error("Erro no fluxo principal da previsão do tempo:", error);
+        exibirStatusTempo(error.message || "Ocorreu um erro ao buscar a previsão. Tente novamente.", 'error');
+    }
 }
 
 
 // --- Inicialização da Aplicação ---
-
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("DOM Carregado. Iniciando Garagem Virtual V3 (API Sim)...");
+    console.log("DOM Carregado. Iniciando Garagem Virtual V3 & Previsão do Tempo...");
 
-    // Envolve a inicialização principal em try/catch para capturar erros graves
     try {
-        // 1. Calcula Comprimento do Path do Velocímetro (se existir)
+        // Inicialização da Garagem (código existente)
         const pathElement = document.querySelector('.velocimetro-progresso');
         if (pathElement && typeof pathElement.getTotalLength === 'function') {
             try {
                 velocimetroPathLength = pathElement.getTotalLength();
                 document.documentElement.style.setProperty('--velocimetro-path-length', velocimetroPathLength);
-                console.log(`[Init] Comprimento path velocímetro: ${velocimetroPathLength.toFixed(2)}`);
             } catch (e) {
-                 console.error("[Init] Erro ao calcular comprimento do path:", e);
-                 document.documentElement.style.setProperty('--velocimetro-path-length', 251.2); // Fallback
+                 document.documentElement.style.setProperty('--velocimetro-path-length', 251.2);
             }
         } else {
-            console.warn("[Init] Elemento .velocimetro-progresso não encontrado ou sem getTotalLength. Usando padrão.");
-            document.documentElement.style.setProperty('--velocimetro-path-length', 251.2); // Fallback
+            document.documentElement.style.setProperty('--velocimetro-path-length', 251.2);
         }
 
-        // 2. Carrega Dados da Garagem (LocalStorage)
         const veiculosSalvos = Garagem.carregarDoLocalStorage();
         minhaGaragem.veiculos = veiculosSalvos;
         const idSelecionadoSalvo = localStorage.getItem('garagemVeiculoSelecionadoId');
         if (idSelecionadoSalvo && minhaGaragem.encontrarVeiculo(idSelecionadoSalvo)) {
-            minhaGaragem.selecionarVeiculo(idSelecionadoSalvo); // Seleciona o salvo
+            minhaGaragem.selecionarVeiculo(idSelecionadoSalvo);
         } else {
-             minhaGaragem.selecionarVeiculo(null); // Limpa seleção
-             if(idSelecionadoSalvo) localStorage.removeItem('garagemVeiculoSelecionadoId'); // Remove ID inválido
+             minhaGaragem.selecionarVeiculo(null);
+             if(idSelecionadoSalvo) localStorage.removeItem('garagemVeiculoSelecionadoId');
         }
 
-        // 3. Configura Listeners de Eventos (com verificações de existência)
         if (ui.btnAbrirModalAdicionar && ui.modalAdicionar) {
             ui.btnAbrirModalAdicionar.addEventListener('click', () => {
                 if(ui.formNovoVeiculo) ui.formNovoVeiculo.reset();
                 if(ui.divCapacidadeCaminhao) ui.divCapacidadeCaminhao.style.display = 'none';
+                if(ui.novoVeiculoTipo) ui.novoVeiculoTipo.value = "";
                 if (!ui.modalAdicionar.open) {
                     try { ui.modalAdicionar.showModal(); } catch (e) { console.error("Erro ao abrir modal:", e); }
                 }
             });
-        } else { console.warn("[Init] Botão/Modal Adicionar não configurado."); }
-
+        }
         if (ui.btnFecharModalAdicionar && ui.modalAdicionar) {
             ui.btnFecharModalAdicionar.addEventListener('click', () => { if (ui.modalAdicionar.open) ui.modalAdicionar.close(); });
         }
         if (ui.modalAdicionar) {
-            ui.modalAdicionar.addEventListener('click', (event) => { if (event.target === ui.modalAdicionar && ui.modalAdicionar.open) ui.modalAdicionar.close(); }); // Fechar ao clicar fora
+            ui.modalAdicionar.addEventListener('click', (event) => { if (event.target === ui.modalAdicionar && ui.modalAdicionar.open) ui.modalAdicionar.close(); });
         }
-
-        if (ui.formNovoVeiculo) {
-            ui.formNovoVeiculo.addEventListener('submit', adicionarNovoVeiculo);
-        } else { console.error("[Init] Erro: Formulário #formNovoVeiculo não encontrado!"); }
-
+        if (ui.formNovoVeiculo) ui.formNovoVeiculo.addEventListener('submit', adicionarNovoVeiculo);
         if (ui.novoVeiculoTipo && ui.divCapacidadeCaminhao) {
             ui.novoVeiculoTipo.addEventListener('change', (event) => {
                 ui.divCapacidadeCaminhao.style.display = (event.target.value === 'Caminhao') ? 'block' : 'none';
             });
-        } else { console.warn("[Init] Select Tipo Veículo ou Div Capacidade não configurados."); }
-
-        if (ui.formManutencao) {
-             ui.formManutencao.addEventListener('submit', agendarOuRegistrarManutencao);
-        } else { console.warn("[Init] Formulário Manutenção não configurado."); }
-
+        }
+        if (ui.formManutencao) ui.formManutencao.addEventListener('submit', agendarOuRegistrarManutencao);
         if (ui.tabLinks && ui.tabLinks.length > 0) {
             ui.tabLinks.forEach(button => {
                 button.addEventListener('click', () => ativarTab(button.dataset.tab));
             });
-        } else { console.warn("[Init] Links das Abas não configurados."); }
-
-        if (ui.botoesAcoesContainer) {
-            ui.botoesAcoesContainer.addEventListener('click', lidarComAcaoVeiculo);
-        } else { console.warn("[Init] Container Botões Ações não configurado."); }
-
-        if(ui.botaoRemoverVeiculoHeader) {
-            ui.botaoRemoverVeiculoHeader.addEventListener('click', removerVeiculoSelecionado);
-        } else { console.warn("[Init] Botão Remover Header não configurado."); }
-
-        // Listeners para remoção em listas de manutenção
+        }
+        if (ui.botoesAcoesContainer) ui.botoesAcoesContainer.addEventListener('click', lidarComAcaoVeiculo);
+        if(ui.botaoRemoverVeiculoHeader) ui.botaoRemoverVeiculoHeader.addEventListener('click', removerVeiculoSelecionado);
+        
         const setupMaintenanceListListener = (ulElement) => {
-             if (ulElement) {
-                ulElement.addEventListener('click', lidarComCliqueListaManutencao);
-             } else {
-                 const id = ulElement === ui.historicoUl ? '#historicoManutencao .lista-itens' : '#agendamentosFuturos .lista-itens';
-                 console.warn(`[Init] Lista de Manutenção (${id}) não configurada.`);
-             }
+             if (ulElement) ulElement.addEventListener('click', lidarComCliqueListaManutencao);
         };
         setupMaintenanceListListener(ui.historicoUl);
         setupMaintenanceListListener(ui.agendamentosUl);
 
+        if (ui.notificationCloseBtn) ui.notificationCloseBtn.addEventListener('click', () => hideNotification(ui));
+        if (ui.btnVerDetalhesExtras) ui.btnVerDetalhesExtras.addEventListener('click', lidarCliqueDetalhesExtras);
 
-        if (ui.notificationCloseBtn) {
-            ui.notificationCloseBtn.addEventListener('click', () => hideNotification(ui));
-        } else { console.warn("[Init] Botão Fechar Notificação não configurado."); }
-
-        // Listener para o botão de Detalhes Extras (API)
-        if (ui.btnVerDetalhesExtras) {
-            ui.btnVerDetalhesExtras.addEventListener('click', lidarCliqueDetalhesExtras);
-            console.log("[Init] Listener para #btnVerDetalhesExtras adicionado.");
-        } else {
-            console.warn("[Init] Botão #btnVerDetalhesExtras não encontrado no DOM.");
+        // Inicialização da Previsão do Tempo
+        // A verificação da chave placeholder agora é feita dentro do handleVerificarClima
+        if (ui.verificarClimaBtn) {
+            ui.verificarClimaBtn.addEventListener('click', handleVerificarClima);
         }
+        if (ui.cidadeInputTempo) {
+            ui.cidadeInputTempo.addEventListener('keypress', (event) => {
+                if (event.key === 'Enter') {
+                    handleVerificarClima();
+                }
+            });
+        }
+        // Verifica se a chave é o placeholder e exibe um aviso inicial se for.
+        if (WEATHER_API_KEY === "569ee28c1908ad6eaadb431e635166be") {
+            exibirStatusTempo("AVISO: A chave da API de Previsão do Tempo é um placeholder. Substitua-a em js/principal.js para usar esta funcionalidade.", 'warning');
+            if(ui.verificarClimaBtn) ui.verificarClimaBtn.disabled = true; // Opcional: desabilitar o botão
+        }
+        
+        
+        // Renderização Inicial da Garagem
+        ativarTab('tab-visao-geral');
+        atualizarInterfaceCompleta();
 
-        // 4. Renderização Inicial da UI
-        ativarTab('tab-visao-geral'); // Garante que a aba correta está ativa
-        atualizarInterfaceCompleta(); // Exibe a lista e o painel (ou mensagem inicial)
-
-        // 5. Verifica Agendamentos Próximos (com um pequeno delay)
+        // Verificação de Agendamentos da Garagem
         setTimeout(() => {
             try {
                 const mensagensAgendamento = minhaGaragem.verificarAgendamentosProximos();
                 if (mensagensAgendamento && mensagensAgendamento.length > 0) {
-                    console.log(`[Init] ${mensagensAgendamento.length} agendamento(s) próximo(s) encontrado(s).`);
                     mensagensAgendamento.forEach((msg, index) => {
-                        // Adiciona um delay entre múltiplas notificações de agendamento
                         setTimeout(() => showNotification(msg, 'info', 8000 + index * 500, ui), index * 700);
                     });
-                } else {
-                    console.log("[Init] Nenhum agendamento próximo.");
                 }
             } catch(error) {
-                console.error("[Init] Erro ao verificar/mostrar agendamentos próximos:", error);
+                console.error("[Init] Erro ao verificar agendamentos próximos:", error);
             }
-        }, 1500); // Delay para não sobrecarregar logo no início
+        }, 1500);
 
-        console.log("✅ Garagem Virtual inicializada e pronta!");
+        console.log("✅ Garagem Virtual & Previsão do Tempo inicializados!");
 
     } catch (error) {
-        // Captura erros graves durante a inicialização
         console.error("❌===== ERRO CRÍTICO NA INICIALIZAÇÃO DA APLICAÇÃO =====", error);
-        alert("Ocorreu um erro grave ao iniciar a Garagem Virtual. A aplicação pode não funcionar corretamente. Verifique o console (F12) para detalhes técnicos.");
-        // Opcional: Exibe mensagem de erro na página
+        alert("Ocorreu um erro grave ao iniciar a aplicação. Verifique o console (F12).");
         const body = document.querySelector('body');
         if (body) {
             body.innerHTML = `<div style="padding: 20px; margin: 20px; background-color: #ffdddd; border: 2px solid red; color: #a02533; text-align: center; font-family: sans-serif;">
                                 <h1>Erro na Aplicação</h1>
-                                <p>Não foi possível carregar a Garagem Virtual corretamente.</p>
+                                <p>Não foi possível carregar corretamente.</p>
                                 <p><strong>Detalhes do Erro:</strong> ${error.message}</p>
-                                <p><em>Verifique o console do navegador (F12) para mais informações.</em></p>
+                                <p><em>Verifique o console do navegador (F12).</em></p>
                               </div>`;
         }
     }

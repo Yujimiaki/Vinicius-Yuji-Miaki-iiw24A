@@ -27,7 +27,9 @@ body {
   min-height: 100vh;
 }
 
-/* Layout Principal */
+/* ======================================== */
+/* == Layout Principal da Aplicação ====== */
+/* ======================================== */
 #app-container { display: flex; width: 100%; min-height: 100vh; }
 #sidebar {
   width: var(--sidebar-width);
@@ -39,6 +41,10 @@ body {
 .sidebar-header h1 { font-size: 1.7em; margin-top: 8px; font-weight: 700; }
 .sidebar-header i { font-size: 2.2em; }
 #main-content { flex: 1; padding: 35px; overflow-y: auto; position: relative; }
+
+/* ======================================== */
+/* == Estilos Comuns ====================== */
+/* ======================================== */
 
 /* Estilo Card Genérico */
 .card {
@@ -53,12 +59,18 @@ body {
 }
 
 /* Títulos */
-.lista-veiculos-container h2, .sidebar-section h2, .maintenance-list h3, #formManutencaoContainer h3 {
+.lista-veiculos-container h2, .sidebar-section h2, .maintenance-list h3, #formManutencaoContainer h3,
+#secao-previsao-tempo h2 { /* Adicionado título da previsão */
   font-size: 1.15em; margin-bottom: 15px; color: var(--cor-secundaria);
   border-bottom: 1px solid var(--cor-borda); padding-bottom: 10px; font-weight: 600;
 }
-.lista-veiculos-container h2 i, .sidebar-section h2 i, .maintenance-list h3 i, #formManutencaoContainer h3 i { margin-right: 10px; }
+.lista-veiculos-container h2 i, .sidebar-section h2 i, .maintenance-list h3 i, #formManutencaoContainer h3 i,
+#secao-previsao-tempo h2 i { /* Adicionado ícone do título da previsão */
+  margin-right: 10px;
+}
 #formManutencaoContainer h3 { font-size: 1.25em; }
+#secao-previsao-tempo h2 {font-size: 1.4em; color: var(--cor-primaria);}
+
 
 /* Botões Gerais e Específicos */
 button {
@@ -80,7 +92,7 @@ button:disabled { background-color: #adb5bd; cursor: not-allowed; opacity: 0.65;
 #botaoCarregar, #botaoDescarregar { background-color: var(--cor-info); }
 .botao-perigo { background-color: var(--cor-perigo); }
 .botao-cancelar { background-color: var(--cor-secundaria); }
-.botao-info { background-color: var(--cor-info); } /* Adicionado para botão API */
+.botao-info { background-color: var(--cor-info); }
 .botao-info:hover { box-shadow: 0 4px 8px rgba(23, 162, 184, 0.2); }
 .botao-remover-header {
   background-color: transparent; color: var(--cor-perigo); border: 1px solid var(--cor-perigo);
@@ -106,6 +118,10 @@ input[type="text"], input[type="number"], input[type="datetime-local"], select {
 input:focus, select:focus { border-color: var(--cor-primaria); outline: none; box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15); }
 ::placeholder { color: #a0a0a0; font-style: italic; font-size: 0.9rem; }
 #formManutencaoContainer button[type="submit"] { width: 100%; margin-top: 10px; background-color: var(--cor-info); }
+
+/* ======================================== */
+/* == Componentes Específicos Garagem ===== */
+/* ======================================== */
 
 /* Lista Veículos Sidebar */
 .lista-veiculos-container { flex-grow: 1; display: flex; flex-direction: column; }
@@ -160,13 +176,14 @@ dialog#modalAdicionarVeiculo h2 i { margin-right: 10px; }
 #info-status-motor .status-off { color: var(--cor-perigo); font-weight: bold;}
 #info-status-motor .fa-circle { font-size: 0.8em; vertical-align: middle; margin-right: 4px;}
 
-/* Velocímetro */
+/* Velocímetro (Gauge) */
 .velocimetro-container { display: flex; flex-direction: column; align-items: center; margin-bottom: 25px; padding: 15px; background-color: #f8f9fa; border-radius: var(--border-radius-padrao); }
 .velocimetro-svg { width: 100%; max-width: 180px; height: auto; transform: rotate(-90deg); }
 .velocimetro-trilha { stroke-width: 10; stroke: #e9ecef; }
 .velocimetro-progresso {
   stroke-width: 10; stroke: var(--cor-primaria); stroke-linecap: round;
-  stroke-dasharray: var(--velocimetro-path-length); stroke-dashoffset: var(--velocimetro-path-length);
+  stroke-dasharray: var(--velocimetro-path-length);
+  stroke-dashoffset: var(--velocimetro-path-length);
   transition: stroke-dashoffset 0.4s ease-out, stroke 0.4s ease-out;
 }
 .velocimetro-texto { font-size: 1.5em; font-weight: 700; color: var(--cor-primaria); margin-top: -10px; text-align: center; }
@@ -192,6 +209,7 @@ nav.tabs-veiculo { display: flex; border-bottom: 2px solid var(--cor-borda); mar
 #formManutencaoContainer { margin-bottom: 30px; padding: 25px; background-color: #f8f9fa; border-radius: var(--border-radius-padrao); border: 1px solid var(--cor-borda); }
 .manutencao-container { display: grid; grid-template-columns: 1fr; gap: 25px; margin-top: 10px; }
 @media (min-width: 992px) { .manutencao-container { grid-template-columns: 1fr 1fr; } }
+
 .maintenance-list ul { list-style: none; padding: 0; max-height: 250px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--cor-secundaria) var(--cor-fundo-card); }
 .maintenance-list ul::-webkit-scrollbar { width: 8px; }
 .maintenance-list ul::-webkit-scrollbar-track { background: #f0f2f5; border-radius: 4px;}
@@ -201,7 +219,7 @@ nav.tabs-veiculo { display: flex; border-bottom: 2px solid var(--cor-borda); mar
 .maintenance-list li:hover { background-color: #f0f5ff; }
 .maintenance-list li:last-child { border-bottom: none; }
 .maintenance-list li span { flex-grow: 1; margin-right: 8px;}
-.maintenance-list li.placeholder { font-style: italic; color: #888; text-align: center; padding: 15px; border-bottom: none; background-color: transparent !important; } /* Estilo Placeholder */
+.maintenance-list li.placeholder { font-style: italic; color: #888; text-align: center; padding: 15px; border-bottom: none; background-color: transparent !important; justify-content: center;}
 
 
 /* Área de Notificação */
@@ -223,12 +241,14 @@ nav.tabs-veiculo { display: flex; border-bottom: 2px solid var(--cor-borda); mar
 #notification-area .close-btn:hover { opacity: 1; }
 
 /* Mensagem "Selecione um veículo" */
-#mensagem-selecione { text-align: center; padding: 60px 40px; color: var(--cor-secundaria); font-size: 1.1em; border: 2px dashed var(--cor-borda); background-color: #fdfdfd; margin-top: 40px; }
-#mensagem-selecione h2 { color: var(--cor-info); margin-bottom: 20px; font-size: 1.6em; }
+#mensagem-selecione { text-align: center; padding: 40px; color: var(--cor-secundaria); font-size: 1.1em; border: 2px dashed var(--cor-borda); background-color: #fdfdfd; margin-top: 40px; }
+#mensagem-selecione h2 { color: var(--cor-info); margin-bottom: 15px; font-size: 1.6em; }
 #mensagem-selecione h2 i { margin-right: 12px; }
+#mensagem-selecione p { margin-bottom: 8px; }
+
 
 /* ======================================== */
-/* == Estilos para Detalhes Extras (API) == */
+/* == Detalhes Extras (API Veículo) ====== */
 /* ======================================== */
 .detalhes-extras-container { margin-top: 25px; padding-top: 20px; border-top: 1px solid var(--cor-borda); text-align: center; }
 #btnVerDetalhesExtras { margin-bottom: 15px; min-width: 200px; }
@@ -252,7 +272,125 @@ nav.tabs-veiculo { display: flex; border-bottom: 2px solid var(--cor-borda); mar
 #detalhesExtrasVeiculo .fa-spinner { animation: spin 1.5s linear infinite; }
 @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-/* Responsividade */
+/* ======================================== */
+/* == Estilos Seção Previsão do Tempo ===== */
+/* ======================================== */
+#secao-previsao-tempo {
+    /* Herda .card mas pode ter ajustes */
+    margin-top: 30px;
+}
+
+.busca-container-tempo {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap; /* Para responsividade */
+}
+
+#cidade-input-tempo {
+    padding: 10px 14px;
+    border: 1px solid var(--cor-borda);
+    border-radius: 6px;
+    font-size: 1rem;
+    font-family: 'Poppins', sans-serif;
+    flex-grow: 1;
+    max-width: 350px;
+}
+#cidade-input-tempo:focus {
+    border-color: var(--cor-primaria);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+}
+
+#verificar-clima-btn { /* O botão já tem estilos base, mas podemos ajustar se necessário */
+    padding: 10px 20px;
+    font-size: 1rem;
+}
+
+.status-mensagem { /* Estilo genérico para mensagens de status/erro */
+    margin-bottom: 20px;
+    font-weight: bold;
+    min-height: 20px;
+    padding: 8px;
+    border-radius: 4px;
+    text-align: center;
+}
+.status-mensagem.loading {
+    color: #555;
+    background-color: #f0f0f0;
+}
+.status-mensagem.error {
+    color: var(--cor-texto-claro);
+    background-color: var(--cor-perigo);
+}
+.status-mensagem:empty { /* Esconde se vazia, mas com min-height ainda ocupa espaço */
+    padding: 0;
+}
+
+
+#previsao-tempo-resultado h3 { /* Título dentro do resultado, ex: "Previsão para X" */
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 1.3em;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    text-align: center;
+}
+
+.previsao-dias-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Ajustado para caber melhor */
+    gap: 15px;
+    text-align: left;
+}
+
+.dia-previsao {
+    background-color: #fdfdfd; /* Um pouco mais claro que o fundo do card principal */
+    border: 1px solid #e9ecef;
+    border-radius: var(--border-radius-padrao);
+    padding: 15px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.07);
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+.dia-previsao:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.dia-previsao .data-dia { /* Classe para a data */
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: var(--cor-primaria);
+    font-size: 1.1em;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Espaço entre ícone e texto */
+}
+
+.dia-previsao img.icone-tempo {
+    width: 40px; /* Ajustado para caber melhor */
+    height: 40px;
+    vertical-align: middle;
+}
+
+.dia-previsao p {
+    margin: 6px 0;
+    font-size: 0.9em;
+    line-height: 1.5;
+}
+.dia-previsao p strong {
+    font-weight: 600;
+    color: #444;
+}
+
+
+/* ======================================== */
+/* == Responsividade ====================== */
+/* ======================================== */
 @media (max-width: 1200px) {
   :root { --sidebar-width: 260px; }
   #sidebar { width: var(--sidebar-width); padding: 20px; }
@@ -279,7 +417,21 @@ nav.tabs-veiculo { display: flex; border-bottom: 2px solid var(--cor-borda); mar
   .modal-actions { justify-content: space-between; }
   .velocimetro-svg { max-width: 150px; }
   .velocimetro-texto { font-size: 1.3em; }
-  #btnVerDetalhesExtras { width: 90%; } /* Botão API mais largo */
+  #btnVerDetalhesExtras { width: 90%; }
+
+  .busca-container-tempo { /* Para previsão do tempo */
+      flex-direction: column;
+  }
+  #cidade-input-tempo {
+      max-width: 100%;
+      width: 100%;
+  }
+  #verificar-clima-btn {
+      width: 100%;
+  }
+  .previsao-dias-grid {
+      grid-template-columns: 1fr; /* Uma coluna em tablets */
+  }
 }
 @media (max-width: 576px) {
   #main-content { padding: 15px; }
@@ -296,6 +448,6 @@ nav.tabs-veiculo { display: flex; border-bottom: 2px solid var(--cor-borda); mar
   .velocimetro-svg { max-width: 130px; }
   .velocimetro-texto { font-size: 1.2em; }
   dialog#modalAdicionarVeiculo { padding: 15px; }
-  #btnVerDetalhesExtras { width: 100%; } /* Botão API largura total */
+  #btnVerDetalhesExtras { width: 100%; }
   #detalhesExtrasVeiculo p { font-size: 0.85rem; }
 }
