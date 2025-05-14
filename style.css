@@ -389,6 +389,58 @@ nav.tabs-veiculo { display: flex; border-bottom: 2px solid var(--cor-borda); mar
 
 
 /* ======================================== */
+/* == Estilos Filtro Dias Previsão Tempo == */
+/* ======================================== */
+.filtro-dias-tempo-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.filtro-dia-btn {
+    padding: 8px 15px;
+    font-size: 0.9rem;
+    background-color: var(--cor-fundo-card);
+    color: var(--cor-secundaria);
+    border: 1px solid var(--cor-borda);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    font-weight: 500;
+}
+
+.filtro-dia-btn:hover {
+    background-color: #e9ecef;
+    border-color: #adb5bd;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.filtro-dia-btn.active {
+    background-color: var(--cor-primaria);
+    color: var(--cor-texto-claro);
+    border-color: var(--cor-primaria);
+    font-weight: 600;
+    box-shadow: 0 2px 5px rgba(0, 123, 255, 0.2);
+}
+
+/* Ajustes para responsividade se necessário */
+@media (max-width: 576px) {
+    .filtro-dias-tempo-container {
+        flex-direction: column; /* Empilha os botões verticalmente em telas pequenas */
+        align-items: stretch; /* Faz os botões ocuparem a largura total */
+    }
+    .filtro-dia-btn {
+        width: 100%;
+        margin-bottom: 5px; /* Adiciona um pequeno espaço entre os botões empilhados */
+    }
+    .filtro-dia-btn:last-child {
+        margin-bottom: 0;
+    }
+}
+
+/* ======================================== */
 /* == Responsividade ====================== */
 /* ======================================== */
 @media (max-width: 1200px) {

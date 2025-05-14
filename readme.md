@@ -11,4 +11,3 @@ Pré-requisito: Tenha o Visual Studio Code instalado. Instale a Extensão: Abra 
 Pré-requisito: Tenha o Python 3 instalado e adicionado ao PATH do seu sistema. Navegue até a Pasta: Abra um terminal ou prompt de comando e use o comando cd para navegar até a pasta raiz do projeto (garagem-virtual). Inicie o Servidor: Digite o comando: python -m http.server Acesse no Navegador: Abra seu navegador e vá para o endereço http://localhost:8000. Alternativa (Node.js + http-server):
 
 Pré-requisito: Tenha o Node.js e npm instalados. Instale o http-server (se ainda não tiver): Abra um terminal e execute: npm install -g http-server (talvez precise de sudo no Linux/macOS). Navegue até a Pasta: Use cd no terminal para ir até a pasta raiz do projeto. Inicie o Servidor: Execute o comando: http-server Acesse no Navegador: Abra seu navegador e vá para um dos endereços listados no terminal (geralmente http://127.0.0.1:8080 ou http://localhost:8080).
-

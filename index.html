@@ -46,6 +46,7 @@
             <div id="painelVeiculoSelecionado" style="display: none;" class="card">
 
                 <div class="vehicle-header">
+                     <!-- OBSERVAÇÃO: Certifique-se que a pasta 'imagens' e o arquivo 'carro_normal.png' existem na raiz do projeto -->
                      <img id="imagemVeiculo" src="imagens/carro_normal.png" alt="Imagem do veículo">
                      <div id="informacoesVeiculo">
                          <h2 id="info-modelo-tipo">Modelo (Tipo)</h2>
@@ -154,6 +155,29 @@
                     <!-- Os resultados da previsão serão inseridos aqui -->
                 </div>
             </section>
+
+                        <!-- NOVA SEÇÃO: Previsão do Tempo -->
+            <section id="secao-previsao-tempo" class="card">
+                <h2><i class="fas fa-cloud-sun"></i> Previsão do Tempo</h2>
+                <div class="busca-container-tempo">
+                    <input type="text" id="cidade-input-tempo" placeholder="Digite o nome da cidade">
+                    <button id="verificar-clima-btn"><i class="fas fa-search"></i> Verificar</button>
+                </div>
+
+                <!-- === NOVOS BOTÕES DE FILTRO DE DIAS === -->
+                <div class="filtro-dias-tempo-container">
+                    <button class="filtro-dia-btn active" data-dias="5" title="Mostrar previsão para os próximos 5 dias">5 Dias</button>
+                    <button class="filtro-dia-btn" data-dias="3" title="Mostrar previsão para os próximos 3 dias">3 Dias</button>
+                    <button class="filtro-dia-btn" data-dias="1" title="Mostrar previsão para hoje">Hoje</button>
+                </div>
+                <!-- === FIM NOVOS BOTÕES DE FILTRO DE DIAS === -->
+
+                <div id="status-mensagem-tempo" class="status-mensagem" aria-live="polite"></div>
+                <div id="previsao-tempo-resultado" class="previsao-resultado-container">
+                    <!-- Os resultados da previsão serão inseridos aqui -->
+                </div>
+            </section>
+            <!-- FIM NOVA SEÇÃO: Previsão do Tempo -->
             <!-- FIM NOVA SEÇÃO: Previsão do Tempo -->
 
         </main>
@@ -191,6 +215,6 @@
         </form>
     </dialog>
 
-    <script type="module" src="js/principal.js"></script>
+    <script type="module" src="java/principal.js"></script>
 </body>
 </html>
