@@ -1,7 +1,5 @@
 // js/models/Manutencao.js
-// A linha abaixo assume que 'ui' está acessível globalmente ou será passada.
-// Se não, remova a dependência direta daqui.
-// import { showNotification } from '../utils/notifications.js'; // Idealmente, a classe não deveria chamar diretamente a UI.
+'use strict';
 
 /**
  * Representa um registro de manutenção ou agendamento para um veículo.
@@ -11,82 +9,74 @@
 export default class Manutencao {
     /**
      * Cria uma instância de Manutencao.
-     * @param {string|Date} dataISO - A data e hora da manutenção. Pode ser uma string ISO 8601 ou um objeto Date.
+     * @param {string|Date} dataISO - A data e hora da manutenção. Idealmente uma string ISO 8601 (ex: "YYYY-MM-DDTHH:mm") ou um objeto Date.
      * @param {string} tipo - O tipo de serviço realizado ou agendado (ex: "Troca de óleo").
-     * @param {number|string} custo - O custo do serviço. Se string, tentará converter para número (',' vira '.'). Zero ou negativo é tratado como 0.
+     * @param {number|string|null|undefined} custo - O custo do serviço. Se string, tentará converter para número (',' vira '.'). Zero ou nulo/undefined é tratado como 0.
      * @param {string} [descricao=''] - Uma descrição opcional do serviço.
+     * @property {string} id - ID único para a manutenção.
+     * @property {Date} data - Objeto Date da manutenção. Pode ser inválido se dataISO for inválida.
+     * @property {string} tipo - Tipo de serviço.
+     * @property {number} custo - Custo do serviço.
+     * @property {string} descricao - Descrição do serviço.
      */
     constructor(dataISO, tipo, custo, descricao = '') {
-        // Validação e conversão da data
         if (dataISO instanceof Date && !isNaN(dataISO)) {
             this.data = dataISO;
-        } else if (typeof dataISO === 'string') {
+        } else if (typeof dataISO === 'string' && dataISO.trim() !== '') {
              try {
+                // Tenta interpretar a string de data. new Date() pode ser inconsistente com formatos não-ISO.
+                // Se a string vier de um <input type="datetime-local">, ela geralmente é no formato "YYYY-MM-DDTHH:mm".
                 this.data = new Date(dataISO);
-                if (isNaN(this.data)) throw new Error("String de data inválida recebida.");
+                if (isNaN(this.data.getTime())) { // Checa explicitamente se a data é válida
+                    console.warn(`String de data resultou em data inválida: "${dataISO}"`);
+                    this.data = new Date(NaN); // Garante que seja um Date inválido
+                }
              } catch (e) {
                  console.error("Erro ao criar data para Manutencao a partir da string:", dataISO, e);
-                 this.data = new Date(NaN); // Data inválida
+                 this.data = new Date(NaN); // Define como data inválida em caso de erro
              }
         } else {
-             console.warn("Tipo de data inválido recebido para Manutencao:", dataISO);
-             this.data = new Date(NaN); // Data inválida
+             console.warn("Tipo de data inválido ou string vazia recebida para Manutencao:", dataISO);
+             this.data = new Date(NaN); // Define como data inválida
         }
 
-        /**
-         * O tipo de serviço.
-         * @type {string}
-         * @public
-         */
         this.tipo = tipo ? String(tipo).trim() : '';
 
-        // Validação e conversão do custo
         let custoNumerico = 0;
-        if (typeof custo === 'string') {
-            custo = custo.replace(',', '.').trim(); // Trata vírgula e espaços
+        if (custo !== null && custo !== undefined && String(custo).trim() !== '') {
+            if (typeof custo === 'string') {
+                // Remove caracteres não numéricos exceto ponto e vírgula (que será trocada por ponto)
+                // e sinal negativo no início. Isso torna a conversão mais robusta.
+                custo = custo.replace(',', '.').replace(/[^\d.-]/g, '');
+            }
+            custoNumerico = parseFloat(custo);
         }
-        if (custo !== null && custo !== undefined && custo !== '') {
-             custoNumerico = parseFloat(custo);
-        }
-        /**
-         * O custo do serviço em valor numérico. Será 0 se inválido ou não fornecido.
-         * @type {number}
-         * @public
-         */
-         this.custo = isNaN(custoNumerico) || custoNumerico < 0 ? 0 : custoNumerico;
+        // Considera NaN ou valores negativos como 0 para custo.
+        this.custo = isNaN(custoNumerico) || custoNumerico < 0 ? 0 : custoNumerico;
 
-        /**
-         * Descrição adicional do serviço.
-         * @type {string}
-         * @public
-         */
         this.descricao = descricao ? String(descricao).trim() : '';
 
-        /**
-         * Identificador único para este registro de manutenção.
-         * @type {string}
-         * @public
-         */
-        this.id = Date.now().toString(36) + Math.random().toString(36).substring(2);
+        // ID único para cada instância de manutenção
+        this.id = Date.now().toString(36) + Math.random().toString(36).substring(2, 7);
     }
 
     /**
-     * Retorna uma string formatada representando a manutenção.
+     * Retorna uma string formatada representando a manutenção, incluindo tipo, data, hora, custo e descrição.
      * Ex: "Troca de óleo em 25/12/2023 às 10:30 - R$ 150,50 (Filtro incluído)"
-     * @param {boolean} [incluirHorario=false] - Se true, inclui a hora na formatação da data (se a hora for diferente de 00:00).
+     * @param {boolean} [incluirHorario=true] - Se true, inclui a hora na formatação da data.
      * @returns {string} A representação textual da manutenção.
      * @public
      */
-    retornarFormatada(incluirHorario = false) {
+    retornarFormatada(incluirHorario = true) {
         if (!this.isValidDate()) {
             return `${this.tipo || 'Tipo Indefinido'} - Data Inválida - ${this.formatarCusto()}${this.descricao ? ` (${this.descricao})` : ''}`;
         }
         const opcoesData = { year: 'numeric', month: '2-digit', day: '2-digit' };
-        const opcoesHora = { hour: '2-digit', minute: '2-digit' };
+        const opcoesHora = { hour: '2-digit', minute: '2-digit', hour12: false };
 
         let dataStr = this.data.toLocaleDateString('pt-BR', opcoesData);
-        // Inclui horário apenas se solicitado e se a hora/minuto/segundo não forem todos zero
-        if (incluirHorario && (this.data.getHours() !== 0 || this.data.getMinutes() !== 0 || this.data.getSeconds() !== 0)) {
+        if (incluirHorario) {
+             // Adiciona ' às HH:MM'
              dataStr += ' às ' + this.data.toLocaleTimeString('pt-BR', opcoesHora);
         }
 
@@ -94,61 +84,65 @@ export default class Manutencao {
     }
 
     /**
-     * Formata o custo como moeda brasileira (BRL) ou retorna "Grátis/Agendado" se custo for zero.
-     * @returns {string} O custo formatado.
+     * Formata o custo como moeda brasileira (BRL). Se o custo for zero,
+     * diferencia entre "Agendado" (para datas futuras) e "Grátis" (para datas passadas ou atuais).
+     * @returns {string} O custo formatado ou status.
      * @public
      */
     formatarCusto() {
-        return this.custo > 0 ? this.custo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : "Grátis/Agendado";
+        if (this.custo === 0) {
+            // Se a data da manutenção for no futuro e o custo for zero, considera-se "Agendado".
+            // Caso contrário (data no passado ou hoje com custo zero), considera-se "Grátis".
+            if (this.isValidDate() && this.data > new Date()) {
+                return "Agendado";
+            }
+            return "Grátis";
+        }
+        // Formata o custo para o padrão monetário brasileiro.
+        return this.custo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     }
 
     /**
-     * Verifica se a data associada a esta manutenção é válida.
-     * @returns {boolean} True se a data for um objeto Date válido, false caso contrário.
+     * Verifica se a data associada a esta manutenção é um objeto Date válido.
+     * @returns {boolean} True se a data for um objeto Date válido (não NaN), false caso contrário.
      * @public
      */
     isValidDate() {
-      // Verifica se é um objeto Date e se o tempo não é NaN
       return this.data instanceof Date && !isNaN(this.data.getTime());
     }
 
     /**
      * Valida os dados essenciais da manutenção (data e tipo).
-     * O custo já é tratado no construtor.
-     * @returns {boolean} True se os dados essenciais são válidos, false caso contrário.
+     * O custo e a descrição são opcionais.
+     * @returns {{valido: boolean, mensagemErro?: string}} Objeto indicando validade e, opcionalmente, uma mensagem de erro.
      * @public
      */
     validarDados() {
-        let valido = true;
         if (!this.isValidDate()) {
             console.error("Erro de validação Manutencao: Data inválida.", this.data);
-            // Idealmente, não mostraria UI daqui. Retorna false e quem chamou decide.
-            // showNotification("Erro: Data da manutenção inválida ou não informada.", 'error', 4000, window.ui);
-            valido = false;
+            return { valido: false, mensagemErro: "Data da manutenção inválida ou não informada." };
         }
-        if (typeof this.tipo !== 'string' || this.tipo === '') {
+        if (typeof this.tipo !== 'string' || this.tipo.trim() === '') {
             console.error("Erro de validação Manutencao: Tipo de serviço não pode ser vazio.", this.tipo);
-            // showNotification("Erro: Tipo de serviço não pode ser vazio.", 'error', 4000, window.ui);
-            valido = false;
+            return { valido: false, mensagemErro: "O tipo de serviço da manutenção não pode ser vazio." };
         }
-        // Custo é validado no construtor para sempre ser um número >= 0
-        return valido;
+        return { valido: true };
     }
 
     /**
      * Retorna uma representação JSON simplificada do objeto Manutencao,
-     * útil para salvar no LocalStorage.
+     * adequada para serialização e armazenamento (ex: no LocalStorage).
      * @returns {object} Objeto com os dados da manutenção.
      * @public
      */
     toJSON() {
         return {
-            _tipoClasse: 'Manutencao', // Identificador para recriar a classe depois
-            dataISO: this.isValidDate() ? this.data.toISOString() : null, // Salva como ISO string
+            _tipoClasse: 'Manutencao', // Identificador para recriação da instância
+            dataISO: this.isValidDate() ? this.data.toISOString() : null, // Armazena em formato ISO para consistência
             tipo: this.tipo,
             custo: this.custo,
             descricao: this.descricao,
-            id: this.id // Mantém o ID original
+            id: this.id
         };
     }
 }

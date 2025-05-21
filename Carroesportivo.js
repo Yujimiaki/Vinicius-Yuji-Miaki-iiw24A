@@ -1,7 +1,7 @@
 // js/models/carroEsportivo.js <-- CORRIGIDO: Nome do arquivo (exemplo)
 'use strict';
 
-import Carro from './Carro.js';
+import Carro from './carro.js';
 
 /**
  * Representa um Carro Esportivo, uma especialização de Carro.

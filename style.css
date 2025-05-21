@@ -60,12 +60,12 @@ body {
 
 /* Títulos */
 .lista-veiculos-container h2, .sidebar-section h2, .maintenance-list h3, #formManutencaoContainer h3,
-#secao-previsao-tempo h2 { /* Adicionado título da previsão */
+#secao-previsao-tempo h2 { 
   font-size: 1.15em; margin-bottom: 15px; color: var(--cor-secundaria);
   border-bottom: 1px solid var(--cor-borda); padding-bottom: 10px; font-weight: 600;
 }
 .lista-veiculos-container h2 i, .sidebar-section h2 i, .maintenance-list h3 i, #formManutencaoContainer h3 i,
-#secao-previsao-tempo h2 i { /* Adicionado ícone do título da previsão */
+#secao-previsao-tempo h2 i {
   margin-right: 10px;
 }
 #formManutencaoContainer h3 { font-size: 1.25em; }
@@ -276,7 +276,6 @@ nav.tabs-veiculo { display: flex; border-bottom: 2px solid var(--cor-borda); mar
 /* == Estilos Seção Previsão do Tempo ===== */
 /* ======================================== */
 #secao-previsao-tempo {
-    /* Herda .card mas pode ter ajustes */
     margin-top: 30px;
 }
 
@@ -286,7 +285,7 @@ nav.tabs-veiculo { display: flex; border-bottom: 2px solid var(--cor-borda); mar
     margin-bottom: 20px;
     justify-content: center;
     align-items: center;
-    flex-wrap: wrap; /* Para responsividade */
+    flex-wrap: wrap;
 }
 
 #cidade-input-tempo {
@@ -304,12 +303,12 @@ nav.tabs-veiculo { display: flex; border-bottom: 2px solid var(--cor-borda); mar
     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
 }
 
-#verificar-clima-btn { /* O botão já tem estilos base, mas podemos ajustar se necessário */
+#verificar-clima-btn { 
     padding: 10px 20px;
     font-size: 1rem;
 }
 
-.status-mensagem { /* Estilo genérico para mensagens de status/erro */
+.status-mensagem { 
     margin-bottom: 20px;
     font-weight: bold;
     min-height: 20px;
@@ -325,12 +324,12 @@ nav.tabs-veiculo { display: flex; border-bottom: 2px solid var(--cor-borda); mar
     color: var(--cor-texto-claro);
     background-color: var(--cor-perigo);
 }
-.status-mensagem:empty { /* Esconde se vazia, mas com min-height ainda ocupa espaço */
+.status-mensagem:empty { 
     padding: 0;
 }
 
 
-#previsao-tempo-resultado h3 { /* Título dentro do resultado, ex: "Previsão para X" */
+#previsao-tempo-resultado h3 { 
     margin-top: 0;
     margin-bottom: 15px;
     color: #333;
@@ -342,13 +341,13 @@ nav.tabs-veiculo { display: flex; border-bottom: 2px solid var(--cor-borda); mar
 
 .previsao-dias-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); /* Ajustado para caber melhor */
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
     gap: 15px;
     text-align: left;
 }
 
 .dia-previsao {
-    background-color: #fdfdfd; /* Um pouco mais claro que o fundo do card principal */
+    background-color: #fdfdfd; 
     border: 1px solid #e9ecef;
     border-radius: var(--border-radius-padrao);
     padding: 15px;
@@ -360,7 +359,7 @@ nav.tabs-veiculo { display: flex; border-bottom: 2px solid var(--cor-borda); mar
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
 
-.dia-previsao .data-dia { /* Classe para a data */
+.dia-previsao .data-dia { 
     margin-top: 0;
     margin-bottom: 10px;
     color: var(--cor-primaria);
@@ -368,11 +367,11 @@ nav.tabs-veiculo { display: flex; border-bottom: 2px solid var(--cor-borda); mar
     font-weight: 600;
     display: flex;
     align-items: center;
-    gap: 8px; /* Espaço entre ícone e texto */
+    gap: 8px; 
 }
 
 .dia-previsao img.icone-tempo {
-    width: 40px; /* Ajustado para caber melhor */
+    width: 40px; 
     height: 40px;
     vertical-align: middle;
 }
@@ -425,15 +424,14 @@ nav.tabs-veiculo { display: flex; border-bottom: 2px solid var(--cor-borda); mar
     box-shadow: 0 2px 5px rgba(0, 123, 255, 0.2);
 }
 
-/* Ajustes para responsividade se necessário */
 @media (max-width: 576px) {
     .filtro-dias-tempo-container {
-        flex-direction: column; /* Empilha os botões verticalmente em telas pequenas */
-        align-items: stretch; /* Faz os botões ocuparem a largura total */
+        flex-direction: column; 
+        align-items: stretch; 
     }
     .filtro-dia-btn {
         width: 100%;
-        margin-bottom: 5px; /* Adiciona um pequeno espaço entre os botões empilhados */
+        margin-bottom: 5px; 
     }
     .filtro-dia-btn:last-child {
         margin-bottom: 0;
@@ -471,7 +469,7 @@ nav.tabs-veiculo { display: flex; border-bottom: 2px solid var(--cor-borda); mar
   .velocimetro-texto { font-size: 1.3em; }
   #btnVerDetalhesExtras { width: 90%; }
 
-  .busca-container-tempo { /* Para previsão do tempo */
+  .busca-container-tempo { 
       flex-direction: column;
   }
   #cidade-input-tempo {
@@ -482,7 +480,7 @@ nav.tabs-veiculo { display: flex; border-bottom: 2px solid var(--cor-borda); mar
       width: 100%;
   }
   .previsao-dias-grid {
-      grid-template-columns: 1fr; /* Uma coluna em tablets */
+      grid-template-columns: 1fr; 
   }
 }
 @media (max-width: 576px) {

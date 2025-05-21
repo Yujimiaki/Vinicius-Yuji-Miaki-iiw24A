@@ -2,10 +2,10 @@
 'use strict';
 
 import Veiculo from './veiculo.js';
-import Carro from './Carro.js';
+import Carro from './carro.js';
 import CarroEsportivo from './Carroesportivo.js'; // <-- CORRIGIDO: Nome do arquivo/classe
 import Caminhao from './caminhao.js';            // <-- CORRIGIDO: Nome do arquivo
-import Manutencao from './manutençao.js';        // <-- CORRIGIDO: Nome do arquivo
+import Manutencao from './Manutencao.js';        // <-- CORRIGIDO: Nome do arquivo
 
 /**
  * Gerencia a coleção de veículos e o veículo atualmente selecionado.

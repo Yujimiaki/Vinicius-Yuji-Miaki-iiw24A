@@ -24,25 +24,35 @@ export default class Carro extends Veiculo {
         this.velocidadeMaxima = 150;
     }
 
+    /**
+     * Liga o motor do carro.
+     * @returns {{success: boolean, message?: string}} Objeto indicando sucesso e mensagem.
+     * @public
+     */
     ligar() {
         if (!this.ligado) {
             this.ligado = true;
             console.log(`${this.modelo} ligado.`);
-            return true;
+            return { success: true, message: `${this.modelo} ligado.` };
         }
         console.log(`${this.modelo} já estava ligado.`);
-        return false;
+        return { success: false, message: `${this.modelo} já estava ligado.` };
     }
 
+    /**
+     * Desliga o motor do carro.
+     * @returns {{success: boolean, message?: string}} Objeto indicando sucesso e mensagem.
+     * @public
+     */
     desligar() {
         if (this.ligado) {
             this.ligado = false;
-            this.velocidade = 0;
+            this.velocidade = 0; // Carro para ao desligar
             console.log(`${this.modelo} desligado.`);
-            return true;
+            return { success: true, message: `${this.modelo} desligado. Velocidade zerada.` };
         }
         console.log(`${this.modelo} já estava desligado.`);
-        return false;
+        return { success: false, message: `${this.modelo} já estava desligado.` };
     }
 
     /**
@@ -50,19 +60,17 @@ export default class Carro extends Veiculo {
      * @returns {{success: boolean, message?: string}} Objeto indicando sucesso e mensagem.
      * @public
      */
-    acelerar() { // <-- ALTERADO: Retorna objeto
+    acelerar() {
         if (!this.ligado) {
             console.warn(`${this.modelo} está desligado, não pode acelerar.`);
-            // <-- ALTERADO: Remove showNotification, retorna mensagem de erro
-            return { success: false, message: 'Ligue o veículo primeiro!' };
+            return { success: false, message: `Ligue o ${this.modelo} primeiro!` };
         }
         if (this.velocidade < this.velocidadeMaxima) {
             this.velocidade = Math.min(this.velocidade + 10, this.velocidadeMaxima);
             console.log(`${this.modelo} acelerou para: ${this.velocidade} km/h`);
-            return { success: true }; // <-- ALTERADO
+            return { success: true }; // Mensagem padrão será montada na UI se necessário
         } else {
              console.log(`${this.modelo} já está na velocidade máxima (${this.velocidadeMaxima} km/h)!`);
-             // <-- ALTERADO: Retorna mensagem informativa
              return { success: false, message: `${this.modelo} já está na velocidade máxima!` };
         }
     }
@@ -72,19 +80,19 @@ export default class Carro extends Veiculo {
      * @returns {{success: boolean, message?: string}} Objeto indicando sucesso e mensagem.
      * @public
      */
-    frear() { // <-- ALTERADO: Retorna objeto
+    frear() {
         if (this.velocidade > 0) {
             this.velocidade = Math.max(0, this.velocidade - 10);
             console.log(`${this.modelo} freou para: ${this.velocidade} km/h`);
-            return { success: true }; // <-- ALTERADO
+            return { success: true }; // Mensagem padrão será montada na UI se necessário
         }
         console.log(`${this.modelo} já está parado.`);
-        // <-- ALTERADO: Retorna mensagem informativa
         return { success: false, message: `${this.modelo} já está parado.` };
     }
 
     /**
      * Retorna um objeto com dados específicos do estado atual do Carro.
+     * Usado para atualizar a UI.
      * @returns {{ligado: boolean, velocidade: number, velocidadeMaxima: number}} Objeto com o estado.
      * @public
      */
@@ -97,17 +105,18 @@ export default class Carro extends Veiculo {
     }
 
     /**
-     * Retorna uma representação JSON do Carro.
+     * Retorna uma representação JSON do Carro para persistência.
      * @returns {object} Objeto serializável.
      * @public
      */
     toJSON() {
-        const baseJSON = super.toJSON();
+        const baseJSON = super.toJSON(); // Pega dados de Veiculo (modelo, cor, id, historicoManutencao)
         return {
-            ...baseJSON,
-            _tipoClasse: 'Carro',
+            ...baseJSON, // Espalha os dados da classe pai
+            _tipoClasse: 'Carro', // Identificador do tipo de classe
             ligado: this.ligado,
             velocidade: this.velocidade
+            // velocidadeMaxima não precisa ser salva, pois é definida no construtor
         };
     }
 }

@@ -1,7 +1,7 @@
 // js/models/Caminhao.js
 'use strict';
 
-import Carro from './Carro.js';
+import Carro from './carro.js';
 // <-- ALTERADO: Removido import de showNotification
 
 /**

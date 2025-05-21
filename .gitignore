@@ -1,0 +1,16 @@
+# Dependências do Node.js (instaladas via npm install)
+node_modules/
+
+# Arquivo de variáveis de ambiente (contém segredos)
+.env
+
+# Arquivos de log (se você gerar algum)
+*.log
+
+# Arquivos de configuração de IDEs comuns (opcional, mas bom)
+.vscode/
+.idea/
+
+# Arquivos de sistema operacional
+.DS_Store
+Thumbs.db
