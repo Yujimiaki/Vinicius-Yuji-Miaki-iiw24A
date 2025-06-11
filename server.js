@@ -32,10 +32,7 @@ app.get('/api/previsao/:cidade', async (req, res) => {
     const { cidade } = req.params;
     console.log(`[Servidor Backend] Recebida requisição para /api/previsao/${cidade}`); // Log
 
-    if (!apiKey) {
-        console.error('[Servidor Backend] ERRO: OPENWEATHER_API_KEY não configurada no ambiente.');
-        return res.status(500).json({ error: 'Configuração do servidor incompleta.' });
-    }
+    
     // ... (resto da sua lógica da API)
     // Seu código de busca da previsão já está bom.
     const weatherAPIUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(cidade)}&appid=${apiKey}&units=metric&lang=pt_br`;
@@ -58,13 +55,13 @@ app.get('/api/previsao/:cidade', async (req, res) => {
             return res.status(500).json({ error: 'Erro interno no servidor ao tentar buscar previsão.' });
         }
     }
-});
 
-app.listen(port, () => {
-    console.log(`🎉 Servidor backend da Garagem Inteligente rodando na porta ${port}`);
-    if (apiKey) {
-        console.log('🔑 Chave da API OpenWeatherMap (OPENWEATHER_API_KEY) carregada.');
-    } else {
-        console.warn('🤫 ATENÇÃO: OPENWEATHER_API_KEY não carregada. API de previsão não funcionará.');
-    }
-});
+
+
+}
+
+)
+;
+
+
+;

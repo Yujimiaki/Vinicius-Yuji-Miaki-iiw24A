@@ -1,13 +1,14 @@
+
 // java/principal.js
 'use strict';
 
 // --- Importações ---
 import Garagem from './models/garagem.js';
 import Manutencao from './models/Manutencao.js';
-import Carro from './models/carro.js';
-import CarroEsportivo from './models/Carroesportivo.js';
-import Caminhao from './models/caminhao.js';
-import { showNotification, hideNotification } from './utils/notificacoes.js';
+import Carro from './models/Carro.js';
+import CarroEsportivo from './models/CarroEsportivo.js';
+import Caminhao from './models/Caminhao.js';
+import { showNotification, hideNotification } from './utils/notifications.js';
 
 // --- Referências aos Elementos da UI (Garagem) ---
 const ui = {
@@ -903,4 +904,31 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch(e) { /* ignore */ }
         alert("Ocorreu um erro grave ao iniciar a aplicação. Verifique o console (F12).");
     }
-});
+
+
+    // js/principal.js
+
+// ... (resto do seu código principal.js)
+
+// js/principal.js
+
+// ... (todo o seu código anterior)
+
+// --- Funções da API de Previsão do Tempo (OpenWeatherMap) ---
+// js/principal.js
+
+// ... (todo o seu código anterior)
+
+// --- Funções da API de Previsão do Tempo (OpenWeatherMap) ---
+
+}
+
+
+// ... (o resto das suas funções de tempo e inicialização continuam aqui)
+
+
+// ... (o resto das suas funções de tempo e inicialização continuam aqui)
+
+// ... (resto do seu código principal.js)
+
+);

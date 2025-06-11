@@ -1,208 +1,148 @@
-// js/models/Caminhao.js
-import Carro from './Carro.js';
-// Idealmente, notificações sobre carga/descarga seriam gerenciadas no main.js
-import { showNotification } from '../utils/notifications.js';
+// js/models/Manutencao.js
+'use strict';
 
 /**
- * Representa um Caminhão, uma especialização de Carro.
- * Possui capacidade de carga, métodos para carregar/descarregar,
- * e sua aceleração/frenagem são afetadas pela carga atual.
- * @class Caminhao
- * @extends Carro
+ * Representa um registro de manutenção ou agendamento para um veículo.
+ * Contém informações sobre data, tipo, custo e descrição do serviço.
+ * @class Manutencao
  */
-export default class Caminhao extends Carro {
+export default class Manutencao {
     /**
-     * Cria uma instância de Caminhao.
-     * @param {string} modelo - O modelo do caminhão.
-     * @param {string} cor - A cor do caminhão.
-     * @param {number|string} capacidadeCarga - A capacidade máxima de carga em KG (deve ser um número positivo).
-     * @param {string|null} [id=null] - O ID único do veículo.
-     * @param {boolean} [ligado=false] - O estado inicial do motor.
-     * @param {number} [velocidade=0] - A velocidade inicial.
-     * @param {number|string} [cargaAtual=0] - A carga inicial em KG (não pode exceder a capacidade).
-     * @throws {Error} Se a capacidade de carga for inválida (não numérica ou não positiva).
+     * Cria uma instância de Manutencao.
+     * @param {string|Date} dataISO - A data e hora da manutenção. Idealmente uma string ISO 8601 (ex: "YYYY-MM-DDTHH:mm") ou um objeto Date.
+     * @param {string} tipo - O tipo de serviço realizado ou agendado (ex: "Troca de óleo").
+     * @param {number|string|null|undefined} custo - O custo do serviço. Se string, tentará converter para número (',' vira '.'). Zero ou nulo/undefined é tratado como 0.
+     * @param {string} [descricao=''] - Uma descrição opcional do serviço.
+     * @property {string} id - ID único para a manutenção.
+     * @property {Date} data - Objeto Date da manutenção. Pode ser inválido se dataISO for inválida.
+     * @property {string} tipo - Tipo de serviço.
+     * @property {number} custo - Custo do serviço.
+     * @property {string} descricao - Descrição do serviço.
      */
-    constructor(modelo, cor, capacidadeCarga, id = null, ligado = false, velocidade = 0, cargaAtual = 0) {
-        // Valida a capacidade ANTES de chamar super() se necessário, ou deixa Carro validar modelo/cor primeiro.
-        const capNum = Number(capacidadeCarga);
-        if (isNaN(capNum) || capNum <= 0) {
-            throw new Error("Capacidade de carga do caminhão deve ser um número positivo.");
-        }
-
-        super(modelo, cor, id, ligado, velocidade); // Chama o construtor de Carro
-
-        /**
-         * A capacidade máxima de carga do caminhão em KG.
-         * @type {number}
-         * @public
-         */
-        this.capacidadeCarga = capNum;
-
-        /**
-         * A quantidade atual de carga no caminhão em KG.
-         * Limitada entre 0 e capacidadeCarga.
-         * @type {number}
-         * @public
-         */
-        this.cargaAtual = Math.max(0, Math.min(Number(cargaAtual) || 0, this.capacidadeCarga));
-
-        /**
-         * Velocidade máxima específica para caminhões.
-         * @type {number}
-         * @override
-         * @public
-         */
-        this.velocidadeMaxima = 120; // Sobrescreve a velocidade máxima
-    }
-
-    /**
-     * Adiciona carga ao caminhão, respeitando a capacidade máxima.
-     * Requer que o caminhão esteja desligado.
-     * @param {number} [quantidade=1000] - A quantidade de carga (KG) a adicionar.
-     * @returns {boolean} True se alguma carga foi adicionada, false caso contrário.
-     * @public
-     */
-    carregar(quantidade = 1000) {
-        const uiRef = window.ui; // Dependência global temporária para notificação
-
-        if (this.ligado) {
-             showNotification("Desligue o caminhão para carregar/descarregar com segurança.", 'warning', 3000, uiRef);
-             return false;
-        }
-        const quantNum = Number(quantidade);
-        if (isNaN(quantNum) || quantNum <= 0) {
-            showNotification("Quantidade inválida para carregar.", 'warning', 3000, uiRef);
-             return false;
-        }
-
-        const espacoDisponivel = this.capacidadeCarga - this.cargaAtual;
-        if (espacoDisponivel <= 0) {
-             showNotification('Caminhão já está na capacidade máxima!', 'warning', 3000, uiRef);
-             return false;
-        }
-
-        const cargaAdicionada = Math.min(quantNum, espacoDisponivel);
-        this.cargaAtual += cargaAdicionada;
-        console.log(`Carga adicionada: ${cargaAdicionada}kg. Carga atual: ${this.cargaAtual}kg / ${this.capacidadeCarga}kg.`);
-
-        if (cargaAdicionada < quantNum) {
-            showNotification(`Carga máxima atingida. ${cargaAdicionada}kg carregados. Carga atual: ${this.cargaAtual}kg`, 'warning', 3500, uiRef);
+    constructor(dataISO, tipo, custo, descricao = '') {
+        if (dataISO instanceof Date && !isNaN(dataISO)) {
+            this.data = dataISO;
+        } else if (typeof dataISO === 'string' && dataISO.trim() !== '') {
+             try {
+                // Tenta interpretar a string de data. new Date() pode ser inconsistente com formatos não-ISO.
+                // Se a string vier de um <input type="datetime-local">, ela geralmente é no formato "YYYY-MM-DDTHH:mm".
+                this.data = new Date(dataISO);
+                if (isNaN(this.data.getTime())) { // Checa explicitamente se a data é válida
+                    console.warn(`String de data resultou em data inválida: "${dataISO}"`);
+                    this.data = new Date(NaN); // Garante que seja um Date inválido
+                }
+             } catch (e) {
+                 console.error("Erro ao criar data para Manutencao a partir da string:", dataISO, e);
+                 this.data = new Date(NaN); // Define como data inválida em caso de erro
+             }
         } else {
-            showNotification(`${cargaAdicionada}kg carregados. Carga atual: ${this.cargaAtual}kg`, 'success', 2500, uiRef);
+             console.warn("Tipo de data inválido ou string vazia recebida para Manutencao:", dataISO);
+             this.data = new Date(NaN); // Define como data inválida
         }
-        return true; // Alguma carga foi adicionada
+
+        this.tipo = tipo ? String(tipo).trim() : '';
+
+        let custoNumerico = 0;
+        if (custo !== null && custo !== undefined && String(custo).trim() !== '') {
+            if (typeof custo === 'string') {
+                // Remove caracteres não numéricos exceto ponto e vírgula (que será trocada por ponto)
+                // e sinal negativo no início. Isso torna a conversão mais robusta.
+                custo = custo.replace(',', '.').replace(/[^\d.-]/g, '');
+            }
+            custoNumerico = parseFloat(custo);
+        }
+        // Considera NaN ou valores negativos como 0 para custo.
+        this.custo = isNaN(custoNumerico) || custoNumerico < 0 ? 0 : custoNumerico;
+
+        this.descricao = descricao ? String(descricao).trim() : '';
+
+        // ID único para cada instância de manutenção
+        this.id = Date.now().toString(36) + Math.random().toString(36).substring(2, 7);
     }
 
     /**
-     * Remove carga do caminhão.
-     * Requer que o caminhão esteja desligado.
-     * @param {number} [quantidade=500] - A quantidade de carga (KG) a remover.
-     * @returns {boolean} True se alguma carga foi removida, false caso contrário.
+     * Retorna uma string formatada representando a manutenção, incluindo tipo, data, hora, custo e descrição.
+     * Ex: "Troca de óleo em 25/12/2023 às 10:30 - R$ 150,50 (Filtro incluído)"
+     * @param {boolean} [incluirHorario=true] - Se true, inclui a hora na formatação da data.
+     * @returns {string} A representação textual da manutenção.
      * @public
      */
-    descarregar(quantidade = 500) {
-        const uiRef = window.ui; // Dependência global temporária
-
-        if (this.ligado) {
-             showNotification("Desligue o caminhão para carregar/descarregar com segurança.", 'warning', 3000, uiRef);
-             return false;
+    retornarFormatada(incluirHorario = true) {
+        if (!this.isValidDate()) {
+            return `${this.tipo || 'Tipo Indefinido'} - Data Inválida - ${this.formatarCusto()}${this.descricao ? ` (${this.descricao})` : ''}`;
         }
-        const quantNum = Number(quantidade);
-         if (isNaN(quantNum) || quantNum <= 0) {
-            showNotification("Quantidade inválida para descarregar.", 'warning', 3000, uiRef);
-             return false;
-        }
+        const opcoesData = { year: 'numeric', month: '2-digit', day: '2-digit' };
+        const opcoesHora = { hour: '2-digit', minute: '2-digit', hour12: false };
 
-        if (this.cargaAtual <= 0) {
-            showNotification('Caminhão já está vazio.', 'info', 3000, uiRef);
-            return false;
+        let dataStr = this.data.toLocaleDateString('pt-BR', opcoesData);
+        if (incluirHorario) {
+             // Adiciona ' às HH:MM'
+             dataStr += ' às ' + this.data.toLocaleTimeString('pt-BR', opcoesHora);
         }
 
-        const cargaRemovida = Math.min(quantNum, this.cargaAtual);
-        this.cargaAtual -= cargaRemovida;
-        console.log(`Carga removida: ${cargaRemovida}kg. Carga atual: ${this.cargaAtual}kg.`);
-        showNotification(`${cargaRemovida}kg descarregados. Carga atual: ${this.cargaAtual}kg`, 'success', 2500, uiRef);
-        return true; // Alguma carga foi removida
-    }
-
-     /**
-      * Acelera o caminhão, considerando o peso da carga atual.
-      * Caminhões mais pesados aceleram mais devagar.
-      * @returns {boolean} True se acelerou, false caso contrário.
-      * @override
-      * @public
-      */
-     acelerar() {
-        if (!this.ligado) {
-             // Notificação gerenciada por quem chama (main.js)
-            // showNotification('Ligue o caminhão primeiro!', 'warning', 3000, window.ui);
-            return false;
-        }
-        if (this.velocidade < this.velocidadeMaxima) {
-            // Fator de carga: 1.0 (vazio) a ~0.3 (cheio). Afeta o incremento.
-            const fatorCarga = Math.max(0.3, 1 - (this.cargaAtual / (this.capacidadeCarga * 1.5)));
-            const incrementoBase = 7; // Incremento base para caminhão
-            const incremento = Math.max(1, Math.round(incrementoBase * fatorCarga)); // Mínimo de 1km/h
-
-            this.velocidade = Math.min(this.velocidade + incremento, this.velocidadeMaxima);
-            console.log(`${this.modelo} (Caminhão) acelerou para: ${this.velocidade} km/h (fator carga: ${fatorCarga.toFixed(2)})`);
-            return true;
-        } else {
-            console.log(`${this.modelo} já está na velocidade máxima (${this.velocidadeMaxima} km/h)!`);
-            return false;
-        }
+        return `${this.tipo} em ${dataStr} - ${this.formatarCusto()}${this.descricao ? ` (${this.descricao})` : ''}`;
     }
 
     /**
-     * Freia o caminhão, considerando o peso da carga atual.
-     * Caminhões mais pesados freiam um pouco mais devagar (menor decremento).
-     * @returns {boolean} True se freou, false se já estava parado.
-     * @override
+     * Formata o custo como moeda brasileira (BRL). Se o custo for zero,
+     * diferencia entre "Agendado" (para datas futuras) e "Grátis" (para datas passadas ou atuais).
+     * @returns {string} O custo formatado ou status.
      * @public
      */
-    frear() {
-        if (this.velocidade > 0) {
-             // Fator de carga para frenagem (um pouco menos sensível que aceleração)
-             const fatorCarga = Math.max(0.4, 1 - (this.cargaAtual / (this.capacidadeCarga * 2.0)));
-             const decrementoBase = 8;
-             const decremento = Math.max(2, Math.round(decrementoBase * fatorCarga)); // Mínimo de 2km/h
-
-            this.velocidade = Math.max(0, this.velocidade - decremento);
-            console.log(`${this.modelo} (Caminhão) freou para: ${this.velocidade} km/h`);
-            return true;
+    formatarCusto() {
+        if (this.custo === 0) {
+            // Se a data da manutenção for no futuro e o custo for zero, considera-se "Agendado".
+            // Caso contrário (data no passado ou hoje com custo zero), considera-se "Grátis".
+            if (this.isValidDate() && this.data > new Date()) {
+                return "Agendado";
+            }
+            return "Grátis";
         }
-         return false;
+        // Formata o custo para o padrão monetário brasileiro.
+        return this.custo.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     }
 
     /**
-     * Retorna dados específicos do Caminhão, incluindo informações de carga.
-     * @returns {{ligado: boolean, velocidade: number, velocidadeMaxima: number, cargaAtual: number, capacidadeCarga: number}} Objeto com o estado.
-     * @override
+     * Verifica se a data associada a esta manutenção é um objeto Date válido.
+     * @returns {boolean} True se a data for um objeto Date válido (não NaN), false caso contrário.
      * @public
      */
-    getDadosEspecificos() {
-        const dadosPai = super.getDadosEspecificos();
-        return {
-            ...dadosPai,
-            velocidadeMaxima: this.velocidadeMaxima, // Vel max do caminhão
-            cargaAtual: this.cargaAtual,
-            capacidadeCarga: this.capacidadeCarga
-        };
+    isValidDate() {
+      return this.data instanceof Date && !isNaN(this.data.getTime());
     }
 
     /**
-     * Retorna uma representação JSON do Caminhao.
-     * @returns {object} Objeto serializável representando o caminhão.
-     * @override
+     * Valida os dados essenciais da manutenção (data e tipo).
+     * O custo e a descrição são opcionais.
+     * @returns {{valido: boolean, mensagemErro?: string}} Objeto indicando validade e, opcionalmente, uma mensagem de erro.
+     * @public
+     */
+    validarDados() {
+        if (!this.isValidDate()) {
+            console.error("Erro de validação Manutencao: Data inválida.", this.data);
+            return { valido: false, mensagemErro: "Data da manutenção inválida ou não informada." };
+        }
+        if (typeof this.tipo !== 'string' || this.tipo.trim() === '') {
+            console.error("Erro de validação Manutencao: Tipo de serviço não pode ser vazio.", this.tipo);
+            return { valido: false, mensagemErro: "O tipo de serviço da manutenção não pode ser vazio." };
+        }
+        return { valido: true };
+    }
+
+    /**
+     * Retorna uma representação JSON simplificada do objeto Manutencao,
+     * adequada para serialização e armazenamento (ex: no LocalStorage).
+     * @returns {object} Objeto com os dados da manutenção.
      * @public
      */
     toJSON() {
-        const baseJSON = super.toJSON();
         return {
-            ...baseJSON,
-            _tipoClasse: 'Caminhao', // Tipo correto
-            capacidadeCarga: this.capacidadeCarga, // Salva capacidade
-            cargaAtual: this.cargaAtual // Salva carga atual
+            _tipoClasse: 'Manutencao', // Identificador para recriação da instância
+            dataISO: this.isValidDate() ? this.data.toISOString() : null, // Armazena em formato ISO para consistência
+            tipo: this.tipo,
+            custo: this.custo,
+            descricao: this.descricao,
+            id: this.id
         };
     }
 }

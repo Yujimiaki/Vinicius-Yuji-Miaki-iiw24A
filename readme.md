@@ -26,7 +26,7 @@
     *   Navegue até a pasta raiz do projeto no terminal.
     *   Crie um arquivo `.env` na raiz do projeto com o seguinte conteúdo, substituindo `SUA_CHAVE_AQUI` pela sua chave da OpenWeatherMap:
         ```
-        OPENWEATHER_API_KEY=SUA_CHAVE_AQUI
+        OPENWEATHER_API_KEY=6dacf82d5af7c058dc2b4bde9bfe765a
         ```
     *   Instale as dependências: `npm install`
     *   Inicie o servidor backend: `node server.js`

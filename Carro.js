@@ -1,7 +1,7 @@
 // js/models/Carro.js
 'use strict';
 
-import Veiculo from './veiculo.js';
+import Veiculo from './Veiculo.js';
 
 /**
  * Representa um Carro comum, herdando de Veiculo.
