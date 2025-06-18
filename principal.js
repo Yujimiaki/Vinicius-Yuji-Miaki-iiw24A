@@ -59,6 +59,9 @@ const ui = {
     previsaoResultadoDivTempo: document.getElementById('previsao-tempo-resultado'),
     statusMensagemTempoDiv: document.getElementById('status-mensagem-tempo'),
     filtroDiasBotoes: document.querySelectorAll('.filtro-dia-btn'),
+
+    veiculosDestaqueContainer: document.getElementById('cards-veiculos-destaque'),
+    servicosOferecidosUl: document.getElementById('lista-servicos-oferecidos'),
 };
 
 // --- Instância Principal da Aplicação (Garagem) ---
@@ -66,6 +69,7 @@ const minhaGaragem = new Garagem();
 
 // --- Variáveis Globais ---
 let velocimetroPathLength = 251.2;
+const backendUrl = 'https://dashboard.render.com/project/prj-d103diumcj7s7385t3fg'; // MUDE PARA A URL DO RENDER.COM PARA PRODUÇÃO!
 
 // const WEATHER_API_KEY = "SUA_CHAVE_API_AQUI"; // REMOVIDO: A chave agora está no backend!
 // console.log("DEBUG: Chave API Configurada (no escopo global de principal.js):", WEATHER_API_KEY); // REMOVIDO
@@ -771,6 +775,94 @@ function handleFiltroDiasClick(event) {
 
 // --- Inicialização da Aplicação ---
 document.addEventListener('DOMContentLoaded', () => {
+
+    // --- NOVAS FUNÇÕES: Arsenal de Dados da Garagem ---
+
+/**
+ * Busca e exibe os veículos em destaque do backend.
+ */
+async function carregarVeiculosDestaque() {
+    if (!ui.veiculosDestaqueContainer) return;
+
+    ui.veiculosDestaqueContainer.innerHTML = '<p>Carregando destaques...</p>';
+    try {
+        const response = await fetch(`${backendUrl}/api/garagem/veiculos-destaque`);
+        if (!response.ok) {
+            throw new Error(`Falha ao buscar destaques: ${response.statusText}`);
+        }
+        const veiculos = await response.json();
+
+        ui.veiculosDestaqueContainer.innerHTML = ''; // Limpa a mensagem "carregando"
+
+        if (veiculos.length === 0) {
+            ui.veiculosDestaqueContainer.innerHTML = '<p>Nenhum veículo em destaque no momento.</p>';
+            return;
+        }
+
+        veiculos.forEach(veiculo => {
+            const card = document.createElement('div');
+            card.className = 'card-item';
+            card.innerHTML = `
+                <img src="${veiculo.imagemUrl || 'imagens/carro_normal.png'}" alt="Imagem de ${veiculo.modelo}">
+                <h3>${veiculo.modelo} (${veiculo.ano})</h3>
+                <p>${veiculo.destaque}</p>
+            `;
+            ui.veiculosDestaqueContainer.appendChild(card);
+        });
+
+    } catch (error) {
+        console.error("Erro ao carregar veículos destaque:", error);
+        ui.veiculosDestaqueContainer.innerHTML = `<p style="color:var(--cor-perigo);">Erro ao carregar os veículos em destaque.</p>`;
+
+           carregarVeiculosDestaque();
+    carregarServicosGaragem();
+
+    ativarTab('tab-visao-geral');
+    atualizarInterfaceCompleta();
+
+    // ... seu setTimeout para verificar agendamentos ...
+
+    console.log("✅ Garagem Virtual & Previsão do Tempo inicializados!");
+    }
+}
+
+/**
+ * Busca e exibe os serviços oferecidos pela garagem.
+ */
+async function carregarServicosGaragem() {
+    if (!ui.servicosOferecidosUl) return;
+
+    ui.servicosOferecidosUl.innerHTML = '<li>Carregando serviços...</li>';
+    try {
+        const response = await fetch(`${backendUrl}/api/garagem/servicos-oferecidos`);
+        if (!response.ok) {
+            throw new Error(`Falha ao buscar serviços: ${response.statusText}`);
+        }
+        const servicos = await response.json();
+
+        ui.servicosOferecidosUl.innerHTML = ''; // Limpa a mensagem "carregando"
+
+        if (servicos.length === 0) {
+            ui.servicosOferecidosUl.innerHTML = '<li>Nenhum serviço cadastrado no momento.</li>';
+            return;
+        }
+
+        servicos.forEach(servico => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <strong>${servico.nome}</strong>
+                <p>${servico.descricao}</p>
+                <span class="preco">Preço: ${servico.precoEstimado}</span>
+            `;
+            ui.servicosOferecidosUl.appendChild(li);
+        });
+
+    } catch (error) {
+        console.error("Erro ao carregar serviços:", error);
+        ui.servicosOferecidosUl.innerHTML = `<li style="color:var(--cor-perigo);">Erro ao carregar os serviços.</li>`;
+    }
+}
+
     console.log("DOM Carregado. Iniciando Garagem Virtual V3 & Previsão do Tempo...");
     // REMOVIDO: console.log("DEBUG: Verificando chave DENTRO do DOMContentLoaded (antes da lógica):", WEATHER_API_KEY);
 
@@ -931,4 +1023,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // ... (resto do seu código principal.js)
 
-);
+
+
+    );
