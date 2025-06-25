@@ -65,9 +65,9 @@ const servicosGaragem = [
 // --- FIM DO ARSENAL DE DADOS ---
 
 
-// CORS Middleware (essencial para a comunicação frontend-backend)
+// CORS Middleware (essencial para a comunicação frontend-backend local)
 app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Origin', '*'); // Permite qualquer origem
     res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
     if (req.method === 'OPTIONS') {
         return res.sendStatus(200);
@@ -81,7 +81,7 @@ app.get('/', (req, res) => {
 });
 
 
-// --- NOVO: NOSSOS NOVOS ENDPOINTS GET ---
+// --- NOSSOS ENDPOINTS GET ---
 
 // Endpoint para retornar a lista completa de veículos em destaque
 app.get('/api/garagem/veiculos-destaque', (req, res) => {
@@ -97,30 +97,27 @@ app.get('/api/garagem/servicos-oferecidos', (req, res) => {
 
 // Endpoint para buscar um serviço específico pelo seu ID
 app.get('/api/garagem/servicos-oferecidos/:idServico', (req, res) => {
-    const { idServico } = req.params; // Captura o ID da URL
+    const { idServico } = req.params;
     console.log(`[Servidor] Requisição para buscar serviço específico com ID: ${idServico}`);
     
     const servico = servicosGaragem.find(s => s.id === idServico);
 
     if (servico) {
-        res.json(servico); // Se encontrou, retorna o serviço
+        res.json(servico);
     } else {
-        // Se não encontrou, retorna um erro 404 (Not Found) com uma mensagem JSON
         res.status(404).json({ error: `Serviço com ID ${idServico} não encontrado.` });
     }
 });
 
-// --- FIM DOS NOVOS ENDPOINTS ---
 
-
-// Endpoint já existente para a Previsão do Tempo
+// Endpoint para a Previsão do Tempo
 app.get('/api/previsao/:cidade', async (req, res) => {
     const { cidade } = req.params;
     console.log(`[Servidor Backend] Recebida requisição para /api/previsao/${cidade}`); 
 
     if (!apiKey) {
         console.error("[Servidor Backend] Erro: A chave da API OpenWeatherMap (OPENWEATHER_API_KEY) não está configurada no servidor.");
-        return res.status(500).json({ error: 'Erro de configuração no servidor: chave da API de previsão do tempo ausente.' });
+        return res.status(500).json({ error: 'Erro de configuração no servidor: chave da API ausente.' });
     }
     
     const weatherAPIUrl = `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(cidade)}&appid=${apiKey}&units=metric&lang=pt_br`;
@@ -133,13 +130,13 @@ app.get('/api/previsao/:cidade', async (req, res) => {
     } catch (error) {
         if (error.response) {
             console.error(`[Servidor Backend] Erro da API OpenWeatherMap para ${cidade}: Status ${error.response.status}`, error.response.data?.message || error.response.data);
-            return res.status(error.response.status).json({ error: error.response.data?.message || 'Erro ao buscar dados da OpenWeatherMap.' });
+            return res.status(error.response.status).json({ error: error.response.data?.message || 'Cidade não encontrada ou erro na API externa.' });
         } else if (error.request) {
             console.error(`[Servidor Backend] Nenhuma resposta da OpenWeatherMap para ${cidade}:`, error.message);
-            return res.status(503).json({ error: 'Serviço da OpenWeatherMap indisponível ou sem resposta no momento.' });
+            return res.status(503).json({ error: 'Serviço de previsão do tempo indisponível.' });
         } else {
             console.error(`[Servidor Backend] Erro interno ao processar requisição para OpenWeatherMap (${cidade}):`, error.message);
-            return res.status(500).json({ error: 'Erro interno no servidor ao tentar buscar previsão.' });
+            return res.status(500).json({ error: 'Erro interno no servidor.' });
         }
     }
 });
@@ -147,11 +144,10 @@ app.get('/api/previsao/:cidade', async (req, res) => {
 
 // Inicia o servidor
 app.listen(port, () => {
-    console.log(`🚗 Servidor da Garagem Inteligente rodando na porta ${port}`);
+    console.log(`🚗 Servidor da Garagem Inteligente rodando em http://localhost:${port}`);
     console.log(`🔗 Endpoints disponíveis:`);
     console.log(`   - GET /`);
     console.log(`   - GET /api/garagem/veiculos-destaque`);
     console.log(`   - GET /api/garagem/servicos-oferecidos`);
-    console.log(`   - GET /api/garagem/servicos-oferecidos/:idServico`);
     console.log(`   - GET /api/previsao/:cidade`);
 });

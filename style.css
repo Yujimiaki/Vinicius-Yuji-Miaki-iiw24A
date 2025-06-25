@@ -589,5 +589,16 @@ nav.tabs-veiculo { display: flex; border-bottom: 2px solid var(--cor-borda); mar
     margin-top: 8px;
     display: block;
 }
+/* Em css/style.css */
+
+.velocimetro-progresso {
+  stroke-width: 10;
+  stroke: var(--cor-primaria);
+  stroke-linecap: round;
+  stroke-dasharray: var(--velocimetro-path-length);
+  stroke-dashoffset: var(--velocimetro-path-length);
+  /* ADICIONE ESTA LINHA para a animação ficar suave */
+  transition: stroke-dashoffset 0.4s ease-out, stroke 0.4s ease-out;
+}
 
 /* A sua seção de @media queries começa aqui */

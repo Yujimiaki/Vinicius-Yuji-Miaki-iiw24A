@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Garagem Inteligente V3 - API Sim & Previsão do Tempo</title>
+    <link rel="stylesheet" href="style.css">
 
     <!-- Google Fonts (Poppins) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,8 +13,9 @@
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-
-    <link rel="stylesheet" href="style.css">
+    
+    <!-- CORREÇÃO: Caminho para o CSS -->
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <div id="app-container">
@@ -46,7 +48,7 @@
             <div id="painelVeiculoSelecionado" style="display: none;" class="card">
 
                 <div class="vehicle-header">
-                     <!-- OBSERVAÇÃO: Certifique-se que a pasta 'imagens' e os arquivos existem na raiz do projeto -->
+                     <!-- OBSERVAÇÃO: Certifique-se que a pasta 'imagens' e os arquivos existem -->
                      <img id="imagemVeiculo" src="imagens/carro_normal.png" alt="Imagem do veículo">
                      <div id="informacoesVeiculo">
                          <h2 id="info-modelo-tipo">Modelo (Tipo)</h2>
@@ -142,25 +144,24 @@
                 <p>Adicione ou selecione um veículo para interagir.</p>
                 <p>Você também pode verificar a previsão do tempo abaixo.</p>
             </div>
+
             <!-- NOVA SEÇÃO: Veículos em Destaque -->
-<section id="secao-veiculos-destaque" class="card secao-extra">
-    <h2><i class="fas fa-star"></i> Veículos em Destaque</h2>
-    <div id="cards-veiculos-destaque" class="cards-container">
-        <p>Carregando destaques...</p> <!-- Mensagem de loading -->
-    </div>
-</section>
+            <section id="secao-veiculos-destaque" class="card secao-extra">
+                <h2><i class="fas fa-star"></i> Veículos em Destaque</h2>
+                <div id="cards-veiculos-destaque" class="cards-container">
+                    <p>Carregando destaques...</p> <!-- Mensagem de loading -->
+                </div>
+            </section>
 
-<!-- NOVA SEÇÃO: Serviços Oferecidos -->
-<section id="secao-servicos" class="card secao-extra">
-    <h2><i class="fas fa-tools"></i> Nossos Serviços</h2>
-    <ul id="lista-servicos-oferecidos" class="lista-servicos">
-        <li>Carregando serviços...</li> <!-- Mensagem de loading -->
-    </ul>
-</section>
+            <!-- NOVA SEÇÃO: Serviços Oferecidos -->
+            <section id="secao-servicos" class="card secao-extra">
+                <h2><i class="fas fa-tools"></i> Nossos Serviços</h2>
+                <ul id="lista-servicos-oferecidos" class="lista-servicos">
+                    <li>Carregando serviços...</li> <!-- Mensagem de loading -->
+                </ul>
+            </section>
 
-<!-- A sua seção de previsão do tempo vem logo aqui abaixo -->
-
-            <!-- NOVA SEÇÃO: Previsão do Tempo -->
+            <!-- SEÇÃO: Previsão do Tempo -->
             <section id="secao-previsao-tempo" class="card">
                 <h2><i class="fas fa-cloud-sun"></i> Previsão do Tempo</h2>
                 <div class="busca-container-tempo">
@@ -168,20 +169,17 @@
                     <button id="verificar-clima-btn"><i class="fas fa-search"></i> Verificar</button>
                 </div>
 
-                <!-- === BOTÕES DE FILTRO DE DIAS === -->
                 <div class="filtro-dias-tempo-container">
                     <button class="filtro-dia-btn active" data-dias="5" title="Mostrar previsão para os próximos 5 dias">5 Dias</button>
                     <button class="filtro-dia-btn" data-dias="3" title="Mostrar previsão para os próximos 3 dias">3 Dias</button>
                     <button class="filtro-dia-btn" data-dias="1" title="Mostrar previsão para hoje">Hoje</button>
                 </div>
-                <!-- === FIM BOTÕES DE FILTRO DE DIAS === -->
 
                 <div id="status-mensagem-tempo" class="status-mensagem" aria-live="polite"></div>
                 <div id="previsao-tempo-resultado" class="previsao-resultado-container">
                     <!-- Os resultados da previsão serão inseridos aqui -->
                 </div>
             </section>
-            <!-- FIM NOVA SEÇÃO: Previsão do Tempo -->
 
         </main>
     </div>
@@ -218,7 +216,7 @@
         </form>
     </dialog>
 
-    <!-- CORRIGIDO: Caminho do script principal -->
+    <!-- CORREÇÃO: Caminho do script principal -->
     <script type="module" src="js/principal.js"></script>
 </body>
 </html>
