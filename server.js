@@ -150,4 +150,5 @@ app.listen(port, () => {
     console.log(`   - GET /api/garagem/veiculos-destaque`);
     console.log(`   - GET /api/garagem/servicos-oferecidos`);
     console.log(`   - GET /api/previsao/:cidade`);
-});
+})
+;

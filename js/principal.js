@@ -1,18 +1,16 @@
-
-// java/principal.js
+// js/principal.js
 'use strict';
 
 // --- Importações ---
-import Garagem from './models/garagem.js';
+import Garagem from './models/Garagem.js';
 import Manutencao from './models/Manutencao.js';
 import Carro from './models/Carro.js';
-import CarroEsportivo from './models/CarroEsportivo.js';
-import Caminhao from './models/Caminhao.js';
+import CarroEsportivo from './models/carroesportivo.js';
+import Caminhao from './models/caminhao.js';
 import { showNotification, hideNotification } from './utils/notifications.js';
 
 // --- Referências aos Elementos da UI (Garagem) ---
 const ui = {
-    // ... (suas referências UI permanecem as mesmas) ...
     modalAdicionar: document.getElementById('modalAdicionarVeiculo'),
     btnAbrirModalAdicionar: document.getElementById('btnAbrirModalAdicionar'),
     btnFecharModalAdicionar: document.getElementById('btnFecharModalAdicionar'),
@@ -59,6 +57,10 @@ const ui = {
     previsaoResultadoDivTempo: document.getElementById('previsao-tempo-resultado'),
     statusMensagemTempoDiv: document.getElementById('status-mensagem-tempo'),
     filtroDiasBotoes: document.querySelectorAll('.filtro-dia-btn'),
+
+    // --- Referências UI (Arsenal de Dados) ---
+    veiculosDestaqueContainer: document.getElementById('cards-veiculos-destaque'),
+    servicosOferecidosUl: document.getElementById('lista-servicos-oferecidos'),
 };
 
 // --- Instância Principal da Aplicação (Garagem) ---
@@ -66,9 +68,8 @@ const minhaGaragem = new Garagem();
 
 // --- Variáveis Globais ---
 let velocimetroPathLength = 251.2;
-
-// const WEATHER_API_KEY = "SUA_CHAVE_API_AQUI"; // REMOVIDO: A chave agora está no backend!
-// console.log("DEBUG: Chave API Configurada (no escopo global de principal.js):", WEATHER_API_KEY); // REMOVIDO
+// CORREÇÃO CRÍTICA: A URL para seu backend local. Render.com lhe dará outra URL quando você publicar.
+const backendUrl = 'http://localhost:3001'; 
 
 // NOVAS VARIÁVEIS GLOBAIS PARA FILTRO DE PREVISÃO
 let diasFiltroPrevisao = 5;
@@ -76,7 +77,6 @@ let previsaoCompletaApiCache = [];
 let cidadeAtualPrevisaoCache = "";
 
 // --- Funções de Atualização da Interface Gráfica (UI) - GARAGEM ---
-// ... (suas funções de UI da garagem permanecem as mesmas) ...
 function atualizarListaVeiculosSidebar() {
     const listaUl = ui.listaVeiculosSidebar;
     if (!listaUl) {
@@ -558,36 +558,30 @@ async function lidarCliqueDetalhesExtras() {
 }
 
 
-// --- Funções da API de Previsão do Tempo (OpenWeatherMap) ---
-// ALTERADO: Esta função agora chama o NOSSO backend
+// --- Funções da API de Previsão do Tempo (OpenWeatherMap via Backend) ---
 async function buscarPrevisaoDetalhadaTempo(cidade) {
     // A URL agora aponta para o seu servidor backend
-    // Certifique-se que a porta (3001 aqui) é a mesma que seu server.js está usando
-    const backendUrl = `http://localhost:3001/api/previsao/${encodeURIComponent(cidade)}`;
-    console.log(`[Frontend] Chamando backend para previsão: ${backendUrl}`);
+    const url = `${backendUrl}/api/previsao/${encodeURIComponent(cidade)}`;
+    console.log(`[Frontend] Chamando backend para previsão: ${url}`);
 
     try {
-        const response = await fetch(backendUrl);
+        const response = await fetch(url);
 
         if (!response.ok) {
-            const errorData = await response.json().catch(() => ({})); // Tenta pegar a mensagem de erro do JSON do backend
-            // Usa a mensagem de erro do backend se disponível, senão uma mensagem genérica
+            const errorData = await response.json().catch(() => ({})); 
             throw new Error(errorData.error || `Erro ${response.status} ao buscar previsão do backend.`);
         }
 
         const data = await response.json();
         console.log("[Frontend] Dados da previsão recebidos do backend:", data);
-        return data; // Retorna os dados recebidos do backend (que são os dados da OpenWeatherMap)
+        return data; 
     } catch (error) {
         console.error("[Frontend] Falha ao buscar previsão do backend:", error);
-        throw error; // Re-lança o erro para ser tratado por handleVerificarClima
+        throw error; 
     }
 }
 
-// As funções processarDadosForecastTempo e exibirPrevisaoDetalhadaTempo permanecem as mesmas,
-// pois o formato dos dados que o backend retorna é o mesmo que a OpenWeatherMap retornava.
 function processarDadosForecastTempo(dataApi) {
-    // ... (esta função não precisa de alteração)
     if (!dataApi || !dataApi.list || !Array.isArray(dataApi.list) || dataApi.list.length === 0) {
         console.error("Dados da API de tempo inválidos ou lista de previsões vazia.", dataApi);
         return null;
@@ -627,7 +621,6 @@ function processarDadosForecastTempo(dataApi) {
 }
 
 function exibirPrevisaoDetalhadaTempo(previsaoDiariaParaExibir, nomeCidade) {
-    // ... (esta função não precisa de alteração)
     if (!ui.previsaoResultadoDivTempo) return;
     ui.previsaoResultadoDivTempo.innerHTML = '';
 
@@ -672,19 +665,16 @@ function exibirPrevisaoDetalhadaTempo(previsaoDiariaParaExibir, nomeCidade) {
 }
 
 function formatarDataParaExibicaoTempo(dataString) {
-    // ... (esta função não precisa de alteração)
     const [ano, mes, dia] = dataString.split('-');
     return `${dia}/${mes}/${ano}`;
 }
 
 function capitalizarPrimeiraLetraTempo(string) {
-    // ... (esta função não precisa de alteração)
     if (!string) return '';
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
 function exibirStatusTempo(mensagem, tipo = 'info') {
-    // ... (esta função não precisa de alteração)
     if (!ui.statusMensagemTempoDiv) return;
     ui.statusMensagemTempoDiv.textContent = mensagem;
     ui.statusMensagemTempoDiv.className = 'status-mensagem';
@@ -694,8 +684,6 @@ function exibirStatusTempo(mensagem, tipo = 'info') {
 }
 
 async function handleVerificarClima() {
-    // ... (esta função não precisa de alteração na sua lógica principal,
-    //      exceto que agora ela não precisa mais se preocupar com a chave API diretamente)
     if (!ui.cidadeInputTempo) return;
     const cidade = ui.cidadeInputTempo.value.trim();
 
@@ -706,22 +694,13 @@ async function handleVerificarClima() {
         if (ui.previsaoResultadoDivTempo) ui.previsaoResultadoDivTempo.innerHTML = '';
         return;
     }
-    // REMOVIDO: A verificação da chave API não é mais feita aqui no frontend.
-    // if (WEATHER_API_KEY === "SUA_CHAVE_API_AQUI" || WEATHER_API_KEY === "569ee28c1908ad6eaadb431e635166be") {
-    //      exibirStatusTempo("AVISO: A chave da API de Previsão do Tempo não foi configurada. Verifique o arquivo js/principal.js.", 'warning');
-    //      if(ui.verificarClimaBtn) ui.verificarClimaBtn.disabled = true;
-    //      return;
-    // }
-    // if(ui.verificarClimaBtn) ui.verificarClimaBtn.disabled = false;
-
+    
     exibirStatusTempo("Carregando previsão...", 'loading');
     if (ui.previsaoResultadoDivTempo) ui.previsaoResultadoDivTempo.innerHTML = '';
 
     try {
-        const dadosApi = await buscarPrevisaoDetalhadaTempo(cidade); // Esta função foi alterada para chamar o backend
+        const dadosApi = await buscarPrevisaoDetalhadaTempo(cidade);
         if (dadosApi) {
-            // O nome da cidade agora vem do backend (que pega da OpenWeatherMap)
-            // Se a API da OpenWeatherMap retornar um nome diferente do digitado, usamos o dela.
             const nomeCidadeRetornado = dadosApi.city && dadosApi.city.name ? dadosApi.city.name : cidade;
 
             previsaoCompletaApiCache = processarDadosForecastTempo(dadosApi);
@@ -732,11 +711,9 @@ async function handleVerificarClima() {
                 exibirPrevisaoDetalhadaTempo(previsaoFiltrada, cidadeAtualPrevisaoCache);
                 exibirStatusTempo("");
             } else {
-                // Se o backend retornou dados, mas o processamento falhou
                 exibirStatusTempo(`Não foi possível processar a previsão para ${capitalizarPrimeiraLetraTempo(nomeCidadeRetornado)}.`, 'error');
             }
         } else {
-             // Caso raro onde buscarPrevisaoDetalhadaTempo retorna null/undefined sem lançar erro.
              exibirStatusTempo("Resposta inesperada do servidor de previsão.", 'error');
         }
     } catch (error) {
@@ -747,7 +724,6 @@ async function handleVerificarClima() {
     }
 }
 function handleFiltroDiasClick(event) {
-    // ... (esta função não precisa de alteração)
     const botaoClicado = event.target.closest('.filtro-dia-btn');
     if (!botaoClicado) return;
 
@@ -768,14 +744,82 @@ function handleFiltroDiasClick(event) {
     }
 }
 
+// --- Funções do Arsenal de Dados da Garagem (Backend) ---
+async function carregarVeiculosDestaque() {
+    if (!ui.veiculosDestaqueContainer) return;
+
+    ui.veiculosDestaqueContainer.innerHTML = '<p>Carregando destaques...</p>';
+    try {
+        const response = await fetch(`${backendUrl}/api/garagem/veiculos-destaque`);
+        if (!response.ok) {
+            throw new Error(`Falha ao buscar destaques: ${response.statusText}`);
+        }
+        const veiculos = await response.json();
+
+        ui.veiculosDestaqueContainer.innerHTML = ''; 
+
+        if (veiculos.length === 0) {
+            ui.veiculosDestaqueContainer.innerHTML = '<p>Nenhum veículo em destaque no momento.</p>';
+            return;
+        }
+
+        veiculos.forEach(veiculo => {
+            const card = document.createElement('div');
+            card.className = 'card-item';
+            card.innerHTML = `
+                <img src="${veiculo.imagemUrl || 'imagens/carro_normal.png'}" alt="Imagem de ${veiculo.modelo}">
+                <h3>${veiculo.modelo} (${veiculo.ano})</h3>
+                <p>${veiculo.destaque}</p>
+            `;
+            ui.veiculosDestaqueContainer.appendChild(card);
+        });
+
+    } catch (error) {
+        console.error("Erro ao carregar veículos destaque:", error);
+        ui.veiculosDestaqueContainer.innerHTML = `<p style="color:var(--cor-perigo);">Erro ao carregar os veículos em destaque.</p>`;
+    }
+}
+
+async function carregarServicosGaragem() {
+    if (!ui.servicosOferecidosUl) return;
+
+    ui.servicosOferecidosUl.innerHTML = '<li>Carregando serviços...</li>';
+    try {
+        const response = await fetch(`${backendUrl}/api/garagem/servicos-oferecidos`);
+        if (!response.ok) {
+            throw new Error(`Falha ao buscar serviços: ${response.statusText}`);
+        }
+        const servicos = await response.json();
+
+        ui.servicosOferecidosUl.innerHTML = '';
+
+        if (servicos.length === 0) {
+            ui.servicosOferecidosUl.innerHTML = '<li>Nenhum serviço cadastrado no momento.</li>';
+            return;
+        }
+
+        servicos.forEach(servico => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                <strong>${servico.nome}</strong>
+                <p>${servico.descricao}</p>
+                <span class="preco">Preço: ${servico.precoEstimado}</span>
+            `;
+            ui.servicosOferecidosUl.appendChild(li);
+        });
+
+    } catch (error) {
+        console.error("Erro ao carregar serviços:", error);
+        ui.servicosOferecidosUl.innerHTML = `<li style="color:var(--cor-perigo);">Erro ao carregar os serviços.</li>`;
+    }
+}
+
 
 // --- Inicialização da Aplicação ---
 document.addEventListener('DOMContentLoaded', () => {
     console.log("DOM Carregado. Iniciando Garagem Virtual V3 & Previsão do Tempo...");
-    // REMOVIDO: console.log("DEBUG: Verificando chave DENTRO do DOMContentLoaded (antes da lógica):", WEATHER_API_KEY);
 
     try {
-        // ... (lógica de inicialização da garagem permanece a mesma) ...
         const pathElement = document.querySelector('.velocimetro-progresso');
         if (pathElement && typeof pathElement.getTotalLength === 'function') {
             try {
@@ -844,19 +888,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (ui.notificationCloseBtn) ui.notificationCloseBtn.addEventListener('click', () => hideNotification(ui));
         if (ui.btnVerDetalhesExtras) ui.btnVerDetalhesExtras.addEventListener('click', lidarCliqueDetalhesExtras);
 
-
         // Inicialização e Event Listeners da Previsão do Tempo
         if (ui.verificarClimaBtn) {
             ui.verificarClimaBtn.addEventListener('click', handleVerificarClima);
-            // REMOVIDO: A verificação da chave API não é mais feita aqui no frontend.
-            // if (WEATHER_API_KEY === "SUA_CHAVE_API_AQUI" || WEATHER_API_KEY === "569ee28c1908ad6eaadb431e635166be") {
-            //     exibirStatusTempo("AVISO: A chave da API de Previsão do Tempo não foi configurada. Verifique o arquivo js/principal.js.", 'warning');
-            //     if (ui.verificarClimaBtn) ui.verificarClimaBtn.disabled = true;
-            // } else {
-            //      if (ui.verificarClimaBtn) ui.verificarClimaBtn.disabled = false;
-            // }
-            // O botão de verificar clima deve estar sempre habilitado agora,
-            // pois a validação da chave é feita no backend.
             if (ui.verificarClimaBtn) ui.verificarClimaBtn.disabled = false;
         }
         if (ui.cidadeInputTempo) {
@@ -873,6 +907,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 botao.addEventListener('click', handleFiltroDiasClick);
             });
         }
+        
+        // CORREÇÃO LÓGICA: Chamar estas funções aqui para carregar os dados do backend.
+        carregarVeiculosDestaque();
+        carregarServicosGaragem();
 
         ativarTab('tab-visao-geral');
         atualizarInterfaceCompleta();
@@ -894,61 +932,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     } catch (error) {
         console.error("❌===== ERRO CRÍTICO NA INICIALIZAÇÃO DA APLICAÇÃO =====", error);
-        try {
-            document.body.innerHTML = `<div style="padding: 20px; margin: 20px; background-color: #ffdddd; border: 2px solid red; color: #a02533; text-align: center; font-family: sans-serif;">
+        document.body.innerHTML = `<div style="padding: 20px; margin: 20px; background-color: #ffdddd; border: 2px solid red; color: #a02533; text-align: center; font-family: sans-serif;">
                                     <h1>Erro na Aplicação</h1>
                                     <p>Não foi possível carregar corretamente.</p>
                                     <p><strong>Detalhes do Erro:</strong> ${error.message}</p>
                                     <p><em>Verifique o console do navegador (F12).</em></p>
                                   </div>`;
-        } catch(e) { /* ignore */ }
         alert("Ocorreu um erro grave ao iniciar a aplicação. Verifique o console (F12).");
     }
-
-
-    // js/principal.js
-
-// ... (resto do seu código principal.js)
-
-async function buscarPrevisaoDetalhadaTempo(cidade) {
-    // !!! IMPORTANTE: Substitua pela SUA URL pública do Render.com !!!
-    // MANTENHA as barras e o encodeURIComponent(cidade) no final.
-    // Exemplo: se sua URL no Render é https://garagem-backend-vinicius.onrender.com
-    // const backendUrl = `https://garagem-backend-vinicius.onrender.com/api/previsao/${encodeURIComponent(cidade)}`;
-    
-    // #############################################################################
-    // ###  👉 COLOQUE A URL DO SEU BACKEND DO RENDER.COM AQUI   👇               ###
-    // #############################################################################
-    const backendUrl = `6dacf82d5af7c058dc2b4bde9bfe765a${encodeURIComponent(cidade)}`;
-    // #############################################################################
-    
-    // ATENÇÃO: Verifique se não há uma barra dupla (//) antes de /api/previsao/
-    // Se sua URL do Render terminar com barra, remova a barra inicial do /api/previsao/
-    // Ex: se Render deu https://meu-app.onrender.com/
-    // então ficaria: `https://meu-app.onrender.com/api/previsao/${encodeURIComponent(cidade)}`
-    // Ex: se Render deu https://meu-app.onrender.com (sem barra no final)
-    // então ficaria: `https://meu-app.onrender.com/api/previsao/${encodeURIComponent(cidade)}` (que já estava certo)
-
-    console.log(`[Frontend] Chamando backend NA NUVEM para previsão: ${backendUrl}`);
-
-    try {
-        const response = await fetch(backendUrl);
-
-        if (!response.ok) {
-            const errorData = await response.json().catch(() => ({})); // Tenta pegar a mensagem de erro do JSON
-            // Usa a mensagem de erro do backend se disponível, senão uma mensagem genérica
-            throw new Error(errorData.error || `Erro ${response.status} do servidor de clima (nuvem) ao buscar previsão.`);
-        }
-
-        const data = await response.json();
-        console.log("[Frontend] Dados da previsão recebidos do backend (nuvem):", data);
-        return data; // Retorna os dados recebidos do backend
-    } catch (error) {
-        console.error("[Frontend] Falha ao buscar previsão do backend (nuvem):", error);
-        throw error; // Re-lança o erro para ser tratado por handleVerificarClima
-    }
-}
-
-// ... (resto do seu código principal.js)
-
 });
