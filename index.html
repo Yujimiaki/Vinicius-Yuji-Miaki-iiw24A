@@ -213,6 +213,41 @@
                  <button type="submit"><i class="fas fa-save"></i> Adicionar</button>
                  <button type="button" id="btnFecharModalAdicionar" class="botao-cancelar"><i class="fas fa-times"></i> Cancelar</button>
              </div>
+
+             <form id="formNovoVeiculo" novalidate>
+     <h2><i class="fas fa-plus-circle"></i> Adicionar Novo Veículo</h2>
+     
+     <!-- CAMPO NOVO E IMPORTANTE -->
+     <div>
+         <label for="novoVeiculoPlaca">Placa:</label> 
+         <input type="text" id="novoVeiculoPlaca" required placeholder="Ex: ABC1D23 ou ABC1234">
+     </div>
+
+     <div>
+         <label for="novoVeiculoMarca">Marca:</label> 
+         <input type="text" id="novoVeiculoMarca" required placeholder="Ex: Volkswagen, Ferrari">
+     </div>
+
+     <div>
+         <label for="novoVeiculoModelo">Modelo:</label> 
+         <input type="text" id="novoVeiculoModelo" required placeholder="Ex: Fusca, F40">
+     </div>
+
+     <div>
+         <label for="novoVeiculoAno">Ano:</label> 
+         <input type="number" id="novoVeiculoAno" required placeholder="Ex: 1970, 2024">
+     </div>
+
+     <div>
+         <label for="novoVeiculoCor">Cor:</label>
+         <input type="text" id="novoVeiculoCor" required placeholder="Ex: Azul, Vermelho">
+     </div>
+
+     <div class="modal-actions">
+         <button type="submit"><i class="fas fa-save"></i> Adicionar</button>
+         <button type="button" id="btnFecharModalAdicionar" class="botao-cancelar"><i class="fas fa-times"></i> Cancelar</button>
+     </div>
+</form>
         </form>
     </dialog>
 

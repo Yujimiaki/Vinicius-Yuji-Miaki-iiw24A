@@ -2,11 +2,11 @@
 'use strict';
 
 // --- Importações ---
-import Garagem from './models/Garagem.js';
-import Manutencao from './models/Manutencao.js';
-import Carro from './models/Carro.js';
-import CarroEsportivo from './models/CarroEsportivo.js';
-import Caminhao from './models/Caminhao.js';
+import Garagem from '../models/Garagem.js';
+import Manutencao from '../models/Manutencao.js';
+import Carro from '../models/Carro.js';
+import CarroEsportivo from '../models/CarroEsportivo.js';
+import Caminhao from '../models/Caminhao.js';
 import { showNotification, hideNotification } from './utils/notifications.js';
 
 // --- Referências aos Elementos da UI (Garagem) ---
@@ -69,7 +69,7 @@ const minhaGaragem = new Garagem();
 // --- Variáveis Globais ---
 let velocimetroPathLength = 251.2;
 // CORREÇÃO CRÍTICA: A URL para seu backend local. Render.com lhe dará outra URL quando você publicar.
-const backendUrl = 'http://localhost:3001'; 
+const backendUrl = 'http://localhost:3001';
 
 // NOVAS VARIÁVEIS GLOBAIS PARA FILTRO DE PREVISÃO
 let diasFiltroPrevisao = 5;
@@ -816,39 +816,21 @@ async function carregarServicosGaragem() {
 
 
 // --- Inicialização da Aplicação ---
+// js/principal.js
+
+// SUBSTITUA TODO O SEU BLOCO 'DOMContentLoaded' POR ESTE AQUI
 document.addEventListener('DOMContentLoaded', () => {
-    console.log("DOM Carregado. Iniciando Garagem Virtual V3 & Previsão do Tempo...");
+    console.log("DOM Carregado. Iniciando Garagem com persistência no MongoDB...");
 
     try {
-        const pathElement = document.querySelector('.velocimetro-progresso');
-        if (pathElement && typeof pathElement.getTotalLength === 'function') {
-            try {
-                velocimetroPathLength = pathElement.getTotalLength();
-                document.documentElement.style.setProperty('--velocimetro-path-length', velocimetroPathLength);
-            } catch (e) {
-                 console.warn("Não foi possível calcular getTotalLength do velocímetro, usando valor padrão.", e);
-                 document.documentElement.style.setProperty('--velocimetro-path-length', 251.2);
-            }
-        } else {
-            document.documentElement.style.setProperty('--velocimetro-path-length', 251.2);
-        }
+        // --- 1. CONFIGURAÇÃO DOS EVENT LISTENERS ---
+        // Esta parte permanece igual. Apenas garantimos que todos os botões
+        // e formulários estarão prontos para receber interações.
 
-        const veiculosSalvos = Garagem.carregarDoLocalStorage();
-        minhaGaragem.veiculos = veiculosSalvos;
-        const idSelecionadoSalvo = localStorage.getItem('garagemVeiculoSelecionadoId');
-        if (idSelecionadoSalvo && minhaGaragem.encontrarVeiculo(idSelecionadoSalvo)) {
-            minhaGaragem.selecionarVeiculo(idSelecionadoSalvo);
-        } else {
-             minhaGaragem.selecionarVeiculo(null);
-             if(idSelecionadoSalvo) localStorage.removeItem('garagemVeiculoSelecionadoId');
-        }
-
-        // Event Listeners da Garagem
+        // Modal para adicionar veículo
         if (ui.btnAbrirModalAdicionar && ui.modalAdicionar) {
             ui.btnAbrirModalAdicionar.addEventListener('click', () => {
                 if(ui.formNovoVeiculo) ui.formNovoVeiculo.reset();
-                if(ui.divCapacidadeCaminhao) ui.divCapacidadeCaminhao.style.display = 'none';
-                if(ui.novoVeiculoTipo) ui.novoVeiculoTipo.value = "";
                 if (!ui.modalAdicionar.open) {
                     try { ui.modalAdicionar.showModal(); } catch (e) { console.error("Erro ao abrir modal:", e); }
                 }
@@ -857,87 +839,123 @@ document.addEventListener('DOMContentLoaded', () => {
         if (ui.btnFecharModalAdicionar && ui.modalAdicionar) {
             ui.btnFecharModalAdicionar.addEventListener('click', () => { if (ui.modalAdicionar.open) ui.modalAdicionar.close(); });
         }
-        if (ui.modalAdicionar) {
-            ui.modalAdicionar.addEventListener('click', (event) => {
-                if (event.target === ui.modalAdicionar && ui.modalAdicionar.open) {
-                    ui.modalAdicionar.close();
-                }
-            });
+        
+        // Formulários
+        if (ui.formNovoVeiculo) {
+             // O addEventListener agora aponta para a nova função que usa a API.
+            ui.formNovoVeiculo.addEventListener('submit', adicionarNovoVeiculo);
         }
-        if (ui.formNovoVeiculo) ui.formNovoVeiculo.addEventListener('submit', adicionarNovoVeiculo);
-        if (ui.novoVeiculoTipo && ui.divCapacidadeCaminhao) {
-            ui.novoVeiculoTipo.addEventListener('change', (event) => {
-                ui.divCapacidadeCaminhao.style.display = (event.target.value === 'Caminhao') ? 'block' : 'none';
-            });
+        if (ui.formManutencao) {
+             // Esta lógica ainda pode ser mantida, mas exigirá adaptações futuras
+             // para salvar manutenções no DB também. Por enquanto, deixamos como está.
+            ui.formManutencao.addEventListener('submit', agendarOuRegistrarManutencao);
         }
-        if (ui.formManutencao) ui.formManutencao.addEventListener('submit', agendarOuRegistrarManutencao);
-        if (ui.tabLinks && ui.tabLinks.length > 0) {
-            ui.tabLinks.forEach(button => {
-                button.addEventListener('click', () => ativarTab(button.dataset.tab));
-            });
-        }
+
+        // Ações do painel do veículo
         if (ui.botoesAcoesContainer) ui.botoesAcoesContainer.addEventListener('click', lidarComAcaoVeiculo);
         if(ui.botaoRemoverVeiculoHeader) ui.botaoRemoverVeiculoHeader.addEventListener('click', removerVeiculoSelecionado);
-
-        const setupMaintenanceListListener = (ulElement) => {
-             if (ulElement) ulElement.addEventListener('click', lidarComCliqueListaManutencao);
-        };
-        setupMaintenanceListListener(ui.historicoUl);
-        setupMaintenanceListListener(ui.agendamentosUl);
-
-        if (ui.notificationCloseBtn) ui.notificationCloseBtn.addEventListener('click', () => hideNotification(ui));
-        if (ui.btnVerDetalhesExtras) ui.btnVerDetalhesExtras.addEventListener('click', lidarCliqueDetalhesExtras);
-
-        // Inicialização e Event Listeners da Previsão do Tempo
-        if (ui.verificarClimaBtn) {
-            ui.verificarClimaBtn.addEventListener('click', handleVerificarClima);
-            if (ui.verificarClimaBtn) ui.verificarClimaBtn.disabled = false;
-        }
-        if (ui.cidadeInputTempo) {
-            ui.cidadeInputTempo.addEventListener('keypress', (event) => {
-                if (event.key === 'Enter') {
-                    if (ui.verificarClimaBtn && !ui.verificarClimaBtn.disabled) {
-                        handleVerificarClima();
-                    }
-                }
-            });
-        }
-        if (ui.filtroDiasBotoes) {
-            ui.filtroDiasBotoes.forEach(botao => {
-                botao.addEventListener('click', handleFiltroDiasClick);
-            });
-        }
         
-        // CORREÇÃO LÓGICA: Chamar estas funções aqui para carregar os dados do backend.
-        carregarVeiculosDestaque();
-        carregarServicosGaragem();
+        // Outros listeners
+        // ... (coloque aqui outros event listeners que você tinha, como das tabs, etc.)
 
-        ativarTab('tab-visao-geral');
-        atualizarInterfaceCompleta();
 
-        setTimeout(() => {
-            try {
-                const mensagensAgendamento = minhaGaragem.verificarAgendamentosProximos();
-                if (mensagensAgendamento && mensagensAgendamento.length > 0) {
-                    mensagensAgendamento.forEach((msg, index) => {
-                        setTimeout(() => showNotification(msg, 'info', 8000 + index * 500, ui), index * 700);
-                    });
-                }
-            } catch(error) {
-                console.error("[Init] Erro ao verificar agendamentos próximos:", error);
-            }
-        }, 1500);
+        // --- 2. INICIALIZAÇÃO DOS DADOS ---
+        // A MUDANÇA PRINCIPAL ESTÁ AQUI!
+        // Em vez de carregar do LocalStorage, agora chamamos nossa função assíncrona
+        // que busca os dados REAIS do nosso backend/banco de dados.
+        
+        console.log("Iniciando busca de veículos no banco de dados...");
+        carregarEExibirVeiculos(); // Esta é a chamada inicial para popular a garagem!
 
-        console.log("✅ Garagem Virtual & Previsão do Tempo inicializados!");
+        // As funções abaixo (que buscam dados secundários) também podem ser mantidas,
+        // mas o foco da nossa mudança está na principal acima.
+        carregarServicosGaragem(); // Assumindo que você manteve esta seção
+        carregarVeiculosDestaque(); // Assumindo que você manteve esta seção
+
+        // Limpa qualquer painel que possa estar aberto e mostra a mensagem de boas-vindas
+        atualizarInterfaceCompleta(); 
+
+        console.log("✅ Garagem Virtual pronta para uso com dados persistentes!");
 
     } catch (error) {
-        console.error("❌===== ERRO CRÍTICO NA INICIALIZAÇÃO DA APLICAÇÃO =====", error);
-        document.body.innerHTML = `<div style="padding: 20px; margin: 20px; background-color: #ffdddd; border: 2px solid red; color: #a02533; text-align: center; font-family: sans-serif;">
-                                    <h1>Erro na Aplicação</h1>
-                                    <p>Não foi possível carregar corretamente.</p>
-                                    <p><strong>Detalhes do Erro:</strong> ${error.message}</p>
-                                    <p><em>Verifique o console do navegador (F12).</em></p>
-                                  </div>`;
+        console.error("❌ ERRO CRÍTICO NA INICIALIZAÇÃO DA APLICAÇÃO:", error);
+        document.body.innerHTML = `<div style="padding: 20px; text-align: center;"><h1>Erro Crítico</h1><p>Não foi possível iniciar a aplicação. Verifique o console para mais detalhes.</p></div>`;
         alert("Ocorreu um erro grave ao iniciar a aplicação. Verifique o console (F12).");
     }
 });
+
+    // Adicione estas funções no seu js/principal.js
+
+/**
+ * Busca todos os veículos da API do backend e atualiza a lista na sidebar.
+ */
+async function carregarEExibirVeiculos() {
+    try {
+        const response = await fetch(`${backendUrl}/api/veiculos`);
+        if (!response.ok) {
+            throw new Error('Falha ao buscar veículos do banco de dados.');
+        }
+        const veiculosDoDb = await response.json();
+        
+        // Substitui a lista de veículos da instância da Garagem pelos dados do DB
+        minhaGaragem.veiculos = veiculosDoDb.map(v => {
+            // Aqui, estamos simplificando. O ideal seria recriar as instâncias de classe
+            // como na sua lógica de LocalStorage, mas para exibir a lista funciona.
+            // A lógica de interação (ligar, acelerar) será tratada em outros endpoints no futuro.
+            return { ...v, id: v._id }; // Mapeia _id do Mongo para id
+        });
+
+        atualizarListaVeiculosSidebar(); // Sua função existente que renderiza a lista
+
+    } catch (error) {
+        console.error("Erro ao carregar veículos:", error);
+        showNotification("Não foi possível carregar os veículos da garagem.", "error", 5000, ui);
+        ui.listaVeiculosSidebar.innerHTML = '<li class="placeholder" style="color:red;">Erro ao carregar.</li>';
+    }
+}
+
+/**
+ * Envia os dados de um novo veículo para a API criar no banco de dados.
+ * @param {Event} event O evento de submit do formulário.
+ */
+async function adicionarNovoVeiculo(event) {
+    event.preventDefault();
+    
+    // Pega os dados do seu formulário (você já tem essa lógica)
+    const veiculoData = {
+        placa: document.getElementById('novoVeiculoPlaca').value.trim(), // Adicione este campo no seu HTML
+        marca: ui.novoVeiculoMarca.value.trim(), // Renomeie os IDs se necessário
+        modelo: ui.novoVeiculoModelo.value.trim(),
+        ano: parseInt(ui.novoVeiculoAno.value, 10),
+        cor: ui.novoVeiculoCor.value.trim(),
+    };
+
+    try {
+        const response = await fetch(`${backendUrl}/api/veiculos`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(veiculoData),
+        });
+
+        const resultado = await response.json();
+
+        if (!response.ok) {
+            // Se a resposta não for OK, lança um erro com a mensagem do backend.
+            throw new Error(resultado.error || `Erro ${response.status}`);
+        }
+
+        showNotification(`Veículo ${resultado.modelo} (placa ${resultado.placa}) adicionado com sucesso!`, 'success', 4000, ui);
+        
+        ui.formNovoVeiculo.reset();
+        if(ui.modalAdicionar.open) ui.modalAdicionar.close();
+
+        // O pulo do gato! Atualiza a lista da tela com os dados mais recentes do DB.
+        await carregarEExibirVeiculos();
+
+    } catch (error) {
+        console.error("Erro ao adicionar veículo:", error);
+        showNotification(`Falha ao adicionar: ${error.message}`, 'error', 5000, ui);
+    }
+}
