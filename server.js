@@ -5,17 +5,14 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import Veiculo from './models/Veiculo.js';
 
-// Carrega as variáveis de ambiente do arquivo .env
 dotenv.config();
 
 const app = express();
 const port = process.env.PORT || 3001;
 
-// --- Middlewares Essenciais ---
 app.use(cors());
 app.use(express.json());
 
-// --- Conexão com o MongoDB Atlas ---
 const mongoUri = process.env.MONGO_URI;
 
 if (!mongoUri) {
@@ -35,7 +32,7 @@ mongoose.connect(mongoUri)
         process.exit(1);
     });
 
-// --- Rotas da API (Endpoints) ---
+// --- ROTAS DA API ---
 
 app.get('/', (req, res) => {
     res.status(200).send('<h1>🚀 API da Garagem Inteligente V3 com MongoDB está no ar!</h1>');
@@ -51,9 +48,7 @@ app.post('/api/veiculos', async (req, res) => {
         const veiculoCriado = await Veiculo.create(novoVeiculoData);
         res.status(201).json(veiculoCriado);
     } catch (error) {
-        // --- MELHORIA CRÍTICA AQUI ---
-        console.error("[ERRO NO POST /api/veiculos]", error); // Loga o erro completo no terminal do backend
-
+        console.error("[ERRO NO POST /api/veiculos]", error);
         if (error.code === 11000) {
             return res.status(409).json({ message: `Veículo com a placa '${error.keyValue.placa}' já existe.` });
         }
@@ -61,8 +56,6 @@ app.post('/api/veiculos', async (req, res) => {
              const messages = Object.values(error.errors).map(val => val.message);
              return res.status(400).json({ message: `Dados inválidos: ${messages.join(' ')}` });
         }
-        
-        // Envia uma mensagem de erro mais específica
         res.status(500).json({ message: 'Ocorreu um erro inesperado no servidor ao criar o veículo.', error: error.message });
     }
 });
@@ -113,9 +106,9 @@ app.put('/api/veiculos/:id', async (req, res) => {
             return res.status(400).json({ message: 'ID de veículo inválido fornecido.' });
         }
         const veiculoAtualizado = await Veiculo.findByIdAndUpdate(
-            id, 
-            req.body, 
-            { new: true, runValidators: true }
+            id,
+            req.body,
+            { new: true, runValidators: true } // new: true retorna o doc atualizado
         );
         if (!veiculoAtualizado) {
             return res.status(404).json({ message: 'Veículo não encontrado para atualização.' });
