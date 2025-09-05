@@ -36,7 +36,7 @@ const veiculoSchema = new mongoose.Schema({
         trim: true,
         required: [true, 'A cor do veículo é obrigatória.'],
     },
-    // Campos de estado do veículo centralizados no backend.
+    // Adicionamos os campos de controle do Veiculo.js do frontend aqui também.
     ligado: {
         type: Boolean,
         default: false,
@@ -55,6 +55,7 @@ const veiculoSchema = new mongoose.Schema({
  * Modelo Mongoose para a coleção 'veiculos'.
  * O Modelo é a nossa interface principal para realizar operações de
  * Create, Read, Update e Delete (CRUD) na coleção 'veiculos' do MongoDB.
+ * É como uma "classe" que representa e interage com a coleção.
  */
 const Veiculo = mongoose.model('Veiculo', veiculoSchema);
 

@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import Veiculo from './models/Veiculo.js';
+import Manutencao from './models/Manutencao.js';
 
 dotenv.config();
 
@@ -32,16 +33,8 @@ mongoose.connect(mongoUri)
         process.exit(1);
     });
 
-// --- ROTAS DA API ---
+// --- ROTAS DE VEÍCULOS (CRUD) ---
 
-app.get('/', (req, res) => {
-    res.status(200).send('<h1>🚀 API da Garagem Inteligente V3 com MongoDB está no ar!</h1>');
-});
-
-/**
- * @route   POST /api/veiculos
- * @desc    Cria um novo veículo.
- */
 app.post('/api/veiculos', async (req, res) => {
     try {
         const novoVeiculoData = req.body;
@@ -60,10 +53,6 @@ app.post('/api/veiculos', async (req, res) => {
     }
 });
 
-/**
- * @route   GET /api/veiculos
- * @desc    Busca e retorna todos os veículos.
- */
 app.get('/api/veiculos', async (req, res) => {
     try {
         const todosOsVeiculos = await Veiculo.find().sort({ createdAt: -1 });
@@ -74,10 +63,6 @@ app.get('/api/veiculos', async (req, res) => {
     }
 });
 
-/**
- * @route   GET /api/veiculos/:id
- * @desc    Busca um único veículo pelo seu ID.
- */
 app.get('/api/veiculos/:id', async (req, res) => {
     try {
         const { id } = req.params;
@@ -95,21 +80,20 @@ app.get('/api/veiculos/:id', async (req, res) => {
     }
 });
 
-/**
- * @route   PUT /api/veiculos/:id
- * @desc    Atualiza um veículo existente.
- */
 app.put('/api/veiculos/:id', async (req, res) => {
     try {
         const { id } = req.params;
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return res.status(400).json({ message: 'ID de veículo inválido fornecido.' });
         }
-        const veiculoAtualizado = await Veiculo.findByIdAndUpdate(
-            id,
-            req.body,
-            { new: true, runValidators: true } // new: true retorna o doc atualizado
-        );
+        const dadosParaAtualizar = {
+            placa: req.body.placa,
+            marca: req.body.marca,
+            modelo: req.body.modelo,
+            ano: req.body.ano,
+            cor: req.body.cor,
+        };
+        const veiculoAtualizado = await Veiculo.findByIdAndUpdate(id, dadosParaAtualizar, { new: true, runValidators: true });
         if (!veiculoAtualizado) {
             return res.status(404).json({ message: 'Veículo não encontrado para atualização.' });
         }
@@ -124,10 +108,6 @@ app.put('/api/veiculos/:id', async (req, res) => {
     }
 });
 
-/**
- * @route   DELETE /api/veiculos/:id
- * @desc    Deleta um veículo.
- */
 app.delete('/api/veiculos/:id', async (req, res) => {
     try {
         const { id } = req.params;
@@ -142,5 +122,96 @@ app.delete('/api/veiculos/:id', async (req, res) => {
     } catch (error) {
         console.error(`[ERRO NO DELETE /api/veiculos/${req.params.id}]`, error);
         res.status(500).json({ message: 'Ocorreu um erro interno ao deletar o veículo.', error: error.message });
+    }
+});
+
+// --- ROTAS DE AÇÃO DO VEÍCULO ---
+
+const handleAction = async (req, res, action) => {
+    try {
+        const { id } = req.params;
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({ message: 'ID de veículo inválido.' });
+        }
+        const veiculo = await Veiculo.findById(id);
+        if (!veiculo) {
+            return res.status(404).json({ message: 'Veículo não encontrado.' });
+        }
+        const result = action(veiculo);
+        if (result.success) {
+            await veiculo.save();
+            return res.status(200).json({ message: result.message, veiculo });
+        } else {
+            return res.status(400).json({ message: result.message, veiculo });
+        }
+    } catch (error) {
+        console.error(`[ERRO NA AÇÃO /api/veiculos/${req.params.id}]`, error);
+        res.status(500).json({ message: 'Erro interno no servidor ao processar a ação.' });
+    }
+};
+
+app.post('/api/veiculos/:id/ligar', (req, res) => handleAction(req, res, (veiculo) => {
+    if (veiculo.ligado) return { success: false, message: `${veiculo.modelo} já está ligado.` };
+    veiculo.ligado = true;
+    return { success: true, message: `Vrum vrum! ${veiculo.modelo} ligado.` };
+}));
+
+app.post('/api/veiculos/:id/desligar', (req, res) => handleAction(req, res, (veiculo) => {
+    if (!veiculo.ligado) return { success: false, message: `${veiculo.modelo} já está desligado.` };
+    veiculo.ligado = false;
+    veiculo.velocidade = 0;
+    return { success: true, message: `${veiculo.modelo} desligado. O silêncio é dourado.` };
+}));
+
+app.post('/api/veiculos/:id/acelerar', (req, res) => handleAction(req, res, (veiculo) => {
+    const VELOCIDADE_MAXIMA = 220;
+    const INCREMENTO = 15;
+    if (!veiculo.ligado) return { success: false, message: 'Não dá pra acelerar um carro desligado!' };
+    if (veiculo.velocidade >= VELOCIDADE_MAXIMA) return { success: false, message: 'Velocidade máxima atingida!' };
+    veiculo.velocidade = Math.min(veiculo.velocidade + INCREMENTO, VELOCIDADE_MAXIMA);
+    return { success: true, message: 'Acelerando...' };
+}));
+
+app.post('/api/veiculos/:id/frear', (req, res) => handleAction(req, res, (veiculo) => {
+    const DECREMENTO = 20;
+    if (veiculo.velocidade === 0) return { success: false, message: 'O carro já está parado.' };
+    veiculo.velocidade = Math.max(0, veiculo.velocidade - DECREMENTO);
+    return { success: true, message: 'Freando...' };
+}));
+
+
+// --- ROTAS PARA O SUB-RECURSO MANUTENÇÃO ---
+
+app.post('/api/veiculos/:veiculoId/manutencoes', async (req, res) => {
+    try {
+        const { veiculoId } = req.params;
+        const veiculoExiste = await Veiculo.findById(veiculoId);
+        if (!veiculoExiste) {
+            return res.status(404).json({ message: 'Veículo não encontrado. Não é possível adicionar manutenção.' });
+        }
+        const novaManutencao = await Manutencao.create({ ...req.body, veiculo: veiculoId });
+        res.status(201).json(novaManutencao);
+    } catch (error) {
+        console.error("[ERRO NO POST /manutencoes]", error);
+        if (error.name === 'ValidationError') {
+            const messages = Object.values(error.errors).map(val => val.message);
+            return res.status(400).json({ message: `Dados inválidos: ${messages.join(' ')}` });
+        }
+        res.status(500).json({ message: 'Ocorreu um erro inesperado no servidor ao criar a manutenção.' });
+    }
+});
+
+app.get('/api/veiculos/:veiculoId/manutencoes', async (req, res) => {
+    try {
+        const { veiculoId } = req.params;
+        const veiculoExiste = await Veiculo.findById(veiculoId);
+        if (!veiculoExiste) {
+            return res.status(404).json({ message: 'Veículo não encontrado.' });
+        }
+        const manutencoes = await Manutencao.find({ veiculo: veiculoId }).sort({ data: -1 });
+        res.status(200).json(manutencoes);
+    } catch (error) {
+        console.error("[ERRO NO GET /manutencoes]", error);
+        res.status(500).json({ message: 'Ocorreu um erro interno ao buscar as manutenções.' });
     }
 });
