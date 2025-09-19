@@ -4,7 +4,7 @@ import dotenv from 'dotenv';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import Veiculo from './models/Veiculo.js';
-import Manutencao from './models/Manutencao.js';
+import Manutencao from './models/Manutencao.js'; // ALTERAÇÃO: Importamos o modelo Manutencao
 
 dotenv.config();
 
@@ -35,6 +35,7 @@ mongoose.connect(mongoUri)
 
 // --- ROTAS DE VEÍCULOS (CRUD) ---
 
+// POST /api/veiculos (sem alterações)
 app.post('/api/veiculos', async (req, res) => {
     try {
         const novoVeiculoData = req.body;
@@ -53,6 +54,7 @@ app.post('/api/veiculos', async (req, res) => {
     }
 });
 
+// GET /api/veiculos (sem alterações)
 app.get('/api/veiculos', async (req, res) => {
     try {
         const todosOsVeiculos = await Veiculo.find().sort({ createdAt: -1 });
@@ -63,6 +65,7 @@ app.get('/api/veiculos', async (req, res) => {
     }
 });
 
+// GET /api/veiculos/:id (sem alterações)
 app.get('/api/veiculos/:id', async (req, res) => {
     try {
         const { id } = req.params;
@@ -80,6 +83,7 @@ app.get('/api/veiculos/:id', async (req, res) => {
     }
 });
 
+// PUT /api/veiculos/:id (sem alterações)
 app.put('/api/veiculos/:id', async (req, res) => {
     try {
         const { id } = req.params;
@@ -108,24 +112,41 @@ app.put('/api/veiculos/:id', async (req, res) => {
     }
 });
 
+
+// ALTERAÇÃO: Rota DELETE agora remove as manutenções associadas
 app.delete('/api/veiculos/:id', async (req, res) => {
     try {
         const { id } = req.params;
          if (!mongoose.Types.ObjectId.isValid(id)) {
             return res.status(400).json({ message: 'ID de veículo inválido fornecido.' });
         }
+
+        console.log(`[DELETE /api/veiculos/${id}] Iniciando exclusão do veículo e suas manutenções.`);
+
+        // 1. Deleta todas as manutenções que pertencem a este veículo
+        const resultadoManutencoes = await Manutencao.deleteMany({ veiculo: id });
+        console.log(`[DELETE] ${resultadoManutencoes.deletedCount} manutenções associadas foram excluídas.`);
+
+        // 2. Deleta o próprio veículo
         const veiculoDeletado = await Veiculo.findByIdAndDelete(id);
+
         if (!veiculoDeletado) {
             return res.status(404).json({ message: 'Veículo não encontrado para exclusão.' });
         }
-        res.status(200).json({ message: `Veículo '${veiculoDeletado.modelo}' (Placa: ${veiculoDeletado.placa}) foi deletado com sucesso.` });
+        
+        // 3. Responde com sucesso
+        res.status(200).json({ 
+            message: `Veículo '${veiculoDeletado.modelo}' (Placa: ${veiculoDeletado.placa}) e suas ${resultadoManutencoes.deletedCount} manutenções foram deletados com sucesso.` 
+        });
+
     } catch (error) {
         console.error(`[ERRO NO DELETE /api/veiculos/${req.params.id}]`, error);
-        res.status(500).json({ message: 'Ocorreu um erro interno ao deletar o veículo.', error: error.message });
+        res.status(500).json({ message: 'Ocorreu um erro interno ao deletar o veículo e suas dependências.', error: error.message });
     }
 });
 
-// --- ROTAS DE AÇÃO DO VEÍCULO ---
+
+// --- ROTAS DE AÇÃO DO VEÍCULO (sem alterações) ---
 
 const handleAction = async (req, res, action) => {
     try {
@@ -180,7 +201,7 @@ app.post('/api/veiculos/:id/frear', (req, res) => handleAction(req, res, (veicul
 }));
 
 
-// --- ROTAS PARA O SUB-RECURSO MANUTENÇÃO ---
+// --- ROTAS PARA O SUB-RECURSO MANUTENÇÃO (sem alterações) ---
 
 app.post('/api/veiculos/:veiculoId/manutencoes', async (req, res) => {
     try {

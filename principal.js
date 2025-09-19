@@ -2,7 +2,7 @@
 
 // --- Constantes e Configuração ---
 const backendUrl = 'http://localhost:3001';
-const VELOCIDADE_MAXIMA_GAUGE = 220; // Velocidade máxima para o visual do velocímetro
+const VELOCIDADE_MAXIMA_GAUGE = 220; 
 
 // --- Referências aos Elementos da UI ---
 const ui = {
@@ -31,6 +31,7 @@ const ui = {
     infoAno: document.getElementById('info-ano'),
     infoId: document.getElementById('info-id'),
     botaoRemoverHeader: document.getElementById('botaoRemoverHeader'),
+    botaoEditarHeader: document.getElementById('botaoEditarHeader'), // ADICIONADO: Referência ao novo botão
     painelDeControle: document.getElementById('painelDeControle'),
     infoStatusMotor: document.getElementById('info-status-motor'),
     velocimetroProgresso: document.getElementById('velocimetro-progresso'),
@@ -46,7 +47,7 @@ const ui = {
 // --- Funções Auxiliares ---
 function showNotification(message, type = 'info', duration = 4000) {
     ui.notificationMessage.textContent = message;
-    ui.notificationArea.className = 'show'; 
+    ui.notificationArea.className = 'show';
     ui.notificationArea.classList.add(type);
     setTimeout(() => ui.notificationArea.classList.remove('show'), duration);
 }
@@ -65,7 +66,7 @@ async function carregarEExibirVeiculos() {
 }
 
 function atualizarListaVeiculosSidebar(veiculos) {
-    ui.listaVeiculosSidebar.innerHTML = ''; 
+    ui.listaVeiculosSidebar.innerHTML = '';
     if (!veiculos || veiculos.length === 0) {
         ui.listaVeiculosSidebar.innerHTML = '<li class="placeholder">Nenhum veículo adicionado.</li>';
         return;
@@ -80,8 +81,11 @@ function atualizarListaVeiculosSidebar(veiculos) {
                 <span>${veiculo.modelo} (${veiculo.placa})</span>
             </div>
             <div class="veiculo-actions">
-                <button class="btn-action btn-edit" data-id="${veiculo._id}" title="Editar ${veiculo.modelo}">
+                <button class="btn-action btn-edit" title="Editar ${veiculo.modelo}">
                     <i class="fas fa-edit"></i>
+                </button>
+                <button class="btn-action btn-delete" title="Excluir ${veiculo.modelo}">
+                    <i class="fas fa-trash-alt"></i>
                 </button>
             </div>`;
         ui.listaVeiculosSidebar.appendChild(li);
@@ -103,15 +107,18 @@ async function selecionarEExibirVeiculo(veiculoId) {
         ui.infoAno.textContent = veiculo.ano;
         ui.infoId.textContent = veiculo._id;
 
-        const actionButtons = [ui.botaoRemoverHeader, ui.botaoLigarDesligar, ui.botaoAcelerar, ui.botaoFrear];
-        actionButtons.forEach(btn => btn.dataset.id = veiculo._id);
+        // ALTERAÇÃO: Adicionado o novo botão de editar ao array para receber o dataset.id
+        const actionButtons = [ui.botaoRemoverHeader, ui.botaoEditarHeader, ui.botaoLigarDesligar, ui.botaoAcelerar, ui.botaoFrear];
+        actionButtons.forEach(btn => {
+            if (btn) btn.dataset.id = veiculo._id; // Checagem de segurança
+        });
         ui.manutencaoVeiculoIdInput.value = veiculo._id;
-        
+
         atualizarPainelControle(veiculo);
 
         document.querySelectorAll('.veiculo-item').forEach(item => item.classList.remove('selecionado'));
         document.querySelector(`.veiculo-item[data-id="${veiculoId}"]`)?.classList.add('selecionado');
-        
+
         await carregarEExibirManutencoes(veiculoId);
     } catch (error) {
         showNotification(error.message, 'error');
@@ -128,35 +135,36 @@ function atualizarPainelControle(veiculo) {
     ui.botaoAcelerar.disabled = !isLigado;
     ui.botaoFrear.disabled = !isLigado;
 
-    const progresso = veiculo.velocidade / VELOCIDADE_MAXIMA_GAUGE;
-    const pathLength = ui.velocimetroProgresso.getTotalLength();
-    ui.velocimetroProgresso.style.strokeDasharray = pathLength;
-    ui.velocimetroProgresso.style.strokeDashoffset = pathLength * (1 - progresso);
-    
+    const progresso = Math.min(veiculo.velocidade / VELOCIDADE_MAXIMA_GAUGE, 1);
+    const path = ui.velocimetroProgresso;
+    const pathLength = path.getTotalLength ? path.getTotalLength() : 251.2;
+    path.style.strokeDasharray = pathLength;
+    path.style.strokeDashoffset = pathLength * (1 - progresso);
+
     let corVelocimetro = 'var(--cor-primaria)';
     if (veiculo.velocidade > VELOCIDADE_MAXIMA_GAUGE * 0.8) corVelocimetro = 'var(--cor-perigo)';
     else if (veiculo.velocidade > VELOCIDADE_MAXIMA_GAUGE * 0.5) corVelocimetro = 'var(--cor-aviso)';
-    ui.velocimetroProgresso.style.stroke = corVelocimetro;
-    
+    path.style.stroke = corVelocimetro;
+
     ui.velocimetroTexto.textContent = `${veiculo.velocidade} km/h`;
 }
 
-// --- Funções de Ação da API ---
 async function executarAcaoVeiculo(veiculoId, acao) {
     try {
         const response = await fetch(`${backendUrl}/api/veiculos/${veiculoId}/${acao}`, { method: 'POST' });
         const resultado = await response.json();
-        
+
         if (!response.ok) showNotification(resultado.message, 'warning');
         else if (acao === 'ligar' || acao === 'desligar') showNotification(resultado.message, 'info');
-        
-        if (resultado.veiculo) atualizarPainelControle(resultado.veiculo);
+
+        if (resultado.veiculo) {
+            atualizarPainelControle(resultado.veiculo);
+        }
     } catch (error) {
         showNotification(`Erro de comunicação: ${error.message}`, 'error');
     }
 }
 
-// --- Funções de Manutenção ---
 async function carregarEExibirManutencoes(veiculoId) {
     ui.listaManutencoes.innerHTML = '<li class="placeholder">Carregando histórico...</li>';
     try {
@@ -197,7 +205,7 @@ async function handleAdicionarManutencao(event) {
         });
         const resultado = await response.json();
         if (!response.ok) throw new Error(resultado.message || `Erro ${response.status}`);
-        
+
         showNotification('Manutenção registrada com sucesso!', 'success');
         ui.formNovaManutencao.reset();
         ui.manutencaoVeiculoIdInput.value = veiculoId;
@@ -207,7 +215,6 @@ async function handleAdicionarManutencao(event) {
     }
 }
 
-// --- Handlers de Formulários (CRUD Veículos) ---
 async function handleAdicionarVeiculo(event) {
     event.preventDefault();
     const veiculoData = Object.fromEntries(new FormData(ui.formNovoVeiculo).entries());
@@ -231,9 +238,16 @@ async function handleAdicionarVeiculo(event) {
 async function abrirModalDeEdicao(veiculoId) {
     try {
         const response = await fetch(`${backendUrl}/api/veiculos/${veiculoId}`);
-        if (!response.ok) throw new Error('Não foi possível carregar os dados.');
+        if (!response.ok) throw new Error('Não foi possível carregar os dados do veículo para edição.');
         const veiculo = await response.json();
-        Object.assign(ui, { editVeiculoId: { value: veiculo._id }, editVeiculoPlaca: { value: veiculo.placa }, editVeiculoMarca: { value: veiculo.marca }, editVeiculoModelo: { value: veiculo.modelo }, editVeiculoAno: { value: veiculo.ano }, editVeiculoCor: { value: veiculo.cor } });
+
+        ui.editVeiculoId.value = veiculo._id;
+        ui.editVeiculoPlaca.value = veiculo.placa;
+        ui.editVeiculoMarca.value = veiculo.marca;
+        ui.editVeiculoModelo.value = veiculo.modelo;
+        ui.editVeiculoAno.value = veiculo.ano;
+        ui.editVeiculoCor.value = veiculo.cor;
+
         ui.modalEditar.showModal();
     } catch (error) {
         showNotification(error.message, 'error');
@@ -255,6 +269,7 @@ async function handleEditarVeiculo(event) {
         showNotification(`Veículo ${resultado.modelo} atualizado!`, 'success');
         ui.modalEditar.close();
         await carregarEExibirVeiculos();
+
         if (document.querySelector('.veiculo-item.selecionado')?.dataset.id === veiculoId) {
             await selecionarEExibirVeiculo(veiculoId);
         }
@@ -264,15 +279,17 @@ async function handleEditarVeiculo(event) {
 }
 
 async function handleDeletarVeiculo(veiculoId) {
-    if (confirm("Tem certeza que deseja excluir este veículo?")) {
+    if (confirm("Tem certeza que deseja excluir este veículo e todo o seu histórico de manutenções? Esta ação não pode ser desfeita.")) {
         try {
             const response = await fetch(`${backendUrl}/api/veiculos/${veiculoId}`, { method: 'DELETE' });
             const resultado = await response.json();
             if (!response.ok) throw new Error(resultado.message || `Erro ${response.status}`);
+
             showNotification(resultado.message, 'success');
+
             if (ui.botaoRemoverHeader.dataset.id === veiculoId) {
-                 ui.painelVeiculoSelecionado.style.display = 'none';
-                 ui.mensagemSelecione.style.display = 'block';
+                ui.painelVeiculoSelecionado.style.display = 'none';
+                ui.mensagemSelecione.style.display = 'block';
             }
             await carregarEExibirVeiculos();
         } catch (error) {
@@ -293,30 +310,43 @@ document.addEventListener('DOMContentLoaded', () => {
     ui.formNovoVeiculo.addEventListener('submit', handleAdicionarVeiculo);
     ui.formEditarVeiculo.addEventListener('submit', handleEditarVeiculo);
     ui.formNovaManutencao.addEventListener('submit', handleAdicionarManutencao);
-    
+
     ui.listaVeiculosSidebar.addEventListener('click', (event) => {
         const veiculoItem = event.target.closest('.veiculo-item');
         if (!veiculoItem) return;
+
         const veiculoId = veiculoItem.dataset.id;
-        if (event.target.closest('.btn-edit')) abrirModalDeEdicao(veiculoId);
-        else if (event.target.closest('.veiculo-info')) selecionarEExibirVeiculo(veiculoId);
+        const btnEdit = event.target.closest('.btn-edit');
+        const btnDelete = event.target.closest('.btn-delete');
+        const infoArea = event.target.closest('.veiculo-info');
+
+        if (btnEdit) {
+            abrirModalDeEdicao(veiculoId);
+        } else if (btnDelete) {
+            handleDeletarVeiculo(veiculoId);
+        } else if (infoArea) {
+            selecionarEExibirVeiculo(veiculoId);
+        }
     });
 
     ui.botaoRemoverHeader.addEventListener('click', (e) => handleDeletarVeiculo(e.currentTarget.dataset.id));
+    // ADICIONADO: Event listener para o novo botão de editar no cabeçalho
+    ui.botaoEditarHeader.addEventListener('click', (e) => abrirModalDeEdicao(e.currentTarget.dataset.id));
     ui.botaoLigarDesligar.addEventListener('click', (e) => executarAcaoVeiculo(e.currentTarget.dataset.id, e.currentTarget.innerText.trim().toLowerCase() === 'ligar' ? 'ligar' : 'desligar'));
     ui.botaoAcelerar.addEventListener('click', (e) => executarAcaoVeiculo(e.currentTarget.dataset.id, 'acelerar'));
     ui.botaoFrear.addEventListener('click', (e) => executarAcaoVeiculo(e.currentTarget.dataset.id, 'frear'));
 
-    console.log("✅ Garagem Inteligente inicializada com relacionamentos!");
+    console.log("✅ Garagem Inteligente inicializada com sucesso!");
 });
 
 // Estilos dinâmicos para botões de ação na lista
 const extraStyles = `
     .veiculo-item { display: flex; justify-content: space-between; align-items: center; }
     .veiculo-info { flex-grow: 1; cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 10px 0; }
-    .veiculo-actions { display: flex; opacity: 0; transition: opacity 0.2s ease; }
+    .veiculo-actions { display: flex; gap: 5px; opacity: 0; transition: opacity 0.2s ease; }
     .veiculo-item:hover .veiculo-actions { opacity: 1; }
     .btn-action { background: transparent; border: none; cursor: pointer; font-size: 1rem; padding: 5px; margin: 0; color: var(--cor-secundaria); }
     .veiculo-item.selecionado .btn-action { color: var(--cor-texto-claro); }
-    .btn-action:hover { background-color: rgba(0,0,0,0.1); border-radius: 4px; }`;
+    .btn-action:hover { background-color: rgba(0,0,0,0.1); border-radius: 4px; }
+    .btn-action.btn-delete:hover { color: var(--cor-perigo); }`;
 document.head.appendChild(Object.assign(document.createElement("style"), { innerText: extraStyles }));
