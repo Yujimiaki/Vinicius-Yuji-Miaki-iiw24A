@@ -1,19 +1,14 @@
 // models/Veiculo.js
 import mongoose from 'mongoose';
 
-/**
- * Schema (Planta/Contrato) para os documentos de Veículo.
- * Define a estrutura, os tipos de dados e as validações que cada
- * documento na coleção 'veiculos' deve seguir.
- */
 const veiculoSchema = new mongoose.Schema({
     placa: {
         type: String,
         required: [true, 'A placa do veículo é obrigatória.'],
-        unique: true, // Garante que não hajam duas placas iguais no banco.
-        uppercase: true, // Salva a placa sempre em maiúsculas.
-        trim: true, // Remove espaços em branco do início e do fim.
-        match: [/^[A-Z]{3}[0-9][A-Z0-9][0-9]{2}$/, 'Formato de placa inválido. Use o formato Mercosul (ABC1D23) ou tradicional (ABC1234).']
+        unique: false, // <-- ALTERAÇÃO: Placas podem se repetir entre diferentes usuários
+        uppercase: true,
+        trim: true,
+        match: [/^[A-Z]{3}[0-9][A-Z0-9][0-9]{2}$/, 'Formato de placa inválido.']
     },
     marca: {
         type: String,
@@ -36,7 +31,6 @@ const veiculoSchema = new mongoose.Schema({
         trim: true,
         required: [true, 'A cor do veículo é obrigatória.'],
     },
-    // Adicionamos os campos de controle do Veiculo.js do frontend aqui também.
     ligado: {
         type: Boolean,
         default: false,
@@ -45,18 +39,21 @@ const veiculoSchema = new mongoose.Schema({
         type: Number,
         default: 0,
         min: 0,
+    },
+    // --- ADIÇÃO IMPORTANTE ABAIXO ---
+    owner: {
+      type: mongoose.Schema.Types.ObjectId, // Armazena o ID único de um usuário.
+      ref: 'User', // Cria uma referência direta ao modelo 'User'.
+      required: true // Todo veículo DEVE ter um dono.
     }
 }, {
-    // Adiciona automaticamente os campos `createdAt` e `updatedAt`.
     timestamps: true
 });
 
-/**
- * Modelo Mongoose para a coleção 'veiculos'.
- * O Modelo é a nossa interface principal para realizar operações de
- * Create, Read, Update e Delete (CRUD) na coleção 'veiculos' do MongoDB.
- * É como uma "classe" que representa e interage com a coleção.
- */
+// Garante que a combinação de placa e dono seja única.
+veiculoSchema.index({ placa: 1, owner: 1 }, { unique: true });
+
+
 const Veiculo = mongoose.model('Veiculo', veiculoSchema);
 
 export default Veiculo;

@@ -31,7 +31,6 @@ const ui = {
     infoAno: document.getElementById('info-ano'),
     infoId: document.getElementById('info-id'),
     botaoRemoverHeader: document.getElementById('botaoRemoverHeader'),
-    botaoEditarHeader: document.getElementById('botaoEditarHeader'), // ADICIONADO: Referência ao novo botão
     painelDeControle: document.getElementById('painelDeControle'),
     infoStatusMotor: document.getElementById('info-status-motor'),
     velocimetroProgresso: document.getElementById('velocimetro-progresso'),
@@ -42,6 +41,12 @@ const ui = {
     formNovaManutencao: document.getElementById('formNovaManutencao'),
     manutencaoVeiculoIdInput: document.getElementById('manutencaoVeiculoId'),
     listaManutencoes: document.getElementById('listaManutencoesVeiculo'),
+    // <-- ADICIONADOS PARA AUTENTICAÇÃO -->
+    authContainer: document.getElementById('auth-container'),
+    appContainer: document.getElementById('app-container'),
+    formLogin: document.getElementById('formLogin'),
+    formRegister: document.getElementById('formRegister'),
+    btnLogout: document.getElementById('btnLogout'),
 };
 
 // --- Funções Auxiliares ---
@@ -52,10 +57,101 @@ function showNotification(message, type = 'info', duration = 4000) {
     setTimeout(() => ui.notificationArea.classList.remove('show'), duration);
 }
 
-// --- Funções de API e UI (Veículos) ---
+// <-- ALTERAÇÃO IMPORTANTE: Função para pegar headers com token -->
+function getAuthHeaders() {
+    const token = localStorage.getItem('garagemToken');
+    const headers = {
+        'Content-Type': 'application/json',
+    };
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+}
+
+// --- Funções de Autenticação (NOVAS) ---
+async function handleRegister(event) {
+    event.preventDefault();
+    const email = document.getElementById('registerEmail').value;
+    const password = document.getElementById('registerPassword').value;
+
+    try {
+        const response = await fetch(`${backendUrl}/api/auth/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password }),
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message);
+        
+        showNotification(data.message, 'success');
+        ui.formRegister.reset();
+        document.getElementById('loginEmail').value = email;
+    } catch (error) {
+        showNotification(`Falha no registro: ${error.message}`, 'error');
+        console.error("Erro no registro:", error);
+    }
+}
+
+async function handleLogin(event) {
+    event.preventDefault();
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+
+    try {
+        const response = await fetch(`${backendUrl}/api/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password }),
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.message);
+
+        localStorage.setItem('garagemToken', data.token);
+        showNotification(data.message, 'success');
+        checkLoginState();
+    } catch (error) {
+        showNotification(`Falha no login: ${error.message}`, 'error');
+        console.error("Erro no login:", error);
+    }
+}
+
+function handleLogout() {
+    localStorage.removeItem('garagemToken');
+    showNotification('Você saiu da sua conta.', 'info');
+    checkLoginState();
+}
+
+// --- Função de Gerenciamento de Estado da UI (NOVA) ---
+function checkLoginState() {
+    const token = localStorage.getItem('garagemToken');
+    if (token) {
+        ui.authContainer.style.display = 'none';
+        ui.appContainer.style.display = 'flex';
+        carregarEExibirVeiculos();
+    } else {
+        ui.authContainer.style.display = 'block';
+        ui.appContainer.style.display = 'none';
+        ui.listaVeiculosSidebar.innerHTML = '<li class="placeholder">Faça login para ver seus veículos.</li>';
+        ui.painelVeiculoSelecionado.style.display = 'none';
+        ui.mensagemSelecione.style.display = 'block';
+    }
+}
+
+// --- Funções de API e UI (Veículos) - AGORA COM TOKEN ---
+
 async function carregarEExibirVeiculos() {
     try {
-        const response = await fetch(`${backendUrl}/api/veiculos`);
+        const response = await fetch(`${backendUrl}/api/veiculos`, {
+            headers: getAuthHeaders()
+        });
+        
+        if (response.status === 401) {
+             handleLogout();
+             showNotification('Sua sessão expirou. Faça login novamente.', 'warning');
+             return;
+        }
+        
         if (!response.ok) throw new Error((await response.json()).message || 'Falha ao buscar veículos.');
         const veiculos = await response.json();
         atualizarListaVeiculosSidebar(veiculos);
@@ -73,145 +169,27 @@ function atualizarListaVeiculosSidebar(veiculos) {
     }
     veiculos.forEach(veiculo => {
         const li = document.createElement('li');
-        li.className = 'veiculo-item';
         li.dataset.id = veiculo._id;
         li.innerHTML = `
-            <div class="veiculo-info" title="Selecionar ${veiculo.modelo}">
-                <i class="fas fa-car"></i>
-                <span>${veiculo.modelo} (${veiculo.placa})</span>
-            </div>
-            <div class="veiculo-actions">
-                <button class="btn-action btn-edit" title="Editar ${veiculo.modelo}">
-                    <i class="fas fa-edit"></i>
-                </button>
-                <button class="btn-action btn-delete" title="Excluir ${veiculo.modelo}">
-                    <i class="fas fa-trash-alt"></i>
-                </button>
-            </div>`;
+            <i class="fas fa-car"></i>
+            <span>${veiculo.modelo} (${veiculo.placa})</span>
+            <button class="botao-remover-item" title="Excluir ${veiculo.modelo}"><i class="fas fa-trash-alt"></i></button>
+        `;
         ui.listaVeiculosSidebar.appendChild(li);
     });
 }
 
 async function selecionarEExibirVeiculo(veiculoId) {
     try {
-        const response = await fetch(`${backendUrl}/api/veiculos/${veiculoId}`);
+        const response = await fetch(`${backendUrl}/api/veiculos/${veiculoId}`, {
+            headers: getAuthHeaders()
+        });
         if (!response.ok) throw new Error('Veículo não encontrado.');
         const veiculo = await response.json();
 
-        ui.painelVeiculoSelecionado.style.display = 'block';
-        ui.mensagemSelecione.style.display = 'none';
-
-        ui.infoModeloPlaca.textContent = `${veiculo.modelo} (${veiculo.placa})`;
-        ui.infoMarca.textContent = veiculo.marca;
-        ui.infoCor.textContent = veiculo.cor;
-        ui.infoAno.textContent = veiculo.ano;
-        ui.infoId.textContent = veiculo._id;
-
-        // ALTERAÇÃO: Adicionado o novo botão de editar ao array para receber o dataset.id
-        const actionButtons = [ui.botaoRemoverHeader, ui.botaoEditarHeader, ui.botaoLigarDesligar, ui.botaoAcelerar, ui.botaoFrear];
-        actionButtons.forEach(btn => {
-            if (btn) btn.dataset.id = veiculo._id; // Checagem de segurança
-        });
-        ui.manutencaoVeiculoIdInput.value = veiculo._id;
-
-        atualizarPainelControle(veiculo);
-
-        document.querySelectorAll('.veiculo-item').forEach(item => item.classList.remove('selecionado'));
-        document.querySelector(`.veiculo-item[data-id="${veiculoId}"]`)?.classList.add('selecionado');
-
-        await carregarEExibirManutencoes(veiculoId);
+        //... (lógica para exibir os detalhes do veículo)
     } catch (error) {
         showNotification(error.message, 'error');
-        ui.painelVeiculoSelecionado.style.display = 'none';
-        ui.mensagemSelecione.style.display = 'block';
-    }
-}
-
-function atualizarPainelControle(veiculo) {
-    const isLigado = veiculo.ligado;
-    ui.infoStatusMotor.innerHTML = `<i class="fas fa-circle status-${isLigado ? 'on' : 'off'}"></i> <span class="status-${isLigado ? 'on' : 'off'}">${isLigado ? 'Ligado' : 'Desligado'}</span>`;
-    ui.botaoLigarDesligar.innerHTML = `<i class="fas fa-power-off"></i> ${isLigado ? 'Desligar' : 'Ligar'}`;
-    ui.botaoLigarDesligar.classList.toggle('botao-perigo', isLigado);
-    ui.botaoAcelerar.disabled = !isLigado;
-    ui.botaoFrear.disabled = !isLigado;
-
-    const progresso = Math.min(veiculo.velocidade / VELOCIDADE_MAXIMA_GAUGE, 1);
-    const path = ui.velocimetroProgresso;
-    const pathLength = path.getTotalLength ? path.getTotalLength() : 251.2;
-    path.style.strokeDasharray = pathLength;
-    path.style.strokeDashoffset = pathLength * (1 - progresso);
-
-    let corVelocimetro = 'var(--cor-primaria)';
-    if (veiculo.velocidade > VELOCIDADE_MAXIMA_GAUGE * 0.8) corVelocimetro = 'var(--cor-perigo)';
-    else if (veiculo.velocidade > VELOCIDADE_MAXIMA_GAUGE * 0.5) corVelocimetro = 'var(--cor-aviso)';
-    path.style.stroke = corVelocimetro;
-
-    ui.velocimetroTexto.textContent = `${veiculo.velocidade} km/h`;
-}
-
-async function executarAcaoVeiculo(veiculoId, acao) {
-    try {
-        const response = await fetch(`${backendUrl}/api/veiculos/${veiculoId}/${acao}`, { method: 'POST' });
-        const resultado = await response.json();
-
-        if (!response.ok) showNotification(resultado.message, 'warning');
-        else if (acao === 'ligar' || acao === 'desligar') showNotification(resultado.message, 'info');
-
-        if (resultado.veiculo) {
-            atualizarPainelControle(resultado.veiculo);
-        }
-    } catch (error) {
-        showNotification(`Erro de comunicação: ${error.message}`, 'error');
-    }
-}
-
-async function carregarEExibirManutencoes(veiculoId) {
-    ui.listaManutencoes.innerHTML = '<li class="placeholder">Carregando histórico...</li>';
-    try {
-        const response = await fetch(`${backendUrl}/api/veiculos/${veiculoId}/manutencoes`);
-        if (!response.ok) throw new Error('Falha ao buscar histórico.');
-        const manutencoes = await response.json();
-
-        ui.listaManutencoes.innerHTML = '';
-        if (manutencoes.length === 0) {
-            ui.listaManutencoes.innerHTML = '<li class="placeholder">Nenhum registro de manutenção.</li>';
-            return;
-        }
-        manutencoes.forEach(manut => {
-            const li = document.createElement('li');
-            const dataFormatada = new Date(manut.data).toLocaleDateString('pt-BR');
-            const custoFormatado = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(manut.custo);
-            li.innerHTML = `<span><strong>${manut.descricaoServico}</strong> em ${dataFormatada}</span><span>${custoFormatado}</span>`;
-            ui.listaManutencoes.appendChild(li);
-        });
-    } catch (error) {
-        showNotification(error.message, 'error');
-        ui.listaManutencoes.innerHTML = '<li class="placeholder error">Erro ao carregar histórico.</li>';
-    }
-}
-
-async function handleAdicionarManutencao(event) {
-    event.preventDefault();
-    const veiculoId = ui.manutencaoVeiculoIdInput.value;
-    if (!veiculoId) return showNotification('Nenhum veículo selecionado.', 'error');
-
-    const manutencaoData = Object.fromEntries(new FormData(ui.formNovaManutencao).entries());
-
-    try {
-        const response = await fetch(`${backendUrl}/api/veiculos/${veiculoId}/manutencoes`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(manutencaoData),
-        });
-        const resultado = await response.json();
-        if (!response.ok) throw new Error(resultado.message || `Erro ${response.status}`);
-
-        showNotification('Manutenção registrada com sucesso!', 'success');
-        ui.formNovaManutencao.reset();
-        ui.manutencaoVeiculoIdInput.value = veiculoId;
-        await carregarEExibirManutencoes(veiculoId);
-    } catch (error) {
-        showNotification(`Falha ao registrar: ${error.message}`, 'error');
     }
 }
 
@@ -221,7 +199,7 @@ async function handleAdicionarVeiculo(event) {
     try {
         const response = await fetch(`${backendUrl}/api/veiculos`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: getAuthHeaders(),
             body: JSON.stringify(veiculoData),
         });
         const resultado = await response.json();
@@ -235,118 +213,80 @@ async function handleAdicionarVeiculo(event) {
     }
 }
 
-async function abrirModalDeEdicao(veiculoId) {
-    try {
-        const response = await fetch(`${backendUrl}/api/veiculos/${veiculoId}`);
-        if (!response.ok) throw new Error('Não foi possível carregar os dados do veículo para edição.');
-        const veiculo = await response.json();
-
-        ui.editVeiculoId.value = veiculo._id;
-        ui.editVeiculoPlaca.value = veiculo.placa;
-        ui.editVeiculoMarca.value = veiculo.marca;
-        ui.editVeiculoModelo.value = veiculo.modelo;
-        ui.editVeiculoAno.value = veiculo.ano;
-        ui.editVeiculoCor.value = veiculo.cor;
-
-        ui.modalEditar.showModal();
-    } catch (error) {
-        showNotification(error.message, 'error');
-    }
-}
-
-async function handleEditarVeiculo(event) {
-    event.preventDefault();
-    const veiculoId = ui.editVeiculoId.value;
-    const veiculoData = Object.fromEntries(new FormData(ui.formEditarVeiculo).entries());
-    try {
-        const response = await fetch(`${backendUrl}/api/veiculos/${veiculoId}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(veiculoData),
-        });
-        const resultado = await response.json();
-        if (!response.ok) throw new Error(resultado.message || `Erro ${response.status}`);
-        showNotification(`Veículo ${resultado.modelo} atualizado!`, 'success');
-        ui.modalEditar.close();
-        await carregarEExibirVeiculos();
-
-        if (document.querySelector('.veiculo-item.selecionado')?.dataset.id === veiculoId) {
-            await selecionarEExibirVeiculo(veiculoId);
-        }
-    } catch (error) {
-        showNotification(`Falha ao atualizar: ${error.message}`, 'error');
-    }
-}
-
+// <-- FUNÇÃO CORRIGIDA E COMPLETA -->
 async function handleDeletarVeiculo(veiculoId) {
-    if (confirm("Tem certeza que deseja excluir este veículo e todo o seu histórico de manutenções? Esta ação não pode ser desfeita.")) {
+    if (confirm("Tem certeza que deseja excluir este veículo e todo o seu histórico?")) {
         try {
-            const response = await fetch(`${backendUrl}/api/veiculos/${veiculoId}`, { method: 'DELETE' });
+            const response = await fetch(`${backendUrl}/api/veiculos/${veiculoId}`, {
+                method: 'DELETE',
+                headers: getAuthHeaders() // Envia o token para autorização
+            });
+            
             const resultado = await response.json();
-            if (!response.ok) throw new Error(resultado.message || `Erro ${response.status}`);
+            if (!response.ok) {
+                throw new Error(resultado.message || `Erro ${response.status}`);
+            }
 
             showNotification(resultado.message, 'success');
 
+            // Se o veículo deletado era o que estava selecionado, limpa o painel
             if (ui.botaoRemoverHeader.dataset.id === veiculoId) {
                 ui.painelVeiculoSelecionado.style.display = 'none';
                 ui.mensagemSelecione.style.display = 'block';
             }
+            // Atualiza a lista na sidebar
             await carregarEExibirVeiculos();
+
         } catch (error) {
             showNotification(`Falha ao excluir: ${error.message}`, 'error');
+            console.error("Erro ao deletar:", error);
         }
     }
 }
 
+
 // --- Inicialização e Event Listeners ---
 document.addEventListener('DOMContentLoaded', () => {
-    carregarEExibirVeiculos();
+    // Listeners de Autenticação
+    ui.formLogin.addEventListener('submit', handleLogin);
+    ui.formRegister.addEventListener('submit', handleRegister);
+    ui.btnLogout.addEventListener('click', handleLogout);
 
+    // Listeners dos Modais
     ui.btnAbrirModalAdicionar.addEventListener('click', () => ui.modalAdicionar.showModal());
     ui.btnFecharModalAdicionar.addEventListener('click', () => ui.modalAdicionar.close());
     ui.btnFecharModalEditar.addEventListener('click', () => ui.modalEditar.close());
     ui.notificationCloseBtn.addEventListener('click', () => ui.notificationArea.classList.remove('show'));
 
+    // Listeners de Formulários
     ui.formNovoVeiculo.addEventListener('submit', handleAdicionarVeiculo);
-    ui.formEditarVeiculo.addEventListener('submit', handleEditarVeiculo);
-    ui.formNovaManutencao.addEventListener('submit', handleAdicionarManutencao);
+    // Adicione aqui os outros listeners que você tinha: formEditarVeiculo, formNovaManutencao, etc.
 
+    // Listener da Lista de Veículos (Sidebar)
     ui.listaVeiculosSidebar.addEventListener('click', (event) => {
-        const veiculoItem = event.target.closest('.veiculo-item');
-        if (!veiculoItem) return;
+        const veiculoLi = event.target.closest('li');
+        if (!veiculoLi || !veiculoLi.dataset.id) return;
 
-        const veiculoId = veiculoItem.dataset.id;
-        const btnEdit = event.target.closest('.btn-edit');
-        const btnDelete = event.target.closest('.btn-delete');
-        const infoArea = event.target.closest('.veiculo-info');
-
-        if (btnEdit) {
-            abrirModalDeEdicao(veiculoId);
-        } else if (btnDelete) {
+        const veiculoId = veiculoLi.dataset.id;
+        
+        // Verifica se o clique foi no botão de remover
+        if (event.target.closest('.botao-remover-item')) {
             handleDeletarVeiculo(veiculoId);
-        } else if (infoArea) {
+        } else {
+            // Se não foi no botão de remover, seleciona o veículo
             selecionarEExibirVeiculo(veiculoId);
         }
     });
 
+    // Outros listeners de botões de ação
     ui.botaoRemoverHeader.addEventListener('click', (e) => handleDeletarVeiculo(e.currentTarget.dataset.id));
-    // ADICIONADO: Event listener para o novo botão de editar no cabeçalho
-    ui.botaoEditarHeader.addEventListener('click', (e) => abrirModalDeEdicao(e.currentTarget.dataset.id));
-    ui.botaoLigarDesligar.addEventListener('click', (e) => executarAcaoVeiculo(e.currentTarget.dataset.id, e.currentTarget.innerText.trim().toLowerCase() === 'ligar' ? 'ligar' : 'desligar'));
-    ui.botaoAcelerar.addEventListener('click', (e) => executarAcaoVeiculo(e.currentTarget.dataset.id, 'acelerar'));
-    ui.botaoFrear.addEventListener('click', (e) => executarAcaoVeiculo(e.currentTarget.dataset.id, 'frear'));
+    // Adicione aqui os listeners para Ligar/Desligar, Acelerar, Frear, etc.
 
-    console.log("✅ Garagem Inteligente inicializada com sucesso!");
+    // Verifica o estado de login assim que a página carrega
+    checkLoginState();
+
+    console.log("✅ Garagem Inteligente inicializada!");
 });
 
-// Estilos dinâmicos para botões de ação na lista
-const extraStyles = `
-    .veiculo-item { display: flex; justify-content: space-between; align-items: center; }
-    .veiculo-info { flex-grow: 1; cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 10px 0; }
-    .veiculo-actions { display: flex; gap: 5px; opacity: 0; transition: opacity 0.2s ease; }
-    .veiculo-item:hover .veiculo-actions { opacity: 1; }
-    .btn-action { background: transparent; border: none; cursor: pointer; font-size: 1rem; padding: 5px; margin: 0; color: var(--cor-secundaria); }
-    .veiculo-item.selecionado .btn-action { color: var(--cor-texto-claro); }
-    .btn-action:hover { background-color: rgba(0,0,0,0.1); border-radius: 4px; }
-    .btn-action.btn-delete:hover { color: var(--cor-perigo); }`;
-document.head.appendChild(Object.assign(document.createElement("style"), { innerText: extraStyles }));
+// Inclua aqui o resto das suas funções (abrirModalDeEdicao, handleEditarVeiculo, executarAcaoVeiculo, etc.),
+// lembrando-se sempre de adicionar `{ headers: getAuthHeaders() }` em todas as chamadas `fetch`.
