@@ -1,4 +1,3 @@
-
 /* Reset Básico e Variáveis de Cor */
 :root {
   --cor-primaria: #007bff; /* Azul */
@@ -15,7 +14,7 @@
   --sombra-card: 0 2px 4px rgba(0, 0, 0, 0.08), 0 8px 16px rgba(0, 0, 0, 0.08);
   --border-radius-padrao: 8px;
   --sidebar-width: 300px;
-  --velocimetro-path-length: 251.2; /* Será atualizado por JS */
+  --velocimetro-path-length: 251.2; 
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -28,9 +27,6 @@ body {
   min-height: 100vh;
 }
 
-/* ======================================== */
-/* == Layout Principal da Aplicação ====== */
-/* ======================================== */
 #app-container { display: flex; width: 100%; min-height: 100vh; }
 #sidebar {
   width: var(--sidebar-width);
@@ -43,11 +39,6 @@ body {
 .sidebar-header i { font-size: 2.2em; }
 #main-content { flex: 1; padding: 35px; overflow-y: auto; position: relative; }
 
-/* ======================================== */
-/* == Estilos Comuns ====================== */
-/* ======================================== */
-
-/* Estilo Card Genérico */
 .card {
   background-color: var(--cor-fundo-card); border-radius: var(--border-radius-padrao);
   box-shadow: var(--sombra-card); padding: 20px; margin-bottom: 25px;
@@ -59,27 +50,12 @@ body {
   border: 1px solid #e9ecef; margin-bottom: 15px;
 }
 
-/* Títulos */
-.lista-veiculos-container h2, .sidebar-section h2, .maintenance-list h3, #formManutencaoContainer h3,
-#secao-previsao-tempo h2 { 
-  font-size: 1.15em; margin-bottom: 15px; color: var(--cor-secundaria);
-  border-bottom: 1px solid var(--cor-borda); padding-bottom: 10px; font-weight: 600;
-}
-.lista-veiculos-container h2 i, .sidebar-section h2 i, .maintenance-list h3 i, #formManutencaoContainer h3 i,
-#secao-previsao-tempo h2 i {
-  margin-right: 10px;
-}
-#formManutencaoContainer h3 { font-size: 1.25em; }
-#secao-previsao-tempo h2 {font-size: 1.4em; color: var(--cor-primaria);}
-
-
-/* Botões Gerais e Específicos */
 button {
   padding: 10px 18px; margin: 5px 3px; border: none;
   background-color: var(--cor-primaria); color: var(--cor-texto-claro);
   border-radius: 6px; cursor: pointer; font-size: 0.9rem; font-weight: 600;
   font-family: 'Poppins', sans-serif;
-  transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease, filter 0.2s ease;
+  transition: all 0.2s ease;
   display: inline-flex; align-items: center; justify-content: center; gap: 8px; vertical-align: middle;
 }
 button:hover { filter: brightness(1.1); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); }
@@ -87,118 +63,93 @@ button:active { transform: translateY(1px); filter: brightness(0.95); }
 button:disabled { background-color: #adb5bd; cursor: not-allowed; opacity: 0.65; box-shadow: none; filter: none; }
 
 .botao-sidebar-add { width: 100%; padding: 12px 20px; font-size: 1.05rem; background-color: var(--cor-sucesso); margin-bottom: 10px; }
-.botao-sidebar-add:hover { box-shadow: 0 4px 8px rgba(40, 167, 69, 0.2); }
-.botao-especial { background-color: var(--cor-aviso); color: var(--cor-texto); }
-#botaoTurbo { background-color: #fd7e14; }
-#botaoCarregar, #botaoDescarregar { background-color: var(--cor-info); }
 .botao-perigo { background-color: var(--cor-perigo); }
 .botao-cancelar { background-color: var(--cor-secundaria); }
 .botao-info { background-color: var(--cor-info); }
-.botao-info:hover { box-shadow: 0 4px 8px rgba(23, 162, 184, 0.2); }
-.botao-remover-header {
-  background-color: transparent; color: var(--cor-perigo); border: 1px solid var(--cor-perigo);
-  padding: 6px 10px; border-radius: 50px; font-size: 0.85rem; margin-left: auto; align-self: flex-start;
-}
-.botao-remover-header:hover { background-color: var(--cor-perigo); color: white; box-shadow: 0 2px 5px rgba(220, 53, 69, 0.3); }
-.botao-remover-item {
-  background-color: transparent; color: var(--cor-perigo); border: none; font-size: 0.9rem;
-  cursor: pointer; padding: 2px 4px; margin-left: 8px; opacity: 0.5;
-  transition: opacity 0.2s ease, color 0.2s ease, background-color 0.2s ease; border-radius: 4px; flex-shrink: 0;
-}
-.maintenance-list li:hover .botao-remover-item { opacity: 1; }
-.botao-remover-item:hover { background-color: rgba(220, 53, 69, 0.1); color: #a02533; }
+.botao-sucesso { background-color: var(--cor-sucesso); }
 
-/* Formulários */
 form div { margin-bottom: 15px; }
 label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 0.9rem; color: #555; }
 label i { margin-right: 6px; color: var(--cor-secundaria); width: 14px; text-align: center; }
-input[type="text"], input[type="number"], input[type="datetime-local"], select {
+input[type="text"], input[type="number"], input[type="email"], input[type="password"], input[type="datetime-local"], select {
   width: 100%; padding: 11px 14px; border: 1px solid var(--cor-borda); border-radius: 6px;
   font-size: 0.95rem; font-family: 'Poppins', sans-serif; transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 input:focus, select:focus { border-color: var(--cor-primaria); outline: none; box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15); }
-::placeholder { color: #a0a0a0; font-style: italic; font-size: 0.9rem; }
-#formManutencaoContainer button[type="submit"] { width: 100%; margin-top: 10px; background-color: var(--cor-info); }
-
-/* ======================================== */
-/* == Componentes Específicos Garagem ===== */
-/* ======================================== */
 
 /* Lista Veículos Sidebar */
 .lista-veiculos-container { flex-grow: 1; display: flex; flex-direction: column; }
 #listaVeiculosSidebar {
-  list-style: none; padding: 0; margin: 0 -15px -15px -15px; overflow-y: auto; flex-grow: 1;
-  scrollbar-width: thin; scrollbar-color: var(--cor-secundaria) #f8f9fa;
+  list-style: none; padding: 0; margin: 0; overflow-y: auto; flex-grow: 1;
 }
-#listaVeiculosSidebar::-webkit-scrollbar { width: 6px; }
-#listaVeiculosSidebar::-webkit-scrollbar-track { background: #f8f9fa; border-radius: 3px;}
-#listaVeiculosSidebar::-webkit-scrollbar-thumb { background-color: var(--cor-secundaria); border-radius: 3px; }
 #listaVeiculosSidebar li {
   padding: 12px 18px; cursor: pointer; border-bottom: 1px solid var(--cor-borda);
   transition: background-color 0.2s ease, color 0.2s ease; font-size: 0.95rem;
   display: flex; align-items: center; gap: 10px;
 }
-#listaVeiculosSidebar li:last-child { border-bottom: none; }
 #listaVeiculosSidebar li:hover { background-color: #e9ecef; }
 #listaVeiculosSidebar li.selecionado { background-color: var(--cor-primaria); color: var(--cor-texto-claro); font-weight: 600; }
 #listaVeiculosSidebar li.selecionado i { color: var(--cor-texto-claro); }
-#listaVeiculosSidebar li i { color: var(--cor-secundaria); width: 18px; text-align: center; font-size: 1.1em; }
-#listaVeiculosSidebar li.placeholder { padding: 20px; text-align: center; font-style: italic; color: #888; cursor: default; background-color: transparent; }
-#listaVeiculosSidebar li.placeholder:hover { background-color: transparent; }
+#listaVeiculosSidebar li > i { color: var(--cor-secundaria); width: 18px; text-align: center; font-size: 1.1em; }
+#listaVeiculosSidebar li .veiculo-nome { flex-grow: 1; }
+#listaVeiculosSidebar li.placeholder { font-style: italic; color: #888; cursor: default; background-color: transparent; }
 
-/* Modal Adicionar Veículo */
-dialog#modalAdicionarVeiculo {
+.sidebar-actions { display: flex; gap: 5px; margin-left: auto; }
+.sidebar-action-btn {
+    background: transparent; border: none; color: var(--cor-secundaria); font-size: 0.9rem; padding: 5px;
+    border-radius: 50%; width: 28px; height: 28px; line-height: 1; opacity: 0;
+    transition: opacity 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+}
+#listaVeiculosSidebar li:hover .sidebar-action-btn { opacity: 0.7; }
+.sidebar-action-btn:hover { opacity: 1; background-color: #d8dde2; }
+.sidebar-action-btn.edit:hover { color: var(--cor-primaria); }
+.sidebar-action-btn.delete:hover { color: var(--cor-perigo); }
+#listaVeiculosSidebar li.selecionado .sidebar-action-btn { color: white; opacity: 0.8; }
+#listaVeiculosSidebar li.selecionado .sidebar-action-btn:hover { opacity: 1; background-color: rgba(255,255,255,0.2); }
+
+/* Modal */
+dialog {
   border: none; border-radius: var(--border-radius-padrao); box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
   padding: 30px 35px; min-width: 450px; max-width: 550px; margin: auto;
 }
-dialog#modalAdicionarVeiculo::backdrop { background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(3px); }
-dialog#modalAdicionarVeiculo h2 { font-size: 1.5em; margin-bottom: 25px; color: var(--cor-primaria); text-align: center; border-bottom: 1px solid var(--cor-borda); padding-bottom: 15px; }
-dialog#modalAdicionarVeiculo h2 i { margin-right: 10px; }
+dialog::backdrop { background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(3px); }
+dialog h2 { font-size: 1.5em; margin-bottom: 25px; color: var(--cor-primaria); text-align: center; border-bottom: 1px solid var(--cor-borda); padding-bottom: 15px; }
+dialog h2 i { margin-right: 10px; }
 .modal-actions { display: flex; justify-content: flex-end; gap: 15px; margin-top: 25px; padding-top: 20px; border-top: 1px solid var(--cor-borda); }
-.modal-actions button { min-width: 120px; }
-.modal-actions button[type="submit"] { background-color: var(--cor-sucesso); }
 
 /* Painel Veículo Selecionado */
 #painelVeiculoSelecionado { animation: fadeIn 0.5s ease-out; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
 .vehicle-header { display: flex; align-items: center; gap: 30px; margin-bottom: 30px; padding-bottom: 20px; border-bottom: 1px solid var(--cor-borda); flex-wrap: wrap; }
-#imagemVeiculo { max-width: 150px; height: auto; min-height: 80px; border-radius: var(--border-radius-padrao); object-fit: contain; border: 1px solid var(--cor-borda); box-shadow: 0 2px 5px rgba(0,0,0,0.08); background-color: #f8f9fa; }
+#imagemVeiculo { max-width: 150px; height: auto; min-height: 80px; border-radius: var(--border-radius-padrao); object-fit: contain; border: 1px solid var(--cor-borda); background-color: #f8f9fa; }
 #informacoesVeiculo { flex: 1; min-width: 200px; }
 #informacoesVeiculo h2 { margin-bottom: 10px; border: none; padding: 0; color: #333; font-size: 1.8em; font-weight: 700; line-height: 1.2; }
 #informacoesVeiculo p { margin-bottom: 6px; font-size: 0.95rem; color: #555; display: flex; align-items: center; }
 #informacoesVeiculo p i.fas { color: var(--cor-secundaria); margin-right: 10px; width: 18px; text-align: center; }
 .info-id-text { display: inline-block; word-break: break-all; margin-right: 10px; }
+.vehicle-header-actions { display: flex; flex-direction: column; gap: 10px; margin-left: auto; align-self: flex-start; }
+.vehicle-header-actions button { width: 100%; margin: 0; }
 
-/* Status Motor */
+/* Status Motor e Velocímetro */
 .status-motor-container { font-size: 1rem; font-weight: 600; color: #555; margin-bottom: 20px; text-align: center; padding: 10px; background-color: #f8f9fa; border-radius: 6px; }
 .status-motor-container i.fa-power-off { margin-right: 8px; color: var(--cor-secundaria);}
-#info-status-motor .status-on { color: var(--cor-sucesso); font-weight: bold;}
-#info-status-motor .status-off { color: var(--cor-perigo); font-weight: bold;}
-#info-status-motor .fa-circle { font-size: 0.8em; vertical-align: middle; margin-right: 4px;}
-
-/* Velocímetro (Gauge) */
+#info-status-motor.status-on { color: var(--cor-sucesso); font-weight: bold;}
+#info-status-motor.status-off { color: var(--cor-perigo); font-weight: bold;}
 .velocimetro-container { display: flex; flex-direction: column; align-items: center; margin-bottom: 25px; padding: 15px; background-color: #f8f9fa; border-radius: var(--border-radius-padrao); }
 .velocimetro-svg { width: 100%; max-width: 180px; height: auto; transform: rotate(-90deg); }
-.velocimetro-trilha { stroke-width: 10; stroke: #e9ecef; }
+.velocimetro-trilha { stroke-width: 10; stroke: #e9ecef; fill: none; }
 .velocimetro-progresso {
-  stroke-width: 10; stroke: var(--cor-primaria); stroke-linecap: round;
+  stroke-width: 10; stroke: var(--cor-primaria); stroke-linecap: round; fill: none;
   stroke-dasharray: var(--velocimetro-path-length);
   stroke-dashoffset: var(--velocimetro-path-length);
   transition: stroke-dashoffset 0.4s ease-out, stroke 0.4s ease-out;
 }
 .velocimetro-texto { font-size: 1.5em; font-weight: 700; color: var(--cor-primaria); margin-top: -10px; text-align: center; }
-
-/* Infos Específicas e Botões Ações*/
-#info-especifica { margin-top: 20px; margin-bottom: 20px; padding: 15px; border: 1px dashed var(--cor-borda); border-radius: 6px; text-align: center; background-color: #fafafa; min-height: 50px; }
-#info-especifica p { font-style: normal; color: #444; font-weight: 600; margin-bottom: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;}
-#info-especifica p:last-child { margin-bottom: 0; }
-#info-especifica p span { font-weight: 400; color: #666; }
-#info-especifica p i { color: var(--cor-secundaria); flex-shrink: 0; }
 .botoes-container { display: flex; flex-wrap: wrap; justify-content: center; margin-top: 20px; }
 #botoesAcoes button { flex-basis: calc(33.33% - 10px); margin: 5px; }
 
-/* Abas (Tabs) */
+/* Abas */
 nav.tabs-veiculo { display: flex; border-bottom: 2px solid var(--cor-borda); margin-bottom: 25px; }
 .tab-link { padding: 12px 25px; border: none; background: none; cursor: pointer; font-size: 1rem; font-weight: 600; color: var(--cor-secundaria); border-bottom: 3px solid transparent; margin-bottom: -2px; transition: color 0.2s ease, border-bottom-color 0.2s ease; gap: 8px; }
 .tab-link:hover { color: var(--cor-primaria); }
@@ -206,412 +157,68 @@ nav.tabs-veiculo { display: flex; border-bottom: 2px solid var(--cor-borda); mar
 .tab-content { display: none; padding-top: 10px; }
 .tab-content.active { display: block; animation: fadeIn 0.4s ease-out; }
 
-/* Aba Manutenção */
-#formManutencaoContainer { margin-bottom: 30px; padding: 25px; background-color: #f8f9fa; border-radius: var(--border-radius-padrao); border: 1px solid var(--cor-borda); }
-.manutencao-container { display: grid; grid-template-columns: 1fr; gap: 25px; margin-top: 10px; }
+/* Manutenção */
+.manutencao-container { display: grid; grid-template-columns: 1fr; gap: 25px; }
 @media (min-width: 992px) { .manutencao-container { grid-template-columns: 1fr 1fr; } }
-
-.maintenance-list ul { list-style: none; padding: 0; max-height: 250px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: var(--cor-secundaria) var(--cor-fundo-card); }
-.maintenance-list ul::-webkit-scrollbar { width: 8px; }
-.maintenance-list ul::-webkit-scrollbar-track { background: #f0f2f5; border-radius: 4px;}
-.maintenance-list ul::-webkit-scrollbar-thumb { background-color: #ccc; border-radius: 4px; border: 2px solid #f0f2f5; }
-.maintenance-list ul::-webkit-scrollbar-thumb:hover { background-color: var(--cor-secundaria); }
-.maintenance-list li { padding: 10px 5px; border-bottom: 1px dotted #e0e0e0; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; line-height: 1.4; transition: background-color 0.2s ease; }
-.maintenance-list li:hover { background-color: #f0f5ff; }
+#formManutencaoContainer h3, .maintenance-list h3 { font-size: 1.1em; margin-bottom: 15px; color: var(--cor-secundaria); border-bottom: 1px solid var(--cor-borda); padding-bottom: 10px; font-weight: 600; }
+.maintenance-list ul { list-style: none; padding: 0; max-height: 250px; overflow-y: auto; }
+.maintenance-list li { padding: 10px 5px; border-bottom: 1px dotted #e0e0e0; font-size: 0.85rem; }
 .maintenance-list li:last-child { border-bottom: none; }
-.maintenance-list li span { flex-grow: 1; margin-right: 8px;}
-.maintenance-list li.placeholder { font-style: italic; color: #888; text-align: center; padding: 15px; border-bottom: none; background-color: transparent !important; justify-content: center;}
+.maintenance-list li.placeholder { font-style: italic; color: #888; text-align: center; }
 
+/* Detalhes Extras */
+.detalhes-extras-container { margin-top: 25px; padding-top: 20px; border-top: 1px solid var(--cor-borda); text-align: center; }
+#detalhesExtrasVeiculo { margin-top: 15px; padding: 18px; background-color: #f8f9fa; border: 1px solid #e9ecef; border-radius: 6px; text-align: left; }
 
 /* Área de Notificação */
 #notification-area {
   position: fixed; top: 20px; right: 20px; padding: 14px 25px; border-radius: var(--border-radius-padrao);
   color: var(--cor-texto-claro); z-index: 1050; min-width: 280px; max-width: 400px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25); display: flex; justify-content: space-between;
-  align-items: center; opacity: 0; transform: translateX(20px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  opacity: 0; transform: translateX(20px);
   transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+  display: none;
 }
-#notification-area.show { opacity: 1; transform: translateX(0); }
+#notification-area.show { opacity: 1; transform: translateX(0); display: flex; }
 #notification-area.info { background-color: var(--cor-info); }
 #notification-area.success { background-color: var(--cor-sucesso); }
 #notification-area.warning { background-color: var(--cor-aviso); color: var(--cor-texto); }
 #notification-area.error { background-color: var(--cor-perigo); }
 #notification-message { font-weight: 600; font-size: 0.9rem; }
-#notification-area .close-btn { background: none; border: none; color: inherit; font-size: 1.5rem; font-weight: bold; cursor: pointer; padding: 0 0 0 15px; line-height: 1; opacity: 0.7; text-shadow: none; }
-#notification-area.warning .close-btn { color: var(--cor-texto); }
-#notification-area .close-btn:hover { opacity: 1; }
+#notification-area .close-btn { background: none; border: none; color: inherit; font-size: 1.5rem; cursor: pointer; padding: 0 0 0 15px; opacity: 0.7; }
 
 /* Mensagem "Selecione um veículo" */
 #mensagem-selecione { text-align: center; padding: 40px; color: var(--cor-secundaria); font-size: 1.1em; border: 2px dashed var(--cor-borda); background-color: #fdfdfd; margin-top: 40px; }
 #mensagem-selecione h2 { color: var(--cor-info); margin-bottom: 15px; font-size: 1.6em; }
-#mensagem-selecione h2 i { margin-right: 12px; }
-#mensagem-selecione p { margin-bottom: 8px; }
 
+/* Estilos Previsão do Tempo */
+#secao-previsao-tempo h2 { font-size: 1.4em; color: var(--cor-primaria); }
+.busca-container-tempo { display: flex; gap: 10px; margin-bottom: 20px; }
+#cidade-input-tempo { flex-grow: 1; }
+.status-mensagem { text-align: center; font-style: italic; color: var(--cor-secundaria); min-height: 24px; }
+.dia-previsao { background-color: #fdfdfd; border: 1px solid #e9ecef; border-radius: var(--border-radius-padrao); padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.07); }
+.dia-previsao .data-dia { font-weight: 600; color: var(--cor-primaria); display: flex; align-items: center; gap: 8px; }
+.dia-previsao .icone-tempo { width: 40px; height: 40px; }
+.dia-previsao p { margin: 6px 0; font-size: 0.9em; }
 
-/* ======================================== */
-/* == Detalhes Extras (API Veículo) ====== */
-/* ======================================== */
-.detalhes-extras-container { margin-top: 25px; padding-top: 20px; border-top: 1px solid var(--cor-borda); text-align: center; }
-#btnVerDetalhesExtras { margin-bottom: 15px; min-width: 200px; }
-#detalhesExtrasVeiculo {
-  margin-top: 15px; padding: 18px; background-color: #f8f9fa; border: 1px solid #e9ecef;
-  border-radius: 6px; text-align: left; min-height: 50px; animation: fadeIn 0.5s ease-out;
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
-}
-#detalhesExtrasVeiculo p { margin-bottom: 12px; line-height: 1.6; color: #343a40; font-size: 0.9rem; display: flex; align-items: flex-start; }
-#detalhesExtrasVeiculo p:last-child { margin-bottom: 0; }
-#detalhesExtrasVeiculo strong { color: var(--cor-secundaria); margin-right: 8px; font-weight: 600; flex-shrink: 0; }
-#detalhesExtrasVeiculo i.fas { margin-right: 10px; color: var(--cor-info); width: 18px; text-align: center; margin-top: 2px; flex-shrink: 0; }
-#detalhesExtrasVeiculo i.fa-dollar-sign { color: var(--cor-sucesso); }
-#detalhesExtrasVeiculo i.fa-exclamation-circle { color: var(--cor-aviso); }
-#detalhesExtrasVeiculo i.fa-exclamation-triangle { color: var(--cor-perigo); }
-#detalhesExtrasVeiculo i.fa-search { color: var(--cor-secundaria); }
-#detalhesExtrasVeiculo .recall-pendente { color: var(--cor-perigo); font-weight: bold; background-color: rgba(220, 53, 69, 0.1); padding: 2px 5px; border-radius: 4px; margin-left: 5px; }
-#detalhesExtrasVeiculo .recall-ok { color: var(--cor-sucesso); font-weight: normal; margin-left: 5px; }
-#detalhesExtrasVeiculo .loading-feedback, #detalhesExtrasVeiculo .error-feedback, #detalhesExtrasVeiculo .notfound-feedback { font-style: italic; color: var(--cor-secundaria); text-align: center; padding: 10px 0; display: flex; align-items: center; justify-content: center; gap: 8px;}
-#detalhesExtrasVeiculo .error-feedback { color: var(--cor-perigo); font-weight: bold; font-style: normal; }
-#detalhesExtrasVeiculo .fa-spinner { animation: spin 1.5s linear infinite; }
-@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-/* ======================================== */
-/* == Estilos Seção Previsão do Tempo ===== */
-/* ======================================== */
-#secao-previsao-tempo {
-    margin-top: 30px;
-}
-
-.busca-container-tempo {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-    justify-content: center;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-#cidade-input-tempo {
-    padding: 10px 14px;
-    border: 1px solid var(--cor-borda);
-    border-radius: 6px;
-    font-size: 1rem;
-    font-family: 'Poppins', sans-serif;
-    flex-grow: 1;
-    max-width: 350px;
-}
-#cidade-input-tempo:focus {
-    border-color: var(--cor-primaria);
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
-}
-
-#verificar-clima-btn { 
-    padding: 10px 20px;
-    font-size: 1rem;
-}
-
-.status-mensagem { 
-    margin-bottom: 20px;
-    font-weight: bold;
-    min-height: 20px;
-    padding: 8px;
-    border-radius: 4px;
-    text-align: center;
-}
-.status-mensagem.loading {
-    color: #555;
-    background-color: #f0f0f0;
-}
-.status-mensagem.error {
-    color: var(--cor-texto-claro);
-    background-color: var(--cor-perigo);
-}
-.status-mensagem:empty { 
-    padding: 0;
-}
-
-
-#previsao-tempo-resultado h3 { 
-    margin-top: 0;
-    margin-bottom: 15px;
-    color: #333;
-    font-size: 1.3em;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 10px;
-    text-align: center;
-}
-
-.previsao-dias-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
-    gap: 15px;
-    text-align: left;
-}
-
-.dia-previsao {
-    background-color: #fdfdfd; 
-    border: 1px solid #e9ecef;
-    border-radius: var(--border-radius-padrao);
-    padding: 15px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.07);
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-}
-.dia-previsao:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-}
-
-.dia-previsao .data-dia { 
-    margin-top: 0;
-    margin-bottom: 10px;
-    color: var(--cor-primaria);
-    font-size: 1.1em;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 8px; 
-}
-
-.dia-previsao img.icone-tempo {
-    width: 40px; 
-    height: 40px;
-    vertical-align: middle;
-}
-
-.dia-previsao p {
-    margin: 6px 0;
-    font-size: 0.9em;
-    line-height: 1.5;
-}
-.dia-previsao p strong {
-    font-weight: 600;
-    color: #444;
-}
-
-
-/* ======================================== */
-/* == Estilos Filtro Dias Previsão Tempo == */
-/* ======================================== */
-.filtro-dias-tempo-container {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-}
-
-.filtro-dia-btn {
-    padding: 8px 15px;
-    font-size: 0.9rem;
-    background-color: var(--cor-fundo-card);
-    color: var(--cor-secundaria);
-    border: 1px solid var(--cor-borda);
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-    font-weight: 500;
-}
-
-.filtro-dia-btn:hover {
-    background-color: #e9ecef;
-    border-color: #adb5bd;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-}
-
-.filtro-dia-btn.active {
-    background-color: var(--cor-primaria);
-    color: var(--cor-texto-claro);
-    border-color: var(--cor-primaria);
-    font-weight: 600;
-    box-shadow: 0 2px 5px rgba(0, 123, 255, 0.2);
-}
-
-@media (max-width: 576px) {
-    .filtro-dias-tempo-container {
-        flex-direction: column; 
-        align-items: stretch; 
-    }
-    .filtro-dia-btn {
-        width: 100%;
-        margin-bottom: 5px; 
-    }
-    .filtro-dia-btn:last-child {
-        margin-bottom: 0;
-    }
-}
-
-/* ======================================== */
-/* == Responsividade ====================== */
-/* ======================================== */
-@media (max-width: 1200px) {
-  :root { --sidebar-width: 260px; }
-  #sidebar { width: var(--sidebar-width); padding: 20px; }
-  #main-content { padding: 25px; }
-}
+/* Responsividade */
 @media (max-width: 992px) {
   #app-container { flex-direction: column; }
   #sidebar { width: 100%; height: auto; position: static; border-right: none; border-bottom: 1px solid var(--cor-borda); flex-direction: row; flex-wrap: wrap; gap: 15px; padding: 15px; }
   .sidebar-header { display: none; }
   .botao-sidebar-add { width: auto; flex-grow: 1; }
   .lista-veiculos-container { width: 100%; order: 3; max-height: 200px; }
-  .lista-veiculos-container h2 { display: none; }
-  #listaVeiculosSidebar { margin: 0; }
   #main-content { padding: 20px; }
   .vehicle-header { flex-direction: column; align-items: center; text-align: center; gap: 15px;}
-  #imagemVeiculo { max-width: 120px; }
-  .botao-remover-header { margin-left: 0; align-self: center; margin-top: 10px; }
-  nav.tabs-veiculo { justify-content: center; }
-  .tab-link { padding: 10px 15px; font-size: 0.9rem; }
-  .manutencao-container { grid-template-columns: 1fr; }
-  #botoesAcoes button { flex-basis: calc(50% - 10px); }
-  dialog#modalAdicionarVeiculo { min-width: 90vw; max-width: 95vw; padding: 20px; }
-  dialog#modalAdicionarVeiculo h2 { font-size: 1.3em; }
-  .modal-actions { justify-content: space-between; }
-  .velocimetro-svg { max-width: 150px; }
-  .velocimetro-texto { font-size: 1.3em; }
-  #btnVerDetalhesExtras { width: 90%; }
-
-  .busca-container-tempo { 
-      flex-direction: column;
-  }
-  #cidade-input-tempo {
-      max-width: 100%;
-      width: 100%;
-  }
-  #verificar-clima-btn {
-      width: 100%;
-  }
-  .previsao-dias-grid {
-      grid-template-columns: 1fr; 
-  }
+  .vehicle-header-actions { margin-left: 0; flex-direction: row; align-self: center; margin-top: 10px; }
 }
+
 @media (max-width: 576px) {
   #main-content { padding: 15px; }
-  #painelVeiculoSelecionado, .card { padding: 15px; }
-  .tab-link { padding: 8px 10px; font-size: 0.85rem; }
-  #botoesAcoes button { flex-basis: calc(100% - 10px); }
-  .botao-sidebar-add { font-size: 0.95rem; padding: 10px 15px;}
-  #listaVeiculosSidebar li { padding: 10px 12px; font-size: 0.9rem;}
+  dialog { min-width: 90vw; }
   #notification-area { top: 10px; right: 10px; left: 10px; width: auto; max-width: none; }
-  .vehicle-header { gap: 10px; }
-  #imagemVeiculo { max-width: 100px; }
   #informacoesVeiculo h2 { font-size: 1.5em;}
-  #informacoesVeiculo p { font-size: 0.9rem;}
-  .velocimetro-svg { max-width: 130px; }
-  .velocimetro-texto { font-size: 1.2em; }
-  dialog#modalAdicionarVeiculo { padding: 15px; }
-  #btnVerDetalhesExtras { width: 100%; }
-  #detalhesExtrasVeiculo p { font-size: 0.85rem; }
+  #botoesAcoes button { flex-basis: calc(50% - 10px); }
+  .busca-container-tempo { flex-direction: column; }
+  #verificar-clima-btn { width: 100%; }
 }
-
-/* ======================================== */
-/* == Estilos Seções Extras (Destaques, Serviços) == */
-/* ======================================== */
-.secao-extra {
-    margin-top: 30px;
-}
-.secao-extra h2 {
-    font-size: 1.4em;
-    color: var(--cor-primaria);
-    margin-bottom: 20px;
-}
-.secao-extra h2 i {
-    margin-right: 10px;
-}
-
-/* Para os cards de veículos destaque */
-.cards-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
-}
-
-.card-item {
-    background: #fdfdfd;
-    border: 1px solid var(--cor-borda);
-    border-radius: var(--border-radius-padrao);
-    padding: 15px;
-    text-align: center;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.06);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-.card-item:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-}
-.card-item img {
-    width: 100%;
-    height: 150px;
-    object-fit: cover;
-    border-radius: 6px;
-    margin-bottom: 15px;
-    background-color: #eee;
-}
-.card-item h3 {
-    font-size: 1.1em;
-    color: #333;
-    margin-bottom: 8px;
-}
-.card-item p {
-    font-size: 0.9em;
-    color: #666;
-    line-height: 1.4;
-}
-
-/* Para a lista de serviços */
-.lista-servicos {
-    list-style: none;
-    padding: 0;
-}
-.lista-servicos li {
-    background: #f8f9fa;
-    padding: 15px;
-    border-bottom: 1px solid #e9ecef;
-    border-radius: 4px;
-    margin-bottom: 10px;
-}
-.lista-servicos li:last-child {
-    border-bottom: none;
-}
-.lista-servicos strong {
-    font-size: 1.05em;
-    color: var(--cor-info);
-    display: block;
-    margin-bottom: 5px;
-}
-.lista-servicos p {
-    margin: 0;
-    font-size: 0.9em;
-    color: #555;
-}
-.lista-servicos .preco {
-    font-weight: 600;
-    color: var(--cor-sucesso);
-    margin-top: 8px;
-    display: block;
-}
-/* Em css/style.css */
-
-.velocimetro-progresso {
-  stroke-width: 10;
-  stroke: var(--cor-primaria);
-  stroke-linecap: round;
-  stroke-dasharray: var(--velocimetro-path-length);
-  stroke-dashoffset: var(--velocimetro-path-length);
-  /* ADICIONE ESTA LINHA para a animação ficar suave */
-  transition: stroke-dashoffset 0.4s ease-out, stroke 0.4s ease-out;
-}
-/* ... (todo o seu CSS existente) ... */
-
-/* DENTRO DA SEÇÃO DO VELOCÍMETRO */
-.velocimetro-progresso {
-  stroke-width: 10;
-  stroke: var(--cor-primaria);
-  stroke-linecap: round;
-  stroke-dasharray: var(--velocimetro-path-length);
-  stroke-dashoffset: var(--velocimetro-path-length);
-  /* LINHA ADICIONADA: para a animação ficar suave */
-  transition: stroke-dashoffset 0.4s ease-out, stroke 0.4s ease-out;
-}
-
-/* ... (o resto do seu CSS) ... */
-/* A sua seção de @media queries começa aqui */

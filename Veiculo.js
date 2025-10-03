@@ -2,13 +2,18 @@
 import mongoose from 'mongoose';
 
 const veiculoSchema = new mongoose.Schema({
+    // Adicionamos o novo campo "tipo"
+    tipo: {
+        type: String,
+        required: [true, 'O tipo do veículo é obrigatório.'],
+        enum: ['Carro', 'Carro Esportivo', 'Caminhão'] // Garante que só esses valores são aceitos
+    },
     placa: {
         type: String,
         required: [true, 'A placa do veículo é obrigatória.'],
-        unique: false, // <-- ALTERAÇÃO: Placas podem se repetir entre diferentes usuários
         uppercase: true,
         trim: true,
-        match: [/^[A-Z]{3}[0-9][A-Z0-9][0-9]{2}$/, 'Formato de placa inválido.']
+        match: [/^[A-Z]{3}[0-9]([A-Z0-9])[0-9]{2}$/, 'Formato de placa inválido. Use o formato Mercosul (ABC1D23) ou tradicional (ABC1234).']
     },
     marca: {
         type: String,
@@ -40,19 +45,16 @@ const veiculoSchema = new mongoose.Schema({
         default: 0,
         min: 0,
     },
-    // --- ADIÇÃO IMPORTANTE ABAIXO ---
     owner: {
-      type: mongoose.Schema.Types.ObjectId, // Armazena o ID único de um usuário.
-      ref: 'User', // Cria uma referência direta ao modelo 'User'.
-      required: true // Todo veículo DEVE ter um dono.
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
     }
 }, {
     timestamps: true
 });
 
-// Garante que a combinação de placa e dono seja única.
 veiculoSchema.index({ placa: 1, owner: 1 }, { unique: true });
-
 
 const Veiculo = mongoose.model('Veiculo', veiculoSchema);
 

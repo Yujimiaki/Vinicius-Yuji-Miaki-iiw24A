@@ -5,10 +5,10 @@ import mongoose from 'mongoose';
 import cors from 'cors';
 import Veiculo from './models/Veiculo.js';
 import Manutencao from './models/Manutencao.js';
-import User from './models/user.js';             // <-- ADICIONADO
-import bcrypt from 'bcryptjs';                   // <-- ADICIONADO
-import jwt from 'jsonwebtoken';                  // <-- ADICIONADO
-import authMiddleware from './middleware/auth.js'; // <-- ADICIONADO
+import User from './models/user.js';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import authMiddleware from './middleware/auth.js';
 
 dotenv.config();
 
@@ -18,7 +18,6 @@ const port = process.env.PORT || 3001;
 app.use(cors());
 app.use(express.json());
 
-// ... (Conexão com o MongoDB existente) ...
 mongoose.connect(process.env.MONGO_URI)
     .then(() => {
         console.log("✅ Conectado ao MongoDB Atlas com sucesso!");
@@ -31,9 +30,7 @@ mongoose.connect(process.env.MONGO_URI)
         process.exit(1);
     });
 
-// --- ROTAS DE AUTENTICAÇÃO --- (NOVO BLOCO)
-
-// POST /api/auth/register (Endpoint de Registro)
+// --- ROTAS DE AUTENTICAÇÃO ---
 app.post('/api/auth/register', async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -58,7 +55,6 @@ app.post('/api/auth/register', async (req, res) => {
     }
 });
 
-// POST /api/auth/login (Endpoint de Login)
 app.post('/api/auth/login', async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -83,9 +79,7 @@ app.post('/api/auth/login', async (req, res) => {
 });
 
 
-// --- ROTAS DE VEÍCULOS (CRUD) --- (BLOCO MODIFICADO)
-
-// GET /api/veiculos (PROTEGIDO E FILTRADO)
+// --- ROTAS DE VEÍCULOS (CRUD) ---
 app.get('/api/veiculos', authMiddleware, async (req, res) => {
     try {
         const todosOsVeiculos = await Veiculo.find({ owner: req.userId }).sort({ createdAt: -1 });
@@ -96,157 +90,117 @@ app.get('/api/veiculos', authMiddleware, async (req, res) => {
     }
 });
 
-// POST /api/veiculos (PROTEGIDO E COM DONO)
 app.post('/api/veiculos', authMiddleware, async (req, res) => {
     try {
-        const novoVeiculoData = { ...req.body, owner: req.userId }; // Adiciona o dono
+        const novoVeiculoData = { ...req.body, owner: req.userId };
         const veiculoCriado = await Veiculo.create(novoVeiculoData);
         res.status(201).json(veiculoCriado);
     } catch (error) {
         console.error("[ERRO NO POST /api/veiculos]", error);
+
+        if (error.name === 'ValidationError') {
+            const mensagens = Object.values(error.errors).map(val => val.message);
+            return res.status(400).json({ message: mensagens.join(' ') });
+        }
         if (error.code === 11000) {
             return res.status(409).json({ message: `Você já possui um veículo com a placa '${req.body.placa}'.` });
         }
-        // ... (resto do tratamento de erro)
+        
         res.status(500).json({ message: 'Ocorreu um erro inesperado no servidor ao criar o veículo.'});
     }
 });
 
-
-// GET /api/veiculos/:id (PROTEGIDO E COM VERIFICAÇÃO DE DONO)
 app.get('/api/veiculos/:id', authMiddleware, async (req, res) => {
     try {
         const { id } = req.params;
-        if (!mongoose.Types.ObjectId.isValid(id)) { /* ... */ }
+        if (!mongoose.Types.ObjectId.isValid(id)) { return res.status(400).json({ message: 'ID do veículo inválido.' }); }
         const veiculo = await Veiculo.findById(id);
-        if (!veiculo) {
-            return res.status(404).json({ message: 'Veículo não encontrado.' });
-        }
-        // VERIFICAÇÃO DE DONO
-        if (veiculo.owner.toString() !== req.userId) {
-            return res.status(403).json({ message: 'Acesso negado.' });
-        }
+        if (!veiculo) { return res.status(404).json({ message: 'Veículo não encontrado.' }); }
+        if (veiculo.owner.toString() !== req.userId) { return res.status(403).json({ message: 'Acesso negado.' }); }
         res.status(200).json(veiculo);
     } catch (error) {
-        // ... (tratamento de erro)
+        console.error(`[ERRO NO GET /api/veiculos/${req.params.id}]`, error);
+        res.status(500).json({ message: 'Erro interno ao buscar o veículo.' });
     }
 });
 
-// PUT /api/veiculos/:id (PROTEGIDO E COM VERIFICAÇÃO DE DONO)
 app.put('/api/veiculos/:id', authMiddleware, async (req, res) => {
     try {
         const { id } = req.params;
-        // ... (validações)
+        if (!mongoose.Types.ObjectId.isValid(id)) { return res.status(400).json({ message: 'ID do veículo inválido.' }); }
         const veiculo = await Veiculo.findById(id);
         if (!veiculo) { return res.status(404).json({ message: 'Veículo não encontrado.' }); }
-        if (veiculo.owner.toString() !== req.userId) {
-            return res.status(403).json({ message: 'Acesso negado.' });
-        }
-
+        if (veiculo.owner.toString() !== req.userId) { return res.status(403).json({ message: 'Acesso negado.' }); }
         const veiculoAtualizado = await Veiculo.findByIdAndUpdate(id, req.body, { new: true, runValidators: true });
         res.status(200).json(veiculoAtualizado);
     } catch (error) {
-        // ... (tratamento de erro)
+        console.error(`[ERRO NO PUT /api/veiculos/${req.params.id}]`, error);
+        res.status(500).json({ message: 'Erro interno ao atualizar o veículo.' });
     }
 });
 
-
-// DELETE /api/veiculos/:id (PROTEGIDO E COM VERIFICAÇÃO DE DONO)
 app.delete('/api/veiculos/:id', authMiddleware, async (req, res) => {
     try {
         const { id } = req.params;
-        if (!mongoose.Types.ObjectId.isValid(id)) { /* ... */ }
-        
+        if (!mongoose.Types.ObjectId.isValid(id)) { return res.status(400).json({ message: 'ID do veículo inválido.' }); }
         const veiculo = await Veiculo.findById(id);
-        if (!veiculo) {
-            return res.status(404).json({ message: 'Veículo não encontrado.' });
-        }
-        // VERIFICAÇÃO DE DONO
-        if (veiculo.owner.toString() !== req.userId) {
-            return res.status(403).json({ message: 'Acesso negado.' });
-        }
-
+        if (!veiculo) { return res.status(404).json({ message: 'Veículo não encontrado.' }); }
+        if (veiculo.owner.toString() !== req.userId) { return res.status(403).json({ message: 'Acesso negado.' }); }
         const resultadoManutencoes = await Manutencao.deleteMany({ veiculo: id });
         const veiculoDeletado = await Veiculo.findByIdAndDelete(id);
-        
         res.status(200).json({ 
             message: `Veículo '${veiculoDeletado.modelo}' e suas ${resultadoManutencoes.deletedCount} manutenções foram deletados.` 
         });
     } catch (error) {
-        // ... (tratamento de erro)
+        console.error(`[ERRO NO DELETE /api/veiculos/${req.params.id}]`, error);
+        res.status(500).json({ message: 'Erro interno ao deletar o veículo.' });
     }
 });
 
-
-// --- ROTAS DE AÇÃO DO VEÍCULO --- (TODAS PROTEGIDAS E COM VERIFICAÇÃO)
-
+// --- ROTAS DE AÇÃO E MANUTENÇÃO ---
 const handleAction = async (req, res, action) => {
     try {
         const { id } = req.params;
-        if (!mongoose.Types.ObjectId.isValid(id)) { /* ... */ }
-        
+        if (!mongoose.Types.ObjectId.isValid(id)) { return res.status(400).json({ message: 'ID do veículo inválido.' });}
         const veiculo = await Veiculo.findById(id);
         if (!veiculo) { return res.status(404).json({ message: 'Veículo não encontrado.' }); }
-        
-        // VERIFICAÇÃO DE DONO
-        if (veiculo.owner.toString() !== req.userId) {
-            return res.status(403).json({ message: 'Acesso negado.' });
-        }
-
+        if (veiculo.owner.toString() !== req.userId) { return res.status(403).json({ message: 'Acesso negado.' }); }
         const result = action(veiculo);
-        if (result.success) {
-            await veiculo.save();
-            return res.status(200).json({ message: result.message, veiculo });
-        } else {
-            return res.status(400).json({ message: result.message, veiculo });
-        }
+        await veiculo.save();
+        return res.status(200).json({ message: result.message, veiculo });
     } catch (error) {
         console.error(`[ERRO NA AÇÃO /api/veiculos/${req.params.id}]`, error);
         res.status(500).json({ message: 'Erro interno no servidor ao processar a ação.' });
     }
 };
 
-// Adiciona o authMiddleware a todas as rotas de ação
-app.post('/api/veiculos/:id/ligar', authMiddleware, (req, res) => handleAction(req, res, (v) => v.ligar ? {s:0,m:`${v.modelo} já ligado.`} : (v.ligado=true, {s:1,m:`Vrum! ${v.modelo} ligado.`})));
-app.post('/api/veiculos/:id/desligar', authMiddleware, (req, res) => handleAction(req, res, (v) => !v.ligado ? {s:0,m:`${v.modelo} já desligado.`} : (v.ligado=false,v.velocidade=0,{s:1,m:`${v.modelo} desligado.`})));
-app.post('/api/veiculos/:id/acelerar', authMiddleware, (req, res) => handleAction(req, res, (v) => !v.ligado ? {s:0,m:'Carro desligado!'} : (v.velocidade>=220 ? {s:0,m:'Vel. máx!'} : (v.velocidade=Math.min(v.velocidade+15,220),{s:1,m:'Acelerando...'}))));
-app.post('/api/veiculos/:id/frear', authMiddleware, (req, res) => handleAction(req, res, (v) => v.velocidade===0 ? {s:0,m:'Carro parado.'} : (v.velocidade=Math.max(0,v.velocidade-20),{s:1,m:'Freando...'})));
-
-
-// --- ROTAS DE MANUTENÇÃO --- (TODAS PROTEGIDAS E COM VERIFICAÇÃO)
+app.post('/api/veiculos/:id/ligar', authMiddleware, (req, res) => handleAction(req, res, (v) => v.ligado ? {message:`${v.modelo} já está ligado.`} : (v.ligado=true, {message:`Vrum! ${v.modelo} ligado.`})));
+app.post('/api/veiculos/:id/desligar', authMiddleware, (req, res) => handleAction(req, res, (v) => !v.ligado ? {message:`${v.modelo} já está desligado.`} : (v.ligado=false,v.velocidade=0,{message:`${v.modelo} desligado.`})));
+app.post('/api/veiculos/:id/acelerar', authMiddleware, (req, res) => handleAction(req, res, (v) => !v.ligado ? {message:'Carro desligado!'} : (v.velocidade>=220 ? {message:'Velocidade máxima atingida!'} : (v.velocidade=Math.min(v.velocidade+15,220),{message:'Acelerando...'}))));
+app.post('/api/veiculos/:id/frear', authMiddleware, (req, res) => handleAction(req, res, (v) => v.velocidade===0 ? {message:'O carro já está parado.'} : (v.velocidade=Math.max(0,v.velocidade-20),{message:'Freando...'})));
 
 app.post('/api/veiculos/:veiculoId/manutencoes', authMiddleware, async (req, res) => {
     try {
         const { veiculoId } = req.params;
-        const veiculoExiste = await Veiculo.findById(veiculoId);
-        if (!veiculoExiste) { return res.status(404).json({ message: 'Veículo não encontrado.' }); }
-        
-        // VERIFICAÇÃO DE DONO
-        if (veiculoExiste.owner.toString() !== req.userId) {
-            return res.status(403).json({ message: 'Acesso negado.' });
-        }
-
+        const veiculoExiste = await Veiculo.findOne({ _id: veiculoId, owner: req.userId });
+        if (!veiculoExiste) { return res.status(404).json({ message: 'Veículo não encontrado ou não pertence a você.' }); }
         const novaManutencao = await Manutencao.create({ ...req.body, veiculo: veiculoId });
         res.status(201).json(novaManutencao);
     } catch (error) {
-        // ... (tratamento de erro)
+        console.error(`[ERRO NO POST /api/veiculos/${req.params.veiculoId}/manutencoes]`, error);
+        res.status(500).json({ message: 'Erro ao adicionar manutenção.' });
     }
 });
 
 app.get('/api/veiculos/:veiculoId/manutencoes', authMiddleware, async (req, res) => {
     try {
         const { veiculoId } = req.params;
-        const veiculoExiste = await Veiculo.findById(veiculoId);
-        if (!veiculoExiste) { return res.status(404).json({ message: 'Veículo não encontrado.' }); }
-
-        // VERIFICAÇÃO DE DONO
-        if (veiculoExiste.owner.toString() !== req.userId) {
-            return res.status(403).json({ message: 'Acesso negado.' });
-        }
-
+        const veiculoExiste = await Veiculo.findOne({ _id: veiculoId, owner: req.userId });
+        if (!veiculoExiste) { return res.status(404).json({ message: 'Veículo não encontrado ou não pertence a você.' }); }
         const manutencoes = await Manutencao.find({ veiculo: veiculoId }).sort({ data: -1 });
         res.status(200).json(manutencoes);
     } catch (error) {
-        // ... (tratamento de erro)
+        console.error(`[ERRO NO GET /api/veiculos/${req.params.veiculoId}/manutencoes]`, error);
+        res.status(500).json({ message: 'Erro ao buscar manutenções.' });
     }
 });
