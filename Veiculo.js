@@ -49,7 +49,12 @@ const veiculoSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
       required: true
-    }
+    },
+    // NOVO CAMPO PARA COMPARTILHAMENTO
+    sharedWith: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User' 
+    }]
 }, {
     timestamps: true
 });
