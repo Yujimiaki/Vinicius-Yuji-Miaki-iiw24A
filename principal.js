@@ -91,30 +91,31 @@ const handleLogout = (ui) => {
 // --- LÓGICA DA GARAGEM ---
 const handleAddVehicle = async (event, ui) => {
     event.preventDefault();
-    const veiculoData = {
-        tipo: document.getElementById('addTipo').value,
-        placa: document.getElementById('addPlaca').value,
-        marca: document.getElementById('addMarca').value,
-        modelo: document.getElementById('addModelo').value,
-        ano: document.getElementById('addAno').value,
-        cor: document.getElementById('addCor').value,
-    };
-    if (!veiculoData.tipo) {
+    const form = ui.formNovoVeiculo;
+    const formData = new FormData(form); // Cria um pacote de dados com o formulário
+
+    if (!formData.get('tipo')) {
         showNotification('Por favor, selecione o tipo de veículo.', 'warning', ui);
         return;
     }
+
     try {
         const token = localStorage.getItem('token');
         const response = await fetch(`${API_BASE_URL}/veiculos`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-            body: JSON.stringify(veiculoData)
+            headers: {
+                'Authorization': `Bearer ${token}`
+                // NÃO defina o 'Content-Type', o navegador fará isso automaticamente
+            },
+            body: formData // Envia o pacote
         });
+
         const result = await response.json();
         if (!response.ok) throw new Error(result.message);
-        showNotification(`Veículo '${result.modelo}' adicionado!`, 'success', ui);
-        ui.formNovoVeiculo.reset();
+
+        showNotification(`Veículo adicionado!`, 'success', ui);
         ui.modalAdicionarVeiculo.close();
+        form.reset();
         await carregarVeiculosDoUsuario(ui);
     } catch (error) {
         showNotification(error.message || 'Erro ao adicionar veículo.', 'error', ui);
@@ -192,6 +193,17 @@ const selecionarEExibirVeiculo = async (veiculoId, ui) => {
         document.getElementById('info-cor').textContent = veiculo.cor;
         document.getElementById('info-ano').textContent = veiculo.ano;
         document.getElementById('info-id').textContent = `ID: ${veiculo._id}`;
+
+           const imgElement = document.getElementById('imagemVeiculo');
+        if (veiculo.imageUrl) {
+            // Corrige as barras do caminho (importante para o navegador)
+            const correctedUrl = veiculo.imageUrl.replace(/\\/g, '/');
+            // Monta a URL completa para a imagem
+            imgElement.src = `http://localhost:3001/${correctedUrl}`;
+        } else {
+            // Usa uma imagem padrão se não houver upload
+            imgElement.src = 'https://i.imgur.com/2s46e5k.png';
+        }
         
         // Verifica se é proprietário
         const userData = parseJwt(token);

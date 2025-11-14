@@ -4,10 +4,15 @@
 // ARQUIVO COMPLETO E CORRIGIDO - Garagem Inteligente V3 (server.js)
 // ===================================================================================
 
-import express from 'express';
+// server.js
+
 import dotenv from 'dotenv';
+dotenv.config(); // <--- ESTA LINHA PRECISA ESTAR AQUI, LOGO DEPOIS DO IMPORT!
+
+import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
+import multer from 'multer'; // APENAS UMA VEZ
 import Veiculo from './models/Veiculo.js';
 import Manutencao from './models/Manutencao.js';
 import User from './models/user.js';
@@ -15,15 +20,34 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import authMiddleware from './middleware/auth.js';
 
-dotenv.config();
 
+// ==============================================================
+// ---- COLE ESTE BLOCO DE CÓDIGO EXATAMENTE AQUI ----
+// Configuração do Multer para criar a variável 'upload'
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, 'uploads/'); 
+  },
+  filename: (req, file, cb) => {
+    cb(null, `${Date.now()}-${file.originalname}`);
+  }
+});
+const upload = multer({ storage: storage });
+// ==============================================================
+
+
+
+
+
+// O resto do seu código começa aqui...
 const app = express();
+// ...etc
 const port = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
 
-mongoose.connect(process.env.MONGO_URI || 'SUA_STRING_DE_CONEXAO_AQUI')
+mongoose.connect(process.env.MONGO_URI )
     .then(() => {
         console.log("✅ Conectado ao MongoDB Atlas com sucesso!");
         app.listen(port, () => {
@@ -64,7 +88,7 @@ app.post('/api/auth/login', async (req, res) => {
             return res.status(400).json({ message: 'E-mail ou senha inválidos.' });
         }
         const payload = { userId: user._id, email: user.email };
-        const token = jwt.sign(payload, process.env.JWT_SECRET || 'SEU_SEGREDO_SUPER_SECRETO', { expiresIn: '1h' });
+       const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
         res.status(200).json({ message: 'Login bem-sucedido!', token });
     } catch (error) {
         console.error("[ERRO LOGIN]", error);
@@ -86,17 +110,25 @@ app.get('/api/veiculos', authMiddleware, async (req, res) => {
     }
 });
 
-app.post('/api/veiculos', authMiddleware, async (req, res) => {
+// DENTRO DO SEU server.js
+
+// Rota de criação de Veículo ATUALIZADA
+app.post('/api/veiculos', authMiddleware, upload.single('imagem'), async (req, res) => {
     try {
-        const novoVeiculoData = { ...req.body, owner: req.userId };
+        // Agora, os dados de texto vêm em `req.body` e o arquivo de imagem em `req.file`
+        const novoVeiculoData = {
+            ...req.body, // Pega tipo, placa, marca, modelo, etc.
+            owner: req.userId,
+            imageUrl: req.file ? req.file.path : null // Se um arquivo foi enviado, salva o caminho dele
+        };
+        
         const veiculoCriado = await Veiculo.create(novoVeiculoData);
         res.status(201).json(veiculoCriado);
+
     } catch (error) {
+        // Lógica de tratamento de erro que você já tem
         if (error.name === 'ValidationError') {
             return res.status(400).json({ message: Object.values(error.errors).map(val => val.message).join(' ') });
-        }
-        if (error.code === 11000) {
-            return res.status(409).json({ message: `Você já possui um veículo com a placa '${req.body.placa}'.` });
         }
         res.status(500).json({ message: 'Erro inesperado ao criar o veículo.'});
     }
