@@ -1,29 +1,37 @@
-// server.js
-
 // ===================================================================================
-// ARQUIVO COMPLETO E CORRIGIDO - Garagem Inteligente V3 (server.js)
+// ARQUIVO COMPLETO E CORRIGIDO - Garagem Inteligente V3 (server.js) - VERSÃO FINAL
 // ===================================================================================
 
-// server.js
 
+// 1. A PRIMEIRA COISA A FAZER É CARREGAR AS VARIÁVEIS DE AMBIENTE
 import dotenv from 'dotenv';
-dotenv.config(); // <--- ESTA LINHA PRECISA ESTAR AQUI, LOGO DEPOIS DO IMPORT!
+dotenv.config();
 
+// 2. AGORA, IMPORTAR AS FERRAMENTAS (DEPENDÊNCIAS)
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
-import multer from 'multer'; // APENAS UMA VEZ
+import multer from 'multer';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+
+// 3. E POR ÚLTIMO, OS SEUS PRÓPRIOS ARQUIVOS E MÓDULOS
 import Veiculo from './models/Veiculo.js';
 import Manutencao from './models/Manutencao.js';
 import User from './models/user.js';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
 import authMiddleware from './middleware/auth.js';
 
 
-// ==============================================================
-// ---- COLE ESTE BLOCO DE CÓDIGO EXATAMENTE AQUI ----
-// Configuração do Multer para criar a variável 'upload'
+// --- CONFIGURAÇÃO INICIAL DO SERVIDOR ---
+const app = express();
+const port = process.env.PORT || 3001;
+
+app.use(cors());
+app.use(express.json());
+app.use('/uploads', express.static('uploads'));
+
+
+// --- CONFIGURAÇÃO DO MULTER (UPLOAD DE ARQUIVOS) ---
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, 'uploads/'); 
@@ -33,21 +41,10 @@ const storage = multer.diskStorage({
   }
 });
 const upload = multer({ storage: storage });
-// ==============================================================
 
 
-
-
-
-// O resto do seu código começa aqui...
-const app = express();
-// ...etc
-const port = process.env.PORT || 3001;
-
-app.use(cors());
-app.use(express.json());
-
-mongoose.connect(process.env.MONGO_URI )
+// --- CONEXÃO COM O BANCO DE DADOS ---
+mongoose.connect(process.env.MONGO_URI)
     .then(() => {
         console.log("✅ Conectado ao MongoDB Atlas com sucesso!");
         app.listen(port, () => {
@@ -59,7 +56,10 @@ mongoose.connect(process.env.MONGO_URI )
         process.exit(1);
     });
 
-// --- ROTAS DE AUTENTICAÇÃO ---
+    
+// --- ROTAS DA APLICAÇÃO ---
+
+// ROTAS DE AUTENTICAÇÃO
 app.post('/api/auth/register', async (req, res) => {
     try {
         const { email, password } = req.body;
@@ -71,12 +71,11 @@ app.post('/api/auth/register', async (req, res) => {
         }
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
-        const newUser = new User({ email, password: hashedPassword });
-        await newUser.save();
-        res.status(201).json({ message: 'Usuário registrado com sucesso! Agora você pode fazer login.' });
+        await new User({ email, password: hashedPassword }).save();
+        res.status(201).json({ message: 'Usuário registrado com sucesso!' });
     } catch (error) {
         console.error("[ERRO REGISTRO]", error);
-        res.status(500).json({ message: 'Erro no servidor ao tentar registrar.' });
+        res.status(500).json({ message: 'Erro no servidor ao registrar.' });
     }
 });
 
@@ -88,45 +87,34 @@ app.post('/api/auth/login', async (req, res) => {
             return res.status(400).json({ message: 'E-mail ou senha inválidos.' });
         }
         const payload = { userId: user._id, email: user.email };
-       const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
+        const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
         res.status(200).json({ message: 'Login bem-sucedido!', token });
     } catch (error) {
         console.error("[ERRO LOGIN]", error);
-        res.status(500).json({ message: 'Erro no servidor ao tentar fazer login.' });
+        res.status(500).json({ message: 'Erro no servidor ao fazer login.' });
     }
 });
 
-// --- ROTAS DE VEÍCULOS (CRUD E COMPARTILHAMENTO) ---
-
-// ROTA ATUALIZADA para listar veículos próprios E compartilhados
+// ROTAS DE VEÍCULOS (CRUD)
 app.get('/api/veiculos', authMiddleware, async (req, res) => {
     try {
-        const veiculos = await Veiculo.find({
-            $or: [{ owner: req.userId }, { sharedWith: req.userId }]
-        }).populate('owner', 'email').sort({ createdAt: -1 });
+        const veiculos = await Veiculo.find({ $or: [{ owner: req.userId }, { sharedWith: req.userId }] }).populate('owner', 'email').sort({ createdAt: -1 });
         res.status(200).json(veiculos);
     } catch (error) {
         res.status(500).json({ message: 'Erro ao buscar os veículos.' });
     }
 });
 
-// DENTRO DO SEU server.js
-
-// Rota de criação de Veículo ATUALIZADA
 app.post('/api/veiculos', authMiddleware, upload.single('imagem'), async (req, res) => {
     try {
-        // Agora, os dados de texto vêm em `req.body` e o arquivo de imagem em `req.file`
-        const novoVeiculoData = {
-            ...req.body, // Pega tipo, placa, marca, modelo, etc.
+        const veiculoData = {
+            ...req.body,
             owner: req.userId,
-            imageUrl: req.file ? req.file.path : null // Se um arquivo foi enviado, salva o caminho dele
+            imageUrl: req.file ? req.file.path : null
         };
-        
-        const veiculoCriado = await Veiculo.create(novoVeiculoData);
+        const veiculoCriado = await Veiculo.create(veiculoData);
         res.status(201).json(veiculoCriado);
-
     } catch (error) {
-        // Lógica de tratamento de erro que você já tem
         if (error.name === 'ValidationError') {
             return res.status(400).json({ message: Object.values(error.errors).map(val => val.message).join(' ') });
         }
@@ -134,55 +122,15 @@ app.post('/api/veiculos', authMiddleware, upload.single('imagem'), async (req, r
     }
 });
 
-// #### ROTA DE COMPARTILHAMENTO - AQUI ESTAVA O PROBLEMA ####
-app.post('/api/veiculos/:veiculoId/share', authMiddleware, async (req, res) => {
-    try {
-        const { veiculoId } = req.params;
-        const { email } = req.body;
-
-        const veiculo = await Veiculo.findById(veiculoId);
-        if (!veiculo) return res.status(404).json({ message: 'Veículo não encontrado.' });
-        
-        // Apenas o proprietário pode compartilhar
-        if (veiculo.owner.toString() !== req.userId) {
-            return res.status(403).json({ message: 'Acesso negado. Apenas o proprietário pode compartilhar.' });
-        }
-
-        const userToShareWith = await User.findOne({ email });
-        if (!userToShareWith) return res.status(404).json({ message: `Usuário com e-mail '${email}' não encontrado.` });
-        if (userToShareWith._id.toString() === req.userId) return res.status(400).json({ message: 'Você não pode compartilhar um veículo com você mesmo.' });
-
-        if (veiculo.sharedWith.includes(userToShareWith._id)) {
-            return res.status(409).json({ message: `Veículo já compartilhado com ${email}.` });
-        }
-
-        veiculo.sharedWith.push(userToShareWith._id);
-        await veiculo.save();
-
-        res.status(200).json({ message: `Veículo '${veiculo.modelo}' compartilhado com ${email}.` });
-
-    } catch (error) {
-        console.error('[ERRO COMPARTILHAR]', error);
-        res.status(500).json({ message: 'Erro interno ao tentar compartilhar o veículo.' });
-    }
-});
-
 app.get('/api/veiculos/:id', authMiddleware, async (req, res) => {
     try {
-        const { id } = req.params;
-        const veiculo = await Veiculo.findById(id).populate('owner', 'email');
+        const veiculo = await Veiculo.findById(req.params.id).populate('owner', 'email');
         if (!veiculo) return res.status(404).json({ message: 'Veículo não encontrado.' });
-        
         const isOwner = veiculo.owner._id.toString() === req.userId;
         const isSharedWith = veiculo.sharedWith.some(id => id.toString() === req.userId);
-        
         if (!isOwner && !isSharedWith) return res.status(403).json({ message: 'Acesso negado.' });
-        
         res.status(200).json(veiculo);
     } catch (error) {
         res.status(500).json({ message: 'Erro ao buscar o veículo.' });
     }
 });
-
-// Resto das rotas (PUT, DELETE, etc.) que não precisam de alteração
-// ...
